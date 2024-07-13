@@ -2,19 +2,37 @@ import java.util.Scanner;
 import java.awt.Robot;
 import java.awt.AWTException;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 public class Firstpass
 {
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_BOLD = "\u001B[1m";
-    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String CurrentVersion = "1.3.0";
+
+    public static final String RESET = "\u001B[0m";
+    public static final String GREEN = "\u001B[32m";
+    public static final String RED = "\u001B[31m";
+    public static final String YELLOW = "\u001B[33m";
+    public static final String PURPLE = "\u001B[35m";
+    public static final String BOLD = "\u001B[1m";
+    public static final String CYAN = "\u001B[36m";
 
     public static void main(String[] args) throws Exception
 	{
+        File f = new File("Firstpass_setup.msi");
+        if(f.exists() && !f.isDirectory())
+        { 
+            f.delete();
+        }
+        
+        boolean UpdateAvailable = false;
+        String NewestVersion = check_version.get();
+        if(NewestVersion != null)
+        {
+            if(NewestVersion.compareToIgnoreCase(CurrentVersion) > 0)
+            {
+                UpdateAvailable = true;
+            }
+        }
 		Scanner input = new Scanner(System.in);
        
         System.out.println("\033\143");
@@ -53,14 +71,14 @@ public class Firstpass
         while(true)
         {
             System.out.println("\033\143");
-            System.out.println(ANSI_BOLD+ANSI_GREEN+"Firstpass Password manager"+ANSI_RESET+"\nby "+ANSI_BOLD+ANSI_RED+"R4ZXRN3T"+ANSI_RESET+"\n\n\n");
+            System.out.println(BOLD+GREEN+"Firstpass Password manager"+RESET+"\nby "+BOLD+RED+"R4ZXRN3T"+RESET+"\n\n\n");
             int n = 0;
             while (n < AccountsArr.length && AccountsArr[n][0] != null)
             {
-                System.out.println(n+". "+ANSI_YELLOW+AccountsArr[n][0]+ANSI_RESET+":\n");
-                System.out.println(ANSI_CYAN+"\tUsername:\t"+ANSI_RESET+AccountsArr[n][1]+"\n");
-                System.out.println(ANSI_CYAN+"\tPassword:\t"+ANSI_RESET+AccountsArr[n][2]+"\n");
-                System.out.println(ANSI_CYAN+"\tURL:\t\t"+ANSI_RESET+AccountsArr[n][3]+"\n");
+                System.out.println(n+". "+YELLOW+AccountsArr[n][0]+RESET+":\n");
+                System.out.println(CYAN+"\tUsername:\t"+RESET+AccountsArr[n][1]+"\n");
+                System.out.println(CYAN+"\tPassword:\t"+RESET+AccountsArr[n][2]+"\n");
+                System.out.println(CYAN+"\tURL:\t\t"+RESET+AccountsArr[n][3]+"\n");
                 n++;
             }
             boolean EmptyFile = false;
@@ -70,12 +88,30 @@ public class Firstpass
                 EmptyFile = true;
             }
 
-            System.out.println( "\nActions:\t"+ANSI_PURPLE+"[exit]"+ANSI_RESET+" save and exit\t"+ANSI_PURPLE+"[add]"+ANSI_RESET+" add new entry\t\t"+ANSI_PURPLE+"[del]"+ANSI_RESET+" delete entry\t\t"+ANSI_PURPLE+"[edit]"+ANSI_RESET+
-                                " edit entry\n\t\t"+ANSI_PURPLE+"[s]"+ANSI_RESET+" search entries\t"+ANSI_PURPLE+"[undo]"+ANSI_RESET+" undo last deletion\t"+ANSI_PURPLE+"[sort]"+ANSI_RESET+" sort the entries\t\t"+ANSI_PURPLE+"[pass]"+ANSI_RESET+" change password\n");
-            String action = "placeholder";
-            while(!action.equals("exit") && !action.equals("add") && !action.equals("del") && !action.equals("s") && !action.equals("undo") && !action.equals("sort") && !action.equals("pass") && !action.equals("edit"))
+            if(!UpdateAvailable)
             {
-                action = input.nextLine();
+                System.out.println( "\nActions:\t"+PURPLE+"[exit]"+RESET+" save and exit\t"+PURPLE+"[add]"+RESET+" add new entry\t\t"+PURPLE+"[del]"+RESET+" delete entry\t\t"+PURPLE+"[edit]"+RESET+
+                                    " edit entry\n\t\t"+PURPLE+"[s]"+RESET+" search entries\t"+PURPLE+"[undo]"+RESET+" undo last deletion\t"+PURPLE+"[sort]"+RESET+" sort the entries\t\t"+PURPLE+"[pass]"+RESET+" change password\n");
+            }
+            else
+            {
+                System.out.println( "\nActions:\t"+PURPLE+"[exit]"+RESET+" save and exit\t"+PURPLE+"[add]"+RESET+" add new entry\t\t"+PURPLE+"[del]"+RESET+" delete entry\t\t"+PURPLE+"[edit]"+RESET+
+                                    " edit entry\n\t\t"+PURPLE+"[s]"+RESET+" search entries\t"+PURPLE+"[undo]"+RESET+" undo last deletion\t"+PURPLE+"[sort]"+RESET+" sort the entries\t\t"+PURPLE+"[pass]"+RESET+" change password"+CYAN+"\n\n\t\t[UPDATE] Update available! Install now!"+RESET);
+            }
+            String action = "placeholder";
+            if(!UpdateAvailable)
+            {
+                while(!action.equals("exit") && !action.equals("add") && !action.equals("del") && !action.equals("s") && !action.equals("undo") && !action.equals("sort") && !action.equals("pass") && !action.equals("edit"))
+                {
+                    action = input.nextLine();
+                }
+            }
+            else
+            {
+                while(!action.equals("exit") && !action.equals("add") && !action.equals("del") && !action.equals("s") && !action.equals("undo") && !action.equals("sort") && !action.equals("pass") && !action.equals("edit") && !action.equals("UPDATE"))
+                {
+                    action = input.nextLine();
+                }
             }
             if(action.equals("exit"))
             {
@@ -169,16 +205,16 @@ public class Firstpass
                 {
                     if(methods.containsIgnoreCase(AccountsArr[i][0], search))
                     {
-                        System.out.println(i+". "+ANSI_YELLOW+AccountsArr[i][0]+ANSI_RESET+":\n");
-                        System.out.println(ANSI_CYAN+"\tUsername:\t"+ANSI_RESET+AccountsArr[i][1]+"\n");
-                        System.out.println(ANSI_CYAN+"\tPassword:\t"+ANSI_RESET+AccountsArr[i][2]+"\n");
-                        System.out.println(ANSI_CYAN+"\tURL:\t\t"+ANSI_RESET+AccountsArr[i][3]+"\n");
+                        System.out.println(i+". "+YELLOW+AccountsArr[i][0]+RESET+":\n");
+                        System.out.println(CYAN+"\tUsername:\t"+RESET+AccountsArr[i][1]+"\n");
+                        System.out.println(CYAN+"\tPassword:\t"+RESET+AccountsArr[i][2]+"\n");
+                        System.out.println(CYAN+"\tURL:\t\t"+RESET+AccountsArr[i][3]+"\n");
                         EntryFound = true;
                     }
                 }
                 if(EntryFound)
                 {
-                    System.out.println("\nActions:\t"+ANSI_PURPLE+"[del]"+ANSI_RESET+" delete entry\t"+ANSI_PURPLE+"[ret]"+ANSI_RESET+" return");
+                    System.out.println("\nActions:\t"+PURPLE+"[del]"+RESET+" delete entry\t"+PURPLE+"[ret]"+RESET+" return");
                     String action2 = "placeholder";
                     while(!action2.equals("del") && !action2.equals("ret"))
                     {
@@ -264,6 +300,14 @@ public class Firstpass
                         }
                     }
                 }
+            }
+            if(action.equals("UPDATE"))
+            {
+                Files.Save(CorrectPassword, AccountsArr);
+                input.close();
+                Runtime re = Runtime.getRuntime();
+                re.exec("java -jar Updater.jar");
+                break;
             }
         }
     }
