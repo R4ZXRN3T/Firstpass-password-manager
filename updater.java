@@ -20,7 +20,7 @@ public class updater
         }
         return false;
     }
-    public static void main(String[] args) throws Throwable
+    public static void Updater() throws Throwable
     {
         System.out.println("\033\143");
         System.out.println("\nFirstpass update service\n");
