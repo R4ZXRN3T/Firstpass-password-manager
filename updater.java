@@ -51,6 +51,9 @@ public class updater
             output.write(buffer,0,n);
         }
         output.close();
-        System.out.println("Done!");
+        System.out.println("Done!\n");
+        System.out.println("Launching Installer...\n");
+        Runtime.getRuntime().exec("Firstpass_setup.msi");
+        System.out.println("Done!\n");
     }
 }
