@@ -16,7 +16,7 @@ public class Firstpass
     public static final String BOLD = "\u001B[1m";
     public static final String CYAN = "\u001B[36m";
 
-    public static void main(String[] args) throws Exception
+    public static void main(String[] args) throws Throwable
 	{
         File f = new File("Firstpass_setup.msi");
         if(f.exists() && !f.isDirectory())
@@ -305,8 +305,7 @@ public class Firstpass
             {
                 Files.Save(CorrectPassword, AccountsArr);
                 input.close();
-                Runtime re = Runtime.getRuntime();
-                re.exec("java -jar Updater.jar");
+                updater.Updater();
                 break;
             }
         }
