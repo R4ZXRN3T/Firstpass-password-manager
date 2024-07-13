@@ -6,7 +6,7 @@ import java.io.File;
 
 public class Firstpass
 {
-    public static final String CurrentVersion = "1.3.1";
+    public static final String CurrentVersion = "1.3.2";
 
     public static final String RESET = "\u001B[0m";
     public static final String GREEN = "\u001B[32m";
@@ -71,7 +71,7 @@ public class Firstpass
         while(true)
         {
             System.out.println("\033\143");
-            System.out.println(BOLD+GREEN+"Firstpass Password manager"+RESET+"\nby "+BOLD+RED+"R4ZXRN3T"+RESET+"\n\n\n");
+            System.out.println(BOLD+GREEN+"Firstpass Password manager v"+CurrentVersion+RESET+"\nby "+BOLD+RED+"R4ZXRN3T"+RESET+"\n\n\n");
             int n = 0;
             while (n < AccountsArr.length && AccountsArr[n][0] != null)
             {
