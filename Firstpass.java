@@ -6,7 +6,7 @@ import java.io.File;
 
 public class Firstpass
 {
-    public static final String CurrentVersion = "1.3.2";
+    public static final String CurrentVersion = "1.3.3";
 
     public static final String RESET = "\u001B[0m";
     public static final String GREEN = "\u001B[32m";
