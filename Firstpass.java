@@ -303,10 +303,20 @@ public class Firstpass
             }
             if(action.equals("UPDATE"))
             {
-                Files.Save(CorrectPassword, AccountsArr);
-                input.close();
-                updater.Updater();
-                break;
+                String Confirmation = "A";
+                while(!Confirmation.equals("Y") && !Confirmation.equals("N"))
+                {
+                    System.out.println("\033\143");
+                    System.out.print("\nAre you sure you want to update? ([Y]/[N])   ");
+                    Confirmation = input.nextLine();
+                }
+                if(Confirmation.equals("Y"))
+                {
+                    Files.Save(CorrectPassword, AccountsArr);
+                    input.close();
+                    updater.Updater();
+                    break;
+                }
             }
         }
     }
