@@ -1,3 +1,4 @@
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.awt.Robot;
 import java.awt.AWTException;
@@ -8,13 +9,13 @@ public class Firstpass
 {
     public static final String CurrentVersion = "1.3.3";
 
-    public static final String RESET = "\u001B[0m";
-    public static final String GREEN = "\u001B[32m";
-    public static final String RED = "\u001B[31m";
-    public static final String YELLOW = "\u001B[33m";
-    public static final String PURPLE = "\u001B[35m";
-    public static final String BOLD = "\u001B[1m";
-    public static final String CYAN = "\u001B[36m";
+    public static final String RESET	= "\u001B[0m";
+    public static final String GREEN	= "\u001B[32m";
+    public static final String RED		= "\u001B[31m";
+    public static final String YELLOW	= "\u001B[33m";
+    public static final String PURPLE	= "\u001B[35m";
+    public static final String BOLD		= "\u001B[1m";
+    public static final String CYAN		= "\u001B[36m";
 
     public static void main(String[] args) throws Throwable
 	{
@@ -56,7 +57,7 @@ public class Firstpass
             robot.keyRelease(KeyEvent.VK_MINUS);
             robot.keyRelease(KeyEvent.VK_CONTROL);
         }
-        catch (AWTException e)
+        catch(AWTException e)
         {
             e.printStackTrace();
         }
@@ -101,25 +102,25 @@ public class Firstpass
             String action = "placeholder";
             if(!UpdateAvailable)
             {
-                while(!action.equals("exit") && !action.equals("add") && !action.equals("del") && !action.equals("s") && !action.equals("undo") && !action.equals("sort") && !action.equals("pass") && !action.equals("edit"))
+                while(!action.equalsIgnoreCase("exit") && !action.equalsIgnoreCase("add") && !action.equalsIgnoreCase("del") && !action.equalsIgnoreCase("s") && !action.equalsIgnoreCase("undo") && !action.equalsIgnoreCase("sort") && !action.equalsIgnoreCase("pass") && !action.equalsIgnoreCase("edit"))
                 {
                     action = input.nextLine();
                 }
             }
             else
             {
-                while(!action.equals("exit") && !action.equals("add") && !action.equals("del") && !action.equals("s") && !action.equals("undo") && !action.equals("sort") && !action.equals("pass") && !action.equals("edit") && !action.equals("UPDATE"))
+                while(!action.equalsIgnoreCase("exit") && !action.equalsIgnoreCase("add") && !action.equalsIgnoreCase("del") && !action.equalsIgnoreCase("s") && !action.equalsIgnoreCase("undo") && !action.equalsIgnoreCase("sort") && !action.equalsIgnoreCase("pass") && !action.equalsIgnoreCase("edit") && !action.equalsIgnoreCase("UPDATE"))
                 {
                     action = input.nextLine();
                 }
             }
-            if(action.equals("exit"))
+            if(action.equalsIgnoreCase("exit"))
             {
                 Files.Save(CorrectPassword, AccountsArr);
                 input.close();
                 return;
             }
-            if(action.equals("add"))
+            if(action.equalsIgnoreCase("add"))
             {
                 System.out.println("\033\143");
                 System.out.println("\nAdd new entry:\n");
@@ -132,17 +133,26 @@ public class Firstpass
                 System.out.print("\nURL:\t\t");
                 AccountsArr[n][3] = input.nextLine();
             }
-            if(action.equals("del"))
+            if(action.equalsIgnoreCase("del"))
             {
                 if(!EmptyFile)
                 {
                     System.out.print("\n\nPlease enter the number of the entry you wish to delete:  ");
                     int EntryToDelete = 1000000000;
-                    while(EntryToDelete >= n)
+                    do
                     {
-                        EntryToDelete = input.nextInt();
+                        try
+                        {
+                            EntryToDelete = input.nextInt();
+                            input.nextLine();
+                        }
+                        catch(InputMismatchException | ArrayIndexOutOfBoundsException e)
+                        {
+                            input.nextLine();
+                            System.out.print("\n\nPlease enter the number of the entry you wish to delete:  ");
+                        }
                     }
-                    input.nextLine();
+                    while(EntryToDelete >= n);
 
                     DeletedEntry = AccountsArr[EntryToDelete];
                     DeletedEntryNumber = EntryToDelete;
@@ -160,7 +170,7 @@ public class Firstpass
                     System.in.read();
                 }
             }
-            if(action.equals("undo"))
+            if(action.equalsIgnoreCase("undo"))
             {
                 if (DeletedEntryNumber != -1)
                 {
@@ -179,11 +189,11 @@ public class Firstpass
                     System.in.read();
                 }
             }
-            if(action.equals("sort"))
+            if(action.equalsIgnoreCase("sort"))
             {
                 AccountsArr = methods.sort2DStringArray(AccountsArr);
             }
-            if(action.equals("pass"))
+            if(action.equalsIgnoreCase("pass"))
             {
                 System.out.println("\033\143");
                 while(!EnteredPassword.equals(CorrectPassword))
@@ -195,7 +205,7 @@ public class Firstpass
                 System.out.print("\nEnter your new password:\t");
                 CorrectPassword = input.nextLine();
             }
-            if(action.equals("s"))
+            if(action.equalsIgnoreCase("s"))
             {
                 boolean EntryFound = false;
                 System.out.print("\nEnter your search:\t");
@@ -216,19 +226,28 @@ public class Firstpass
                 {
                     System.out.println("\nActions:\t"+PURPLE+"[del]"+RESET+" delete entry\t"+PURPLE+"[ret]"+RESET+" return");
                     String action2 = "placeholder";
-                    while(!action2.equals("del") && !action2.equals("ret"))
+                    while(!action2.equalsIgnoreCase("del") && !action2.equalsIgnoreCase("ret"))
                     {
                         action2 = input.nextLine();
                     }
-                    if(action2.equals("del"))
+                    if(action2.equalsIgnoreCase("del"))
                     {
                         System.out.print("\n\nPlease enter the number of the entry you wish to delete:  ");
                         int EntryToDelete = 1000000000;
-                        while(EntryToDelete >= n)
+                        do
                         {
-                            EntryToDelete = input.nextInt();
+                            try
+                            {
+                                EntryToDelete = input.nextInt();
+                                input.nextLine();
+                            }
+                            catch(InputMismatchException | ArrayIndexOutOfBoundsException e)
+                            {
+                                input.nextLine();
+                                System.out.print("\n\nPlease enter the number of the entry you wish to delete:  ");
+                            }
                         }
-                        input.nextLine();
+                        while(EntryToDelete >= n);
 
                         DeletedEntry = AccountsArr[EntryToDelete];
                         DeletedEntryNumber = EntryToDelete;
@@ -247,70 +266,89 @@ public class Firstpass
                     System.in.read();
                 }
             }
-            if(action.equals("edit"))
+            if(action.equalsIgnoreCase("edit"))
             {
-                System.out.print("\n\nPlease enter the number of the entry you wish to edit:  ");
-                int EntryToEdit = 1000000000;
-                while(EntryToEdit > n)
+                if(!EmptyFile)
                 {
-                    EntryToEdit = input.nextInt();
-                    input.nextLine();
+                    System.out.print("\n\nPlease enter the number of the entry you wish to edit:  ");
+                    int EntryToEdit = 1000000000;
+                    do
+                    {
+                        try
+                        {
+                            EntryToEdit = input.nextInt();
+                            input.nextLine();
+                        }
+                        catch(InputMismatchException | ArrayIndexOutOfBoundsException e)
+                        {
+                            input.nextLine();
+                            System.out.print("\n\nPlease enter the number of the entry you wish to edit:  ");
+                        }
+                    }
+                    while(EntryToEdit >= n);
+                    
+                    while(true)
+                    {
+                        System.out.println("\033\143");
+                        System.out.println("\nEdit entry:\n");
+                        System.out.println("0.: Provider\t"+AccountsArr[EntryToEdit][0]+"\n\n1.: Username\t"+AccountsArr[EntryToEdit][1]+"\n\n2.: Password\t"+AccountsArr[EntryToEdit][2]+"\n\n3.: URL\t\t"+AccountsArr[EntryToEdit][3]);
+                        System.out.println("\nEnter what you want to edit (0-3 / [ret] to return)\n\n");
+                        String EntryPartToEdit = "1000000000";
+                        while(!EntryPartToEdit.equals("0") && !EntryPartToEdit.equals("1") && !EntryPartToEdit.equals("2") && !EntryPartToEdit.equals("3") && !EntryPartToEdit.equalsIgnoreCase("ret"))
+                        {
+                            EntryPartToEdit = input.nextLine();
+                        }
+                        if(EntryPartToEdit.equalsIgnoreCase("ret"))
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            int EntryPartToEditNumber = Integer.valueOf(EntryPartToEdit);
+                            if(EntryPartToEditNumber == 0)
+                            {
+                                System.out.println("\033\143");
+                                System.out.print("\n0.: Provider:\t"+AccountsArr[EntryToEdit][EntryPartToEditNumber]+"  ->  ");
+                                AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
+                            }
+                            else if(EntryPartToEditNumber == 1)
+                            {
+                                System.out.println("\033\143");
+                                System.out.print("\n1.: Username:\t"+AccountsArr[EntryToEdit][EntryPartToEditNumber]+"  ->  ");
+                                AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
+                            }
+                            else if(EntryPartToEditNumber == 2)
+                            {
+                                System.out.println("\033\143");
+                                System.out.print("\n2.: Password:\t"+AccountsArr[EntryToEdit][EntryPartToEditNumber]+"  ->  ");
+                                AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
+                            }
+                            else if(EntryPartToEditNumber == 3)
+                            {
+                                System.out.println("\033\143");
+                                System.out.print("\n3.: URL:\t\t"+AccountsArr[EntryToEdit][EntryPartToEditNumber]+"  ->  ");
+                                AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
+                            }
+                        }
+                    }
                 }
-                while(true)
+                else
                 {
-                    System.out.println("\033\143");
-                    System.out.println("\nEdit entry:\n");
-                    System.out.println("0.: Provider\t"+AccountsArr[EntryToEdit][0]+"\n\n1.: Username\t"+AccountsArr[EntryToEdit][1]+"\n\n2.: Password\t"+AccountsArr[EntryToEdit][2]+"\n\n3.: URL\t\t"+AccountsArr[EntryToEdit][3]);
-                    System.out.println("\nEnter what you want to edit (0-3 / [ret] to return)\n\n");
-                    String EntryPartToEdit = "1000000000";
-                    while(!EntryPartToEdit.equals("0") && !EntryPartToEdit.equals("1") && !EntryPartToEdit.equals("2") && !EntryPartToEdit.equals("3") && !EntryPartToEdit.equals("ret"))
-                    {
-                        EntryPartToEdit = input.nextLine();
-                    }
-                    if(EntryPartToEdit.equals("ret"))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        int EntryPartToEditNumber = Integer.valueOf(EntryPartToEdit);
-                        if(EntryPartToEditNumber == 0)
-                        {
-                            System.out.println("\033\143");
-                            System.out.print("\n0.: Provider:\t");
-                            AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
-                        }
-                        else if(EntryPartToEditNumber == 1)
-                        {
-                            System.out.println("\033\143");
-                            System.out.print("\n1.: Username:\t");
-                            AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
-                        }
-                        else if(EntryPartToEditNumber == 2)
-                        {
-                            System.out.println("\033\143");
-                            System.out.print("\n2.: Password:\t");
-                            AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
-                        }
-                        else if(EntryPartToEditNumber == 3)
-                        {
-                            System.out.println("\033\143");
-                            System.out.print("\n3.: URL:\t\t");
-                            AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
-                        }
-                    }
+                    System.out.println("\nNothing to edit here :)");
+                    System.out.println("\nPress Enter to continue");
+                    System.in.read();
                 }
             }
-            if(action.equals("UPDATE"))
+            if(action.equalsIgnoreCase("UPDATE"))
             {
                 String Confirmation = "A";
-                while(!Confirmation.equals("Y") && !Confirmation.equals("N"))
+                while(!Confirmation.equalsIgnoreCase("Y") && !Confirmation.equalsIgnoreCase("N"))
                 {
                     System.out.println("\033\143");
                     System.out.print("\nAre you sure you want to update? ([Y]/[N])   ");
                     Confirmation = input.nextLine();
                 }
-                if(Confirmation.equals("Y"))
+                if(Confirmation.equalsIgnoreCase("Y"))
                 {
                     Files.Save(CorrectPassword, AccountsArr);
                     input.close();
