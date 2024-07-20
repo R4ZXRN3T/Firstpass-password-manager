@@ -24,10 +24,19 @@ public class Firstpass
         { 
             f.delete();
         }
-        
+        String NewestVersion = CurrentVersion;
         boolean UpdateAvailable = false;
-        String NewestVersion = check_version.get();
-        if(NewestVersion != null)
+        boolean UpdaterNotAvailable = false;
+        try
+        {
+            NewestVersion = check_version.get();
+        }
+        catch(NoClassDefFoundError e)
+        {
+            UpdaterNotAvailable = true;
+        }
+        
+        if(NewestVersion != null && !UpdaterNotAvailable)
         {
             if(NewestVersion.compareToIgnoreCase(CurrentVersion) > 0)
             {
