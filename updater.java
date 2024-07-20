@@ -31,7 +31,7 @@ public class updater
 
         System.out.println("Downloading installer...\n");
         String link = "https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/download/"+NewestVersion+"/Firstpass_setup.msi";
-        String fileName = "Firstpass.jar";
+        String fileName = "Firstpass_setup.msi";
         URL url  = new URL( link );
         HttpURLConnection http = (HttpURLConnection)url.openConnection();
         Map < String, List< String >> header = http.getHeaderFields();
