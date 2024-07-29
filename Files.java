@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 import org.jasypt.util.text.BasicTextEncryptor;
 import java.io.File;
@@ -6,35 +7,35 @@ import java.io.PrintWriter;
 
 public class Files
 {
-    public static String[][] getAccounts() throws Exception
+    public static ArrayList<String[]> getAccounts() throws Exception
     {
         File AccountsFile = new File("accounts.txt");
         AccountsFile.createNewFile();
         Scanner ReadAcc = new Scanner(AccountsFile);
-        String[][] AccountsArr = new String[10000][4];
+        ArrayList<String[]> AccountsArr = new ArrayList<String[]>();
         if(ReadAcc.hasNextLine())
         {
             ReadAcc.nextLine();
-        }        
-        int m = 0;
-        while(ReadAcc.hasNextLine() && m < AccountsArr.length)
+        }
+        while(ReadAcc.hasNextLine())
         {
+            String[] TempArray = new String[4];
             if (ReadAcc.hasNextLine()) {
-                AccountsArr[m][0] = ReadAcc.nextLine();
+                TempArray[0] = ReadAcc.nextLine();
             } else break;
 
             if (ReadAcc.hasNextLine()) {
-                AccountsArr[m][1] = ReadAcc.nextLine();
+                TempArray[1] = ReadAcc.nextLine();
             } else break;
 
             if (ReadAcc.hasNextLine()) {
-                AccountsArr[m][2] = ReadAcc.nextLine();
+                TempArray[2] = ReadAcc.nextLine();
             } else break;
 
             if (ReadAcc.hasNextLine()) {
-                AccountsArr[m][3] = ReadAcc.nextLine();
+                TempArray[3] = ReadAcc.nextLine();
             } else break;
-            m++;
+            AccountsArr.add(new String[] {TempArray[0],TempArray[1],TempArray[2],TempArray[3]});
         }
         AccountsArr = methods.DecryptArray(AccountsArr);
         ReadAcc.close();
@@ -57,7 +58,7 @@ public class Files
         ReadAcc.close();
         return CorrectPassword;
     }
-    public static void Save(String password, String[][] accounts) throws Exception
+    public static void Save(String password, ArrayList<String[]> accounts) throws Exception
     {
         BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
 		String Password = "CieS~L*2lf#r[0I)pAi3aR5C7n-_}@^RGdAo|V;+";
@@ -67,12 +68,12 @@ public class Files
         PrintWriter pw = new PrintWriter(new FileWriter("accounts.txt"));
         pw.println(password);
         int g = 0;
-        while(accounts[g][0] != null)
+        while(g<accounts.size())
         {
-            pw.println(accounts[g][0]);
-            pw.println(accounts[g][1]);
-            pw.println(accounts[g][2]);
-            pw.println(accounts[g][3]);
+            pw.println(accounts.get(g)[0]);
+            pw.println(accounts.get(g)[1]);
+            pw.println(accounts.get(g)[2]);
+            pw.println(accounts.get(g)[3]);
             g++;
         }
         pw.close();
