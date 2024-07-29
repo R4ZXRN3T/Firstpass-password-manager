@@ -1,25 +1,22 @@
+import java.util.ArrayList;
+
 import org.jasypt.util.text.BasicTextEncryptor;
 public class methods
 {
-	public static String[][] sort2DStringArray(String[][] InitialArray)
+	public static ArrayList<String[]> sort2DStringArray(ArrayList<String[]> InitialArray)
 	{
-		int n = 0;
-		while(InitialArray[n][0] != null)
-		{
-			n++;
-		}
 		String[] temp;
-		for(int i=0;i<n;i++)
+		for(int i=0;i<InitialArray.size();i++)
 		{
-			for(int j=0;j<n;j++)
+			for(int j=0;j<InitialArray.size();j++)
 			{
-				if(j<(n-1))
-				{
-					if(InitialArray[j][0].compareToIgnoreCase(InitialArray[j+1][0]) > 0)
+				if(j<(InitialArray.size()-1))
+				{					
+					if(InitialArray.get(j)[0].compareToIgnoreCase(InitialArray.get(j+1)[0]) > 0)
 					{
-						temp = InitialArray[j];
-						InitialArray[j] = InitialArray[j+1];
-						InitialArray[j+1] = temp;
+						temp = InitialArray.get(j);
+						InitialArray.set(j, InitialArray.get(j+1));
+						InitialArray.set(j+1, temp);
 					}
 				}				
 			}
@@ -35,43 +32,39 @@ public class methods
 		}		
 		return containsIsTrue;
 	}
-	public static String[][] EncryptArray(String[][] InitialArray) throws Exception
+	public static ArrayList<String[]> EncryptArray(ArrayList<String[]> InitialArray) throws Exception
 	{
-		String[][] FinalArray = new String[InitialArray.length][InitialArray[0].length];
+		ArrayList<String[]> FinalArray = new ArrayList<String[]>();
 		BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
 		String Password = "CieS~L*2lf#r[0I)pAi3aR5C7n-_}@^RGdAo|V;+";
 		textEncryptor.setPasswordCharArray(Password.toCharArray());
-		int n = 0;
-		while(n<InitialArray.length && InitialArray[n][0] != null)
+		String[] TempArray = new String[4];
+		for(int i=0;i<InitialArray.size();i++)
 		{
-			n++;
-		}
-		for(int i=0;i<n;i++)
-		{
-			FinalArray[i][0] = textEncryptor.encrypt(InitialArray[i][0]);
-			FinalArray[i][1] = textEncryptor.encrypt(InitialArray[i][1]);
-			FinalArray[i][2] = textEncryptor.encrypt(InitialArray[i][2]);
-			FinalArray[i][3] = textEncryptor.encrypt(InitialArray[i][3]);
+			TempArray = InitialArray.get(i);
+			for(int f=0;f<TempArray.length;f++)
+			{
+				TempArray[f] = textEncryptor.encrypt(TempArray[f]);
+			}
+			FinalArray.add(TempArray);
 		}
 		return FinalArray;
 	}
-	public static String[][] DecryptArray(String[][] InitialArray) throws Exception
+	public static ArrayList<String[]> DecryptArray(ArrayList<String[]> InitialArray) throws Exception
 	{
-		String[][] FinalArray = new String[InitialArray.length][InitialArray[0].length];
+		ArrayList<String[]> FinalArray = new ArrayList<String[]>();
 		BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
 		String Password = "CieS~L*2lf#r[0I)pAi3aR5C7n-_}@^RGdAo|V;+";
 		textEncryptor.setPasswordCharArray(Password.toCharArray());
-		int n = 0;
-		while(n<InitialArray.length && InitialArray[n][0] != null)
+		String[] TempArray = new String[4];
+		for(int i=0;i<InitialArray.size();i++)
 		{
-			n++;
-		}
-		for(int i=0;i<n;i++)
-		{
-			FinalArray[i][0] = textEncryptor.decrypt(InitialArray[i][0]);
-			FinalArray[i][1] = textEncryptor.decrypt(InitialArray[i][1]);
-			FinalArray[i][2] = textEncryptor.decrypt(InitialArray[i][2]);
-			FinalArray[i][3] = textEncryptor.decrypt(InitialArray[i][3]);
+			TempArray = InitialArray.get(i);
+			for(int f=0;f<TempArray.length;f++)
+			{
+				TempArray[f] = textEncryptor.decrypt(TempArray[f]);
+			}
+			FinalArray.add(TempArray);
 		}
 		return FinalArray;
 	}
