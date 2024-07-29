@@ -1,5 +1,6 @@
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.ArrayList;
 import java.awt.Robot;
 import java.awt.AWTException;
 import java.awt.event.KeyEvent;
@@ -7,7 +8,7 @@ import java.io.File;
 
 public class Firstpass
 {
-    public static final String CurrentVersion = "1.3.3";
+    public static final String CurrentVersion = "1.3.5";
 
     public static final String RESET	= "\u001B[0m";
     public static final String GREEN	= "\u001B[32m";
@@ -47,7 +48,7 @@ public class Firstpass
        
         System.out.println("\033\143");
 
-        String[][] AccountsArr = Files.getAccounts();
+        ArrayList<String[]> AccountsArr = Files.getAccounts();
 
         String CorrectPassword = Files.getCorrectPassword();
         
@@ -83,16 +84,16 @@ public class Firstpass
             System.out.println("\033\143");
             System.out.println(BOLD+GREEN+"Firstpass Password manager v"+CurrentVersion+RESET+"\nby "+BOLD+RED+"R4ZXRN3T"+RESET+"\n\n\n");
             int n = 0;
-            while (n < AccountsArr.length && AccountsArr[n][0] != null)
+            while (n < AccountsArr.size())
             {
-                System.out.println(n+". "+YELLOW+AccountsArr[n][0]+RESET+":\n");
-                System.out.println(CYAN+"\tUsername:\t"+RESET+AccountsArr[n][1]+"\n");
-                System.out.println(CYAN+"\tPassword:\t"+RESET+AccountsArr[n][2]+"\n");
-                System.out.println(CYAN+"\tURL:\t\t"+RESET+AccountsArr[n][3]+"\n");
+                System.out.println(n+". "+YELLOW+AccountsArr.get(n)[0]+RESET+":\n");
+                System.out.println(CYAN+"\tUsername:\t"+RESET+AccountsArr.get(n)[1]+"\n");
+                System.out.println(CYAN+"\tPassword:\t"+RESET+AccountsArr.get(n)[2]+"\n");
+                System.out.println(CYAN+"\tURL:\t\t"+RESET+AccountsArr.get(n)[3]+"\n");
                 n++;
             }
             boolean EmptyFile = false;
-            if(AccountsArr[0][0] == null)
+            if(AccountsArr.isEmpty())
             {
                 System.out.println("\n\t[File empty]\n");
                 EmptyFile = true;
@@ -131,16 +132,18 @@ public class Firstpass
             }
             if(action.equalsIgnoreCase("add"))
             {
+                String[] TempArray = new String[4];
                 System.out.println("\033\143");
                 System.out.println("\nAdd new entry:\n");
                 System.out.print("\nProvider:\t");
-                AccountsArr[n][0] = input.nextLine();
+                TempArray[0] = input.nextLine();
                 System.out.print("\nUsername:\t");
-                AccountsArr[n][1] = input.nextLine();
+                TempArray[1] = input.nextLine();
                 System.out.print("\nPassword:\t");
-                AccountsArr[n][2] = input.nextLine();
+                TempArray[2] = input.nextLine();
                 System.out.print("\nURL:\t\t");
-                AccountsArr[n][3] = input.nextLine();
+                TempArray[3] = input.nextLine();
+                AccountsArr.add(new String[] {TempArray[0],TempArray[1],TempArray[2],TempArray[3]});
             }
             if(action.equalsIgnoreCase("del"))
             {
@@ -163,14 +166,10 @@ public class Firstpass
                     }
                     while(EntryToDelete >= n);
 
-                    DeletedEntry = AccountsArr[EntryToDelete];
+                    DeletedEntry = AccountsArr.get(EntryToDelete);
                     DeletedEntryNumber = EntryToDelete;
 
-                    for(int i = EntryToDelete; i < n - 1; i++)
-                    {
-                        AccountsArr[i] = AccountsArr[i + 1];
-                    }
-                    AccountsArr[n - 1] = new String[4];
+                    AccountsArr.remove(EntryToDelete);
                 }
                 else
                 {
@@ -183,13 +182,7 @@ public class Firstpass
             {
                 if (DeletedEntryNumber != -1)
                 {
-                    for(int i=n;i>DeletedEntryNumber;i--)
-                    {
-                        AccountsArr[i] = AccountsArr[i - 1];
-                    }
-                    AccountsArr[DeletedEntryNumber] = DeletedEntry;
-                    DeletedEntry = new String[4];
-                    DeletedEntryNumber = -1;
+                    AccountsArr.add(DeletedEntryNumber, DeletedEntry);
                 }
                 else
                 {
@@ -222,12 +215,12 @@ public class Firstpass
                 System.out.println("\033\143");
                 for(int i=0;i<n;i++)
                 {
-                    if(methods.containsIgnoreCase(AccountsArr[i][0], search))
+                    if(methods.containsIgnoreCase(AccountsArr.get(i)[0], search))
                     {
-                        System.out.println(i+". "+YELLOW+AccountsArr[i][0]+RESET+":\n");
-                        System.out.println(CYAN+"\tUsername:\t"+RESET+AccountsArr[i][1]+"\n");
-                        System.out.println(CYAN+"\tPassword:\t"+RESET+AccountsArr[i][2]+"\n");
-                        System.out.println(CYAN+"\tURL:\t\t"+RESET+AccountsArr[i][3]+"\n");
+                        System.out.println(i+". "+YELLOW+AccountsArr.get(i)[0]+RESET+":\n");
+                        System.out.println(CYAN+"\tUsername:\t"+RESET+AccountsArr.get(i)[1]+"\n");
+                        System.out.println(CYAN+"\tPassword:\t"+RESET+AccountsArr.get(i)[2]+"\n");
+                        System.out.println(CYAN+"\tURL:\t\t"+RESET+AccountsArr.get(i)[3]+"\n");
                         EntryFound = true;
                     }
                 }
@@ -258,14 +251,10 @@ public class Firstpass
                         }
                         while(EntryToDelete >= n);
 
-                        DeletedEntry = AccountsArr[EntryToDelete];
+                        DeletedEntry = AccountsArr.get(EntryToDelete);
                         DeletedEntryNumber = EntryToDelete;
 
-                        for(int i = EntryToDelete; i < n - 1; i++)
-                        {
-                            AccountsArr[i] = AccountsArr[i + 1];
-                        }
-                        AccountsArr[n - 1] = new String[4];
+                       AccountsArr.remove(EntryToDelete);
                     }
                 }
                 else
@@ -300,7 +289,7 @@ public class Firstpass
                     {
                         System.out.println("\033\143");
                         System.out.println("\nEdit entry:\n");
-                        System.out.println("0.: Provider\t"+AccountsArr[EntryToEdit][0]+"\n\n1.: Username\t"+AccountsArr[EntryToEdit][1]+"\n\n2.: Password\t"+AccountsArr[EntryToEdit][2]+"\n\n3.: URL\t\t"+AccountsArr[EntryToEdit][3]);
+                        System.out.println("0.: Provider\t"+AccountsArr.get(EntryToEdit)[0]+"\n\n1.: Username\t"+AccountsArr.get(EntryToEdit)[1]+"\n\n2.: Password\t"+AccountsArr.get(EntryToEdit)[2]+"\n\n3.: URL\t\t"+AccountsArr.get(EntryToEdit)[3]);
                         System.out.println("\nEnter what you want to edit (0-3 / [ret] to return)\n\n");
                         String EntryPartToEdit = "1000000000";
                         while(!EntryPartToEdit.equals("0") && !EntryPartToEdit.equals("1") && !EntryPartToEdit.equals("2") && !EntryPartToEdit.equals("3") && !EntryPartToEdit.equalsIgnoreCase("ret"))
@@ -317,26 +306,26 @@ public class Firstpass
                             if(EntryPartToEditNumber == 0)
                             {
                                 System.out.println("\033\143");
-                                System.out.print("\n0.: Provider:\t"+AccountsArr[EntryToEdit][EntryPartToEditNumber]+"  ->  ");
-                                AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
+                                System.out.print("\n0.: Provider:\t"+AccountsArr.get(EntryToEdit)[EntryPartToEditNumber]+"  ->  ");
+                                AccountsArr.get(EntryToEdit)[EntryPartToEditNumber] = input.nextLine();
                             }
                             else if(EntryPartToEditNumber == 1)
                             {
                                 System.out.println("\033\143");
-                                System.out.print("\n1.: Username:\t"+AccountsArr[EntryToEdit][EntryPartToEditNumber]+"  ->  ");
-                                AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
+                                System.out.print("\n1.: Username:\t"+AccountsArr.get(EntryToEdit)[EntryPartToEditNumber]+"  ->  ");
+                                AccountsArr.get(EntryToEdit)[EntryPartToEditNumber] = input.nextLine();
                             }
                             else if(EntryPartToEditNumber == 2)
                             {
                                 System.out.println("\033\143");
-                                System.out.print("\n2.: Password:\t"+AccountsArr[EntryToEdit][EntryPartToEditNumber]+"  ->  ");
-                                AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
+                                System.out.print("\n2.: Password:\t"+AccountsArr.get(EntryToEdit)[EntryPartToEditNumber]+"  ->  ");
+                                AccountsArr.get(EntryToEdit)[EntryPartToEditNumber] = input.nextLine();
                             }
                             else if(EntryPartToEditNumber == 3)
                             {
                                 System.out.println("\033\143");
-                                System.out.print("\n3.: URL:\t\t"+AccountsArr[EntryToEdit][EntryPartToEditNumber]+"  ->  ");
-                                AccountsArr[EntryToEdit][EntryPartToEditNumber] = input.nextLine();
+                                System.out.print("\n3.: URL:\t\t"+AccountsArr.get(EntryToEdit)[EntryPartToEditNumber]+"  ->  ");
+                                AccountsArr.get(EntryToEdit)[EntryPartToEditNumber] = input.nextLine();
                             }
                         }
                     }
