@@ -48,8 +48,6 @@ public class Firstpass
        
         System.out.println("\033\143");
 
-        ArrayList<String[]> AccountsArr = Files.getAccounts();
-
         String CorrectPassword = Files.getCorrectPassword();
         
         String EnteredPassword = "PlpqVDkAuMes";
@@ -79,6 +77,9 @@ public class Firstpass
             EnteredPassword = input.nextLine();
         }
         EnteredPassword = "PlpqVDkAuMes";
+
+        ArrayList<String[]> AccountsArr = Files.getAccounts();
+        
         while(true)
         {
             System.out.println("\033\143");
