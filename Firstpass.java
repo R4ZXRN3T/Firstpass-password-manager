@@ -1,5 +1,8 @@
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
 import java.util.ArrayList;
 import java.awt.Robot;
 import java.awt.AWTException;
@@ -8,7 +11,7 @@ import java.io.File;
 
 public class Firstpass
 {
-    public static final String CurrentVersion = "1.3.5";
+    public static final String CurrentVersion = "1.4.0";
 
     public static final String RESET	= "\u001B[0m";
     public static final String GREEN	= "\u001B[32m";
@@ -70,7 +73,7 @@ public class Firstpass
             e.printStackTrace();
         }
 
-        while(!EnteredPassword.equals(CorrectPassword))
+        while(!EnteredPassword.equals(CorrectPassword) && !CorrectPassword.equals("4N5l9bz};wUPI^N>=77jZ5x#q!qX4oO_jhVbkf8[q4if3&6;vl"))
         {
             System.out.println("\033\143");
             System.out.println("Please enter your password:\n");
@@ -96,42 +99,42 @@ public class Firstpass
             boolean EmptyFile = false;
             if(AccountsArr.isEmpty())
             {
-                System.out.println("\n\t[File empty]\n");
+                System.out.println("\n\t\t\t[File empty]\n");
                 EmptyFile = true;
             }
 
             if(!UpdateAvailable)
             {
                 System.out.println( "\nActions:\t"+PURPLE+"[exit]"+RESET+" save and exit\t"+PURPLE+"[add]"+RESET+" add new entry\t\t"+PURPLE+"[del]"+RESET+" delete entry\t\t"+PURPLE+"[edit]"+RESET+
-                                    " edit entry\n\t\t"+PURPLE+"[s]"+RESET+" search entries\t"+PURPLE+"[undo]"+RESET+" undo last deletion\t"+PURPLE+"[sort]"+RESET+" sort the entries\t\t"+PURPLE+"[pass]"+RESET+" change password\n");
+                                    " edit entry\n\t\t"+PURPLE+"[s]"+RESET+" search entries\t"+PURPLE+"[undo]"+RESET+" undo last deletion\t"+PURPLE+"[sort]"+RESET+" sort the entries\t\t"+PURPLE+"[set]"+RESET+" open settings menu\n\t\t"+PURPLE+"[gen]"+RESET+" password generator\n");
             }
             else
             {
                 System.out.println( "\nActions:\t"+PURPLE+"[exit]"+RESET+" save and exit\t"+PURPLE+"[add]"+RESET+" add new entry\t\t"+PURPLE+"[del]"+RESET+" delete entry\t\t"+PURPLE+"[edit]"+RESET+
-                                    " edit entry\n\t\t"+PURPLE+"[s]"+RESET+" search entries\t"+PURPLE+"[undo]"+RESET+" undo last deletion\t"+PURPLE+"[sort]"+RESET+" sort the entries\t\t"+PURPLE+"[pass]"+RESET+" change password"+CYAN+"\n\n\t\t[UPDATE] Update available! Install now!"+RESET);
+                                    " edit entry\n\t\t"+PURPLE+"[s]"+RESET+" search entries\t"+PURPLE+"[undo]"+RESET+" undo last deletion\t"+PURPLE+"[sort]"+RESET+" sort the entries\t\t"+PURPLE+"[set]"+RESET+" open settings menu\n\t\t"+PURPLE+"[gen]"+RESET+" password generator"+CYAN+"\n\n\t\t[UPDATE] Update available! Install now!"+RESET);
             }
-            String action = "placeholder";
+            String MainAction = "placeholder";
             if(!UpdateAvailable)
             {
-                while(!action.equalsIgnoreCase("exit") && !action.equalsIgnoreCase("add") && !action.equalsIgnoreCase("del") && !action.equalsIgnoreCase("s") && !action.equalsIgnoreCase("undo") && !action.equalsIgnoreCase("sort") && !action.equalsIgnoreCase("pass") && !action.equalsIgnoreCase("edit"))
+                while(!MainAction.equalsIgnoreCase("exit") && !MainAction.equalsIgnoreCase("add") && !MainAction.equalsIgnoreCase("del") && !MainAction.equalsIgnoreCase("s") && !MainAction.equalsIgnoreCase("undo") && !MainAction.equalsIgnoreCase("sort") && !MainAction.equalsIgnoreCase("set") && !MainAction.equalsIgnoreCase("edit") && !MainAction.equalsIgnoreCase("gen"))
                 {
-                    action = input.nextLine();
+                    MainAction = input.nextLine();
                 }
             }
             else
             {
-                while(!action.equalsIgnoreCase("exit") && !action.equalsIgnoreCase("add") && !action.equalsIgnoreCase("del") && !action.equalsIgnoreCase("s") && !action.equalsIgnoreCase("undo") && !action.equalsIgnoreCase("sort") && !action.equalsIgnoreCase("pass") && !action.equalsIgnoreCase("edit") && !action.equalsIgnoreCase("UPDATE"))
+                while(!MainAction.equalsIgnoreCase("exit") && !MainAction.equalsIgnoreCase("add") && !MainAction.equalsIgnoreCase("del") && !MainAction.equalsIgnoreCase("s") && !MainAction.equalsIgnoreCase("undo") && !MainAction.equalsIgnoreCase("sort") && !MainAction.equalsIgnoreCase("set") && !MainAction.equalsIgnoreCase("edit") && !MainAction.equalsIgnoreCase("UPDATE") && !MainAction.equalsIgnoreCase("gen"))
                 {
-                    action = input.nextLine();
+                    MainAction = input.nextLine();
                 }
             }
-            if(action.equalsIgnoreCase("exit"))
+            if(MainAction.equalsIgnoreCase("exit"))
             {
                 Files.Save(CorrectPassword, AccountsArr);
                 input.close();
                 return;
             }
-            if(action.equalsIgnoreCase("add"))
+            if(MainAction.equalsIgnoreCase("add"))
             {
                 String[] TempArray = new String[4];
                 System.out.println("\033\143");
@@ -146,7 +149,7 @@ public class Firstpass
                 TempArray[3] = input.nextLine();
                 AccountsArr.add(new String[] {TempArray[0],TempArray[1],TempArray[2],TempArray[3]});
             }
-            if(action.equalsIgnoreCase("del"))
+            if(MainAction.equalsIgnoreCase("del"))
             {
                 if(!EmptyFile)
                 {
@@ -175,11 +178,11 @@ public class Firstpass
                 else
                 {
                     System.out.println("\nNothing to delete here :)");
-                    System.out.println("\nPress Enter to continue");
+                    System.out.println("\nPress Enter to continue...");
                     System.in.read();
                 }
             }
-            if(action.equalsIgnoreCase("undo"))
+            if(MainAction.equalsIgnoreCase("undo"))
             {
                 if (DeletedEntryNumber != -1)
                 {
@@ -188,27 +191,63 @@ public class Firstpass
                 else
                 {
                     System.out.println("\nNothing to undo here :)");
-                    System.out.println("\nPress Enter to continue");
+                    System.out.println("\nPress Enter to continue...");
                     System.in.read();
                 }
             }
-            if(action.equalsIgnoreCase("sort"))
+            if(MainAction.equalsIgnoreCase("sort"))
             {
                 AccountsArr = methods.sort2DStringArray(AccountsArr);
             }
-            if(action.equalsIgnoreCase("pass"))
+            if(MainAction.equalsIgnoreCase("set"))
             {
-                System.out.println("\033\143");
-                while(!EnteredPassword.equals(CorrectPassword))
+                String SettingsAction = "placeholder";
+                while (!SettingsAction.equals("1") && !SettingsAction.equals("2") && !SettingsAction.equals("ret"))
                 {
-                    System.out.print("\n\nEnter your old password:\t");
-                    EnteredPassword = input.nextLine();
-                    System.out.println();
+                    if(!CorrectPassword.equals("4N5l9bz};wUPI^N>=77jZ5x#q!qX4oO_jhVbkf8[q4if3&6;vl"))
+                    {
+                        System.out.println("\033\143");
+                        System.out.println("\nSettings:\n");
+                        System.out.println("\n1.:\tChange password\n\n2.:\tRemove Password");
+                    }
+                    else
+                    {
+                        System.out.println("\033\143");
+                        System.out.println("\nSettings:\n");
+                        System.out.println("\n1.:\tSet password\n\n2.:\tRemove Password");
+                    }
+                    System.out.println("\n\nEnter what you want to change:\t(1-2 / "+PURPLE+"[ret]"+RESET+" return)\n");
+                    SettingsAction = input.nextLine();
                 }
-                System.out.print("\nEnter your new password:\t");
-                CorrectPassword = input.nextLine();
+                if(SettingsAction.equals("1"))
+                {
+                    System.out.println("\033\143");
+                    while (!EnteredPassword.equals(CorrectPassword) && !CorrectPassword.equals("4N5l9bz};wUPI^N>=77jZ5x#q!qX4oO_jhVbkf8[q4if3&6;vl"))
+                    {
+                        System.out.print("\n\nEnter your old password:\t");
+                        EnteredPassword = input.nextLine();
+                        System.out.println();
+                    }
+                    System.out.print("\nEnter your new password:\t");
+                    CorrectPassword = input.nextLine();
+                }
+                if(SettingsAction.equals("2"))
+                {
+                    System.out.println("\033\143");
+                    String Confirmation = "placeholder";
+                    while(!Confirmation.equalsIgnoreCase("Y") && !Confirmation.equalsIgnoreCase("N"))
+                    {
+                        System.out.println("\033\143");
+                        System.out.print("\nAre you sure you want to remove your password? ("+PURPLE+"[Y]"+RESET+"/"+PURPLE+"[N]"+RESET+")   ");
+                        Confirmation = input.nextLine();
+                    }
+                    if(Confirmation.equalsIgnoreCase("Y"))
+                    {
+                        CorrectPassword = "4N5l9bz};wUPI^N>=77jZ5x#q!qX4oO_jhVbkf8[q4if3&6;vl";
+                    }
+                }
             }
-            if(action.equalsIgnoreCase("s"))
+            if(MainAction.equalsIgnoreCase("s"))
             {
                 boolean EntryFound = false;
                 System.out.print("\nEnter your search:\t");
@@ -255,17 +294,17 @@ public class Firstpass
                         DeletedEntry = AccountsArr.get(EntryToDelete);
                         DeletedEntryNumber = EntryToDelete;
 
-                       AccountsArr.remove(EntryToDelete);
+                        AccountsArr.remove(EntryToDelete);
                     }
                 }
                 else
                 {
                     System.out.println("\n\n[no matching entry found]");
-                    System.out.println("\n\nPress Enter to return");
+                    System.out.println("\n\nPress Enter to return...");
                     System.in.read();
                 }
             }
-            if(action.equalsIgnoreCase("edit"))
+            if(MainAction.equalsIgnoreCase("edit"))
             {
                 if(!EmptyFile)
                 {
@@ -334,17 +373,17 @@ public class Firstpass
                 else
                 {
                     System.out.println("\nNothing to edit here :)");
-                    System.out.println("\nPress Enter to continue");
+                    System.out.println("\nPress Enter to continue...");
                     System.in.read();
                 }
             }
-            if(action.equalsIgnoreCase("UPDATE"))
+            if(MainAction.equalsIgnoreCase("UPDATE"))
             {
                 String Confirmation = "A";
                 while(!Confirmation.equalsIgnoreCase("Y") && !Confirmation.equalsIgnoreCase("N"))
                 {
                     System.out.println("\033\143");
-                    System.out.print("\nAre you sure you want to update? ([Y]/[N])   ");
+                    System.out.print("\nAre you sure you want to update? ("+PURPLE+"[Y]"+RESET+"/"+PURPLE+"[N]"+RESET+")   ");
                     Confirmation = input.nextLine();
                 }
                 if(Confirmation.equalsIgnoreCase("Y"))
@@ -354,6 +393,30 @@ public class Firstpass
                     updater.Updater();
                     break;
                 }
+            }
+            if(MainAction.equalsIgnoreCase("gen"))
+            {
+                String GeneratedPassword = methods.GenerateRandomPassword();
+                if(GeneratedPassword != null)
+                {
+                    String ActionGeneratedPassword = "placeholder";
+                    while(!ActionGeneratedPassword.equalsIgnoreCase("ret") && !ActionGeneratedPassword.equalsIgnoreCase("copy"))
+                    {
+                        System.out.println("\033\143");
+                        System.out.println("\nYour generated password is:    "+GeneratedPassword);
+                        System.out.println("\n\n"+PURPLE+"[ret]"+RESET+" return\t"+PURPLE+"[copy]"+RESET+" Copy generated password to clipboard\n");
+                        ActionGeneratedPassword = input.nextLine();
+                    }
+                    if(ActionGeneratedPassword.equalsIgnoreCase("copy"))
+                    {
+                        StringSelection stringSelection = new StringSelection(GeneratedPassword);
+                        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        clipboard.setContents(stringSelection, null);
+                        System.out.println("\nPassword successfully copied! ");
+                        System.out.println("\nPress enter to return...");
+                        System.in.read();
+                    }      
+                }                          
             }
         }
     }
