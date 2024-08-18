@@ -2,7 +2,7 @@ Hello!
 
 This is my very own password manager:
 
-## Firstpass Password Manager
+### Firstpass Password Manager
 
 # Usage:
 
