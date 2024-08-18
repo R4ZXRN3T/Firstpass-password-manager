@@ -23,8 +23,8 @@ in order to install this program, just run the .msi installer from the latest re
 ### You NEED to have Java installed to launch the program
 Download Java here: https://www.java.com/download
 
-### To all Linux users:
-A Linux installer is planned, but not on priority. Either just use the standalone (portable) Version or create an installer yourself :)
+### To all Linux and MacOS users:
+A Linux and MacOS installer is planned, but not on priority. Either just use the standalone (portable) Version or create an installer yourself (And then send it to me).
 
 ## Standalone Version:
 
