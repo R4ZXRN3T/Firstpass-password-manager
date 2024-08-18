@@ -47,8 +47,9 @@ public class Files
         BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
 		String Password = "CieS~L*2lf#r[0I)pAi3aR5C7n-_}@^RGdAo|V;+";
 		textEncryptor.setPasswordCharArray(Password.toCharArray());
-        String CorrectPassword = "password";
+        String CorrectPassword = "4N5l9bz};wUPI^N>=77jZ5x#q!qX4oO_jhVbkf8[q4if3&6;vl";
         File AccountsFile = new File("accounts.txt");
+        AccountsFile.createNewFile();
         Scanner ReadAcc = new Scanner(AccountsFile);
         if(AccountsFile.length() > 0)
         {
