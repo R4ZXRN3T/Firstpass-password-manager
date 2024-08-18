@@ -32,7 +32,7 @@ The standalone version does not open on double click.
 Instead, you need to launch it via command line.
 
 If Java is installed, just run: ```java -jar Firstpass_standalone.jar``` from the directory the jar is placed in.
-If this command is not recognized, make sure that you have porperly set your system's enviroment variables.
+If this command is not recognized, make sure that you have properly set your system's enviroment variables.
 
 Alternatively, you can also create a batch file, which executes the command automatically.
 
