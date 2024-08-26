@@ -41,7 +41,7 @@ Just type in a text document:
 TITLE Firstpass
 java -jar "Firstpass_standalone.jar"
 ```
-Make sure that you also add the .bat or .cmd file extension to the file.
+Make sure that you also add the .bat or .cmd file extension to the file and save it in the directory the jar is placed in.
 
 # Notes:
 
