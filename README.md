@@ -31,7 +31,8 @@ A Linux and MacOS installer is planned, but not on priority. Either just use the
 The standalone version does not open on double click.
 Instead, you need to launch it via command line.
 
-If Java is installed, just run: ```
+If Java is installed, just run: 
+```
 java -jar Firstpass_standalone.jar
 ``` from the directory the jar is placed in.
 If this command is not recognized, make sure that you have properly set your system's enviroment variables.
