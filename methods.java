@@ -1,10 +1,10 @@
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.Scanner;
-
 import org.jasypt.util.text.BasicTextEncryptor;
+import QolPack.ConfirmationPrompt;
+import QolPack.InputField;
+
 public class methods
 {
 	public static ArrayList<String[]> sort2DStringArray(ArrayList<String[]> InitialArray)
@@ -74,104 +74,14 @@ public class methods
 	}
 	public static String GenerateRandomPassword() throws IOException
 	{
-		@SuppressWarnings("resource")
-		Scanner input = new Scanner(System.in);
-		boolean InputFailed = true;
-		boolean AddLetters = false;
-		boolean AddSpecialCharacters = false;
-		boolean AddNumbers = false;
+		System.out.println("\033\143");
+		boolean AddLetters = ConfirmationPrompt.simple(0, "\nDo you want to add Letters?: (y/n)\t");
+		boolean AddSymbols = ConfirmationPrompt.simple(0, "\n\nDo you want to add symbols?: (y/n)\t");
+		boolean AddNumbers = ConfirmationPrompt.simple(0, "\n\nDo you want to add numbers? (y/n)\t");
 		String Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 		String Numbers = "1234567890";
 		String SpecialCharacters = "!§$%&/()=?{[]}<>|,;.:-_#'+*~\\\"^°";
-		int PasswordLength = 1;
-		while(InputFailed)
-		{
-			System.out.println("\033\143");
-			System.out.println("Do you want to add Letters?\n");
-			try
-			{
-				if(input.nextBoolean())
-				{
-					AddLetters = true;
-				}
-				InputFailed = false;
-				input.nextLine();
-			}
-			catch(InputMismatchException e)
-			{
-				InputFailed = true;
-				input.nextLine();
-			}
-		}
-		InputFailed = true;
-		while(InputFailed)
-		{
-			System.out.println("\033\143");
-			System.out.println("Do you want to add special characters?\n");
-			try
-			{
-				if(input.nextBoolean())
-				{
-					AddSpecialCharacters = true;
-				}
-				InputFailed = false;
-				input.nextLine();
-			}
-			catch(InputMismatchException e)
-			{
-				InputFailed = true;
-				input.nextLine();
-			}
-		}
-		InputFailed = true;
-		while(InputFailed)
-		{
-			System.out.println("\033\143");
-			System.out.println("Do you want to add numbers?\n");
-			try
-			{
-				if(input.nextBoolean())
-				{
-					AddNumbers = true;
-				}
-				InputFailed = false;
-				input.nextLine();
-			}
-			catch(InputMismatchException e)
-			{
-				InputFailed = true;
-				input.nextLine();
-			}
-		}
-		InputFailed = true;
-		if(!AddLetters && !AddNumbers && !AddSpecialCharacters)
-		{
-			System.out.println("You need to select one of the options");
-			System.out.println("\n\nPress Enter to return...");
-			System.in.read();
-			return null;
-		}
-		do
-		{
-			System.out.println("\033\143");
-			System.out.println("How long should the password be?    (Max. 100 characters)\n");
-			try
-			{
-				PasswordLength = input.nextInt();
-				if(PasswordLength > 100)
-				{
-					PasswordLength = 100;
-				}
-				InputFailed = false;
-				input.nextLine();
-			}
-			catch(InputMismatchException e)
-			{
-				InputFailed = true;
-				input.nextLine();
-			}
-		}
-		while (InputFailed);
+		int PasswordLength = InputField.IntInput(0, "\n\nHow long should the password be?:  (Max. 100 characters)\t", 100, 1);
 		
 		String FinalCharacterCollection = "";
 
@@ -179,7 +89,7 @@ public class methods
 
 		if(AddNumbers) {FinalCharacterCollection = FinalCharacterCollection + Numbers;}
 
-		if(AddSpecialCharacters) {FinalCharacterCollection = FinalCharacterCollection + SpecialCharacters;}
+		if(AddSymbols) {FinalCharacterCollection = FinalCharacterCollection + SpecialCharacters;}
 
 		SecureRandom random = new SecureRandom();
 		
