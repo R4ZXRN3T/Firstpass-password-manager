@@ -108,7 +108,7 @@ public class Firstpass
 			else
 			{
 				MainAction = ConfirmationPrompt.customIgnoreCase(1, "\n\nActions:\t"+PURPLE+"[exit]"+RESET+" save and exit\t"+PURPLE+"[add]"+RESET+" add new entry\t\t"+PURPLE+"[del]"+RESET+" delete entry\t\t"+PURPLE+"[edit]"+RESET+" edit entry\n\t\t"+PURPLE+"[s]"+RESET+" search entries\t"+PURPLE+"[undo]"
-																	+RESET+" undo last deletion\t"+PURPLE+"[sort]"+RESET+" sort the entries\t\t"+PURPLE+"[set]"+RESET+" open settings menu\n\t\t"+PURPLE+"[gen]"+RESET+" password generator"+CYAN+"\n\n\t\t[UPDATE] Update available! Install now!"+RESET
+																	+RESET+" undo last deletion\t"+PURPLE+"[sort]"+RESET+" sort the entries\t\t"+PURPLE+"[set]"+RESET+" open settings menu\n\t\t"+PURPLE+"[gen]"+RESET+" password generator"+CYAN+"\n\n\t\t[UPDATE] Update available! Install now!\n"+RESET
 																	, "exit", "add", "del", "s", "undo", "sort", "set", "edit", "update", "gen");
 			}
 			
