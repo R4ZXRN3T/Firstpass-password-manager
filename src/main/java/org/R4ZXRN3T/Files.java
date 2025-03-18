@@ -150,6 +150,8 @@ class Files {
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(false);
 		fileChooser.setCurrentDirectory(new File(Files.getConfig(Files.LAST_EXPORT_LOCATION)));
+		Action details = fileChooser.getActionMap().get("viewTypeDetails");
+		details.actionPerformed(null);
 
 		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Text File (*.txt)", "txt"));
 		fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Comma Seperated Values (*.csv)", "csv"));
@@ -223,6 +225,7 @@ class Files {
 			JOptionPane.showMessageDialog(null, "Data successfully exported under:\n" + exportFile.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
 		} catch (Exception e) {
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "An error occurred while exporting the data", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -238,6 +241,9 @@ class Files {
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Supported file types (*.txt, *.csv, *.json, *.xml)", "txt", "csv", "json", "xml");
 		fileChooser.addChoosableFileFilter(filter);
+		fileChooser.setFileFilter(filter);
+		Action details = fileChooser.getActionMap().get("viewTypeDetails");
+		details.actionPerformed(null);
 
 		int userSelection = fileChooser.showSaveDialog(null);
 
@@ -346,7 +352,8 @@ class Files {
 			Main.refreshTable();
 			Main.changeMade = true;
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "An error occurred while importing the data", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }
