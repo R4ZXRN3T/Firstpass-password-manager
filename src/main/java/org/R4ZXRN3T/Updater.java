@@ -77,8 +77,8 @@ class Updater {
 					String newestVersion = checkVersion();
 
 					String link = "https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/download/" + newestVersion
-							+ "/Firstpass_setup.msi";
-					String fileName = "Firstpass_setup.msi";
+							+ (Main.portableVersion ? "Firstpass_standalone.jar" : "/Firstpass_setup.msi");
+					String fileName = Main.portableVersion ? "Firstpass_standalone.jar" : "Firstpass_setup.msi";
 
 					URL url = new URL(link);
 					HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -109,7 +109,7 @@ class Updater {
 					output.close();
 					input.close();
 					Main.save();
-					Runtime.getRuntime().exec("cmd /c start Firstpass_setup.msi");
+					Runtime.getRuntime().exec(Main.portableVersion ? "cmd /c start Firstpass_standalone.jar" : "cmd /c start Firstpass_setup.msi");
 					System.exit(0);
 				} catch (IOException e) {
 					throw new RuntimeException(e);

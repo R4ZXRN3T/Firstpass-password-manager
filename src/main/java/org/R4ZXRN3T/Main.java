@@ -14,7 +14,7 @@ import static org.R4ZXRN3T.Icons.*;
 
 class Main {
 
-	public static final String CURRENT_VERSION = "2.0.0";
+	public static final String CURRENT_VERSION = "2.0.1";
 
 	// global variables, important for not having to pass them around
 	public static ArrayList<Account> accountList = new ArrayList<>();
@@ -26,11 +26,15 @@ class Main {
 	public static boolean changeMade = false;
 	public static boolean passwordSet = true;
 	public static boolean updateAvailable = false;
+	public static boolean portableVersion = false;
 
 	public static void main(String[] args) {
 
-		if (CURRENT_VERSION.compareToIgnoreCase(Updater.checkVersion()) < 0) updateAvailable = true;
+		portableVersion = Main.class.getResource("/assets/firstpass_icon.png") != null;
 
+		if (Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0) updateAvailable = true;
+
+		// delete installer file if it exists
 		File installerFile = new File("Firstpass_setup.msi");
 		if (installerFile.exists()) installerFile.delete();
 
