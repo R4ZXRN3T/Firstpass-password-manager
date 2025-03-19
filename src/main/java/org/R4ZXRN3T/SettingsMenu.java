@@ -68,7 +68,10 @@ class SettingsMenu {
 	private static JPanel getPasswordPanel() {
 		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		passwordPanel.setBorder(BorderFactory.createTitledBorder("Password"));
-		changePasswordButton = new CustomButton("Change Password", e -> {changePassword(); refreshButton();}, new Dimension(130, 30));
+		changePasswordButton = new CustomButton("Change Password", e -> {
+			changePassword();
+			refreshButton();
+		}, new Dimension(130, 30));
 		passwordPanel.add(changePasswordButton);
 		removePasswordButton = new CustomButton("Remove Password", e -> removePasswordDialog(), new Dimension(130, 30));
 		passwordPanel.add(removePasswordButton);
@@ -90,8 +93,11 @@ class SettingsMenu {
 		JToolBar bottomToolbar = new JToolBar();
 		bottomToolbar.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		bottomToolbar.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-		bottomToolbar.add(new CustomButton("Apply", Main.darkMode ? Icons.APPLY_ICON_WHITE_SCALED : Icons.APPLY_ICON_SCALED, e -> SettingsMenu.applySettings(), false, false, new Dimension(90, 30), Main.darkMode ? new Color(50, 50 ,50) : Color.lightGray, null, null));
-		bottomToolbar.add(new CustomButton("Cancel", Main.darkMode ? Icons.CANCEL_ICON_WHITE_SCALED : Icons.CANCEL_ICON_SCALED, e -> {Main.frame.setEnabled(true); settingsFrame.dispose();}, false, false, new Dimension(90, 30), Main.darkMode ? new Color(50, 50 ,50) : Color.lightGray, null, null));
+		bottomToolbar.add(new CustomButton("Apply", Main.darkMode ? Icons.APPLY_ICON_WHITE_SCALED : Icons.APPLY_ICON_SCALED, e -> SettingsMenu.applySettings(), false, false, new Dimension(90, 30), Main.darkMode ? new Color(50, 50, 50) : Color.lightGray, null, null));
+		bottomToolbar.add(new CustomButton("Cancel", Main.darkMode ? Icons.CANCEL_ICON_WHITE_SCALED : Icons.CANCEL_ICON_SCALED, e -> {
+			Main.frame.setEnabled(true);
+			settingsFrame.dispose();
+		}, false, false, new Dimension(90, 30), Main.darkMode ? new Color(50, 50, 50) : Color.lightGray, null, null));
 		return bottomToolbar;
 	}
 
