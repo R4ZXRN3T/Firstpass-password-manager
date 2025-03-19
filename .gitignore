@@ -39,9 +39,11 @@ build/
 .DS_Store
 
 ### Custom ###
-*.txt
+account.txt
 Firstpass.jar
 config.json
 pom.xml
 ignore/
 /installer files/Firstpass Password Manager-cache
+/installer files/Firstpass_setup.msi
+/Firstpass_portable.jar

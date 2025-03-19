@@ -53,5 +53,4 @@ class BottomToolBar {
 	public static void refreshUndoButton() {
 		undoButton.setEnabled(!Main.undoStack.isEmpty());
 	}
-
 }

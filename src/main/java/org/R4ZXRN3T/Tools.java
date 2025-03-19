@@ -9,6 +9,7 @@ import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -56,9 +57,13 @@ class Tools {
 	// restarts the program. Used if the settings menu needs to save and restart
 	public static void restart() {
 		try {
-			Runtime.getRuntime().exec("java -jar Firstpass.jar");
+			String jarPath = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
+			if (!jarPath.contains(".jar")) jarPath = "Firstpass.jar";
+			jarPath = "\"" + jarPath + "\"";
+			System.out.println("Restarting with JAR path: " + jarPath);
+			Runtime.getRuntime().exec("java -jar " + jarPath);
 			System.exit(0);
-		} catch (IOException e) {
+		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 		}
 	}
