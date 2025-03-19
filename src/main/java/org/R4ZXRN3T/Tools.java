@@ -24,7 +24,7 @@ class Tools {
 	private static final int SALT_LENGTH = 16;
 	private static final String DEFAULT_EXPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
 	private static final String DEFAULT_IMPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
-	private static JFrame frame = new JFrame("Password Generator");
+	private static JDialog frame = new JDialog(Main.frame, "Password Generator", true);
 
 	// encodes a String with SHA-256. Only used for password check and saving
 	public static String encodePassword(String initialPassword, String salt) {
@@ -178,12 +178,12 @@ class Tools {
 			frame.requestFocus();
 			return;
 		}
-		frame = new JFrame("Password Generator");
+		frame = new JDialog(Main.frame, "Password Generator", true);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setLayout(new BorderLayout(10, 10));
 		frame.setIconImage(Icons.FIRSTPASS_ICON.getImage());
 		frame.setSize(420, 250);
-		frame.setLocationRelativeTo(null);
+		frame.setLocationRelativeTo(Main.frame);
 		frame.setResizable(false);
 
 		JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));

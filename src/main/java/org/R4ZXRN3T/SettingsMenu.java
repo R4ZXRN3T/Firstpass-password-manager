@@ -7,7 +7,7 @@ import java.util.*;
 class SettingsMenu {
 
 	private static final HashMap<Integer, String> currentSettings = new HashMap<>();
-	private static JFrame settingsFrame;
+	private static JDialog settingsFrame;
 	private static boolean needsRestart = false;
 	private static CustomButton changePasswordButton;
 	private static CustomButton removePasswordButton;
@@ -17,16 +17,9 @@ class SettingsMenu {
 		setCurrentSettings();
 
 		// set up frame
-		Main.frame.setEnabled(false);
-		settingsFrame = new JFrame("Firstpass Settings");
+		settingsFrame = new JDialog(Main.frame, "Firstpass Settings", true);
 		settingsFrame.setLayout(new BorderLayout(16, 16));
 		settingsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		settingsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
-			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-				Main.frame.setEnabled(true);
-			}
-		});
 
 		// add elements to the main frame
 		settingsFrame.add(getMainPanel(), BorderLayout.CENTER);
@@ -35,7 +28,7 @@ class SettingsMenu {
 		// set up the frame
 		settingsFrame.setSize(500, 400);
 		settingsFrame.setResizable(false);
-		settingsFrame.setLocationRelativeTo(null);
+		settingsFrame.setLocationRelativeTo(Main.frame);
 		settingsFrame.setIconImage(Icons.FIRSTPASS_ICON.getImage());
 		settingsFrame.requestFocus();
 		settingsFrame.setVisible(true);
@@ -120,19 +113,19 @@ class SettingsMenu {
 
 		Object[] message = Main.passwordSet ? new Object[]{"Old Password:", oldPassword, "New Password:", newPassword} : new Object[]{"New Password:", newPassword};
 
-		int option = JOptionPane.showConfirmDialog(null, message, "Change Password", JOptionPane.OK_CANCEL_OPTION);
+		int option = JOptionPane.showConfirmDialog(settingsFrame, message, "Change Password", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION) {
 			if (!Main.passwordSet) {
 				currentSettings.replace(0, newPassword.getText());
 				Main.passwordSet = true;
-				JOptionPane.showMessageDialog(null, "Password successfully set", "Success", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(settingsFrame, "Password successfully set", "Success", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			if (oldPassword.getText().equals(Main.correctPassword)) {
 				currentSettings.replace(0, newPassword.getText());
-				JOptionPane.showMessageDialog(null, "Password successfully changed", "Success", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(settingsFrame, "Password successfully changed", "Success", JOptionPane.INFORMATION_MESSAGE);
 			} else {
-				JOptionPane.showMessageDialog(null, "The old password is incorrect", "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(settingsFrame, "The old password is incorrect", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 	}
