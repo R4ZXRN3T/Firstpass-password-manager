@@ -9,7 +9,10 @@ class TopToolBar {
 		JMenuBar toolBar = new JMenuBar();
 
 		JMenuItem saveItem = new JMenuItem("Save");
-		saveItem.addActionListener(e -> {Main.save(); Main.changeMade = false;});
+		saveItem.addActionListener(e -> {
+			Main.save();
+			Main.changeMade = false;
+		});
 		saveItem.setIcon(Main.darkMode ? Icons.SAVE_ICON_WHITE_SCALED : Icons.SAVE_ICON_SCALED);
 
 		JMenuItem exportAsItem = new JMenuItem("Export as...");

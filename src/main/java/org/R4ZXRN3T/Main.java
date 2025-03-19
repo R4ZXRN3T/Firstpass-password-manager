@@ -14,7 +14,7 @@ import static org.R4ZXRN3T.Icons.*;
 
 class Main {
 
-	public static final String CURRENT_VERSION = "2.0.2";
+	public static final String CURRENT_VERSION = "2.0.3";
 
 	// global variables, important for not having to pass them around
 	public static ArrayList<Account> accountList = new ArrayList<>();
@@ -52,7 +52,7 @@ class Main {
 		table = new AccountTable(accountList);
 
 		// initialize frame
-		frame = new JFrame("Firstpass Password Manager");
+		frame = new JFrame("Firstpass Password Manager v" + CURRENT_VERSION);
 		frame.setSize(1000, 650);
 		frame.setMinimumSize(new Dimension(690, 270));
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -85,15 +85,6 @@ class Main {
 				}
 			}
 		});
-
-		/*frame.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				Dimension size = frame.getSize();
-				System.out.println("Current frame size: " + size.width + "x" + size.height);
-			}
-		});*/
-
 		refreshFrame();
 	}
 
@@ -389,8 +380,4 @@ class Main {
 		}
 		return false;
 	}
-
-
-
-
 }

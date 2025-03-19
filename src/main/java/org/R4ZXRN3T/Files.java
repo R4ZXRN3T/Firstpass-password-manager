@@ -203,7 +203,7 @@ class Files {
 			} else if (fileName.endsWith(".json")) {
 				JSONObject jsonObject = new JSONObject();
 				for (Account account : accountList) {
-					jsonObject.put(account.getProvider(), new String[] {account.getUsername(), account.getPassword(), account.getUrl(), account.getComment()});
+					jsonObject.put(account.getProvider(), new String[]{account.getUsername(), account.getPassword(), account.getUrl(), account.getComment()});
 				}
 				writer.println(jsonObject.toString(4));
 			} else if (fileName.endsWith(".xml")) {
