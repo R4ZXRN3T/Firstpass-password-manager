@@ -14,7 +14,7 @@ import static org.R4ZXRN3T.Icons.*;
 
 class Main {
 
-	public static final String CURRENT_VERSION = "2.0.3";
+	public static final String CURRENT_VERSION = "2.0.4";
 
 	// global variables, important for not having to pass them around
 	public static ArrayList<Account> accountList = new ArrayList<>();
@@ -105,7 +105,7 @@ class Main {
 		ImageIcon icon = darkMode ? ADD_ICON_WHITE_SCALED : ADD_ICON_SCALED;
 
 		// show dialog and add account if OK is pressed
-		int option = JOptionPane.showConfirmDialog(null, message, "Add Account", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon);
+		int option = JOptionPane.showConfirmDialog(frame, message, "Add Account", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon);
 		if (option == JOptionPane.OK_OPTION) {
 			Account newAccount = new Account(providerField.getText(), usernameField.getText(), passwordField.getText(), URLField.getText(), commentField.getText());
 			accountList.add(newAccount);
