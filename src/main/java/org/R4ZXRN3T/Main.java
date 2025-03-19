@@ -14,7 +14,7 @@ import static org.R4ZXRN3T.Icons.*;
 
 class Main {
 
-	public static final String CURRENT_VERSION = "2.0.1";
+	public static final String CURRENT_VERSION = "2.0.2";
 
 	// global variables, important for not having to pass them around
 	public static ArrayList<Account> accountList = new ArrayList<>();
