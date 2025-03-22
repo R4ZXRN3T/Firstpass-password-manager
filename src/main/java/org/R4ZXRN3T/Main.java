@@ -14,7 +14,7 @@ import static org.R4ZXRN3T.Icons.*;
 
 class Main {
 
-	public static final String CURRENT_VERSION = "2.0.4";
+	public static final String CURRENT_VERSION = "2.0.0";
 
 	// global variables, important for not having to pass them around
 	public static ArrayList<Account> accountList = new ArrayList<>();
@@ -30,13 +30,27 @@ class Main {
 
 	public static void main(String[] args) {
 
-		portableVersion = Main.class.getResource("/assets/firstpass_icon.png") != null;
+		new Thread(() -> {
+			// check for portable version and update availability
+			// in new thread to reduce startup time
+			portableVersion = Main.class.getResource("/assets/firstpass_icon.png") != null;
+			if (Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0) updateAvailable = true;
+		}).start();
 
-		if (Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0) updateAvailable = true;
-
-		// delete installer file if it exists
-		File installerFile = new File("Firstpass_setup.msi");
-		if (installerFile.exists()) installerFile.delete();
+		new Thread(() -> {
+			// delete installer files if existing
+			// in new thread as I need a delay. If deletion happens too quickly the files are still open, thus can't be deleted
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			new File("Firstpass_setup.msi").delete();
+			new File("Firstpass_setup.msi.tmp").delete();
+			new File("Firstpass_portable.jar.tmp").delete();
+			new File("rename.bat").delete();
+			new File("rename.sh").delete();
+		}).start();
 
 		// general initialization
 		Locale.setDefault(Locale.ENGLISH);

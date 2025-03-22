@@ -47,3 +47,7 @@ ignore/
 /installer files/Firstpass Password Manager-cache
 /installer files/Firstpass_setup.msi
 /Firstpass_portable.jar
+/Firstpass_setup.msi
+/Firstpass_portable.jar.tmp
+/Firstpass_setup.msi.tmp
+!/installer files/License Agreement.txt
