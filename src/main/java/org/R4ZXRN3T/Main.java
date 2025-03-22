@@ -30,12 +30,8 @@ class Main {
 
 	public static void main(String[] args) {
 
-		new Thread(() -> {
-			// check for portable version and update availability
-			// in new thread to reduce startup time
-			portableVersion = Main.class.getResource("/assets/firstpass_icon.png") != null;
-			if (Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0) updateAvailable = true;
-		}).start();
+		portableVersion = Main.class.getResource("/assets/firstpass_icon.png") != null;
+		if (Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0) updateAvailable = true;
 
 		new Thread(() -> {
 			// delete installer files if existing
