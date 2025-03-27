@@ -3,17 +3,17 @@ package org.R4ZXRN3T;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.RowSorterEvent;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 public class AccountTable extends JTable {
 
 	private final String[] columns = {"Provider", "Username", "Password", "URL", "Comment"};
 	private String[][] data;
-
 
 	public AccountTable(ArrayList<Account> accounts) {
 		super();
@@ -36,30 +36,22 @@ public class AccountTable extends JTable {
 		setColumnSelectionAllowed(false);
 		setFillsViewportHeight(true);
 		getTableHeader().setBackground(Main.darkMode ? new Color(48, 48, 48) : new Color(200, 200, 200));
+		TableRowSorter<TableModel> sorter = new TableRowSorter<>(this.getModel());
+		setRowSorter(sorter);
 
-		// Add MouseListener to the table header for sorting
-		getTableHeader().addMouseListener(new MouseAdapter() {
-			private boolean sortingReversed = false;
-			private int prevCol = 0;
-			int currentCol = 0;
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				currentCol = columnAtPoint(e.getPoint()) + 1;
-				if (currentCol != prevCol) {
-					sortingReversed = false;
-					prevCol = currentCol;
+		sorter.addRowSorterListener(e -> {
+			if (e.getType() == RowSorterEvent.Type.SORT_ORDER_CHANGED) {
+				Main.accountList.clear();
+				Main.accountList.ensureCapacity(this.getRowCount());
+				for (int i = 0; i < this.getRowCount(); i++) {
+					Main.accountList.add(this.getAccount(i));
 				}
-
-				if (sortingReversed) {
-					Main.sort(currentCol, false);
-					sortingReversed = false;
-				} else {
-					Main.sort(currentCol, true);
-					sortingReversed = true;
-				}
+				Main.refreshIndices();
+				Main.changeMade = true;
 			}
 		});
+
+		// Add MouseListener to the table header for sorting
 	}
 
 	// puts the table into a JScrollPane
@@ -101,10 +93,24 @@ public class AccountTable extends JTable {
 			}
 		};
 		setModel(model);
+		TableRowSorter<TableModel> sorter = new TableRowSorter<>(this.getModel());
+		setRowSorter(sorter);
+
+		sorter.addRowSorterListener(e -> {
+			if (e.getType() == RowSorterEvent.Type.SORT_ORDER_CHANGED) {
+				Main.accountList.clear();
+				Main.accountList.ensureCapacity(this.getRowCount());
+				for (int i = 0; i < this.getRowCount(); i++) {
+					Main.accountList.add(this.getAccount(i));
+				}
+				Main.refreshIndices();
+				Main.changeMade = true;
+			}
+		});
 	}
 
 	// returns the content of a given row as an Account object
-	public Account getAccountAt(int rowIndex) {
+	public Account getAccount(int rowIndex) {
 		return new Account(data[rowIndex][0], data[rowIndex][1], data[rowIndex][2], data[rowIndex][3], data[rowIndex][4]);
 	}
 
