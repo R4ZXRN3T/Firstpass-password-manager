@@ -129,7 +129,7 @@ class Updater {
 			}
 			tmp.renameTo(current);
 			try {
-				Runtime.getRuntime().exec("cmd /c start Firstpass_setup.msi");
+				new ProcessBuilder("cmd", "/c", "start", "Firstpass_setup.msi").start();
 				System.exit(0);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -140,7 +140,7 @@ class Updater {
 		String currentFileName = "Firstpass_portable.jar";
 		try {
 			String script = System.getProperty("os.name").toLowerCase().contains("win") ? "rename.bat" : "rename.sh";
-			PrintWriter writer = new PrintWriter(script, "UTF-8");
+			PrintWriter writer = new PrintWriter(script);
 
 			if (System.getProperty("os.name").toLowerCase().contains("win")) {
 				writer.println("@echo off");
@@ -158,7 +158,7 @@ class Updater {
 				writer.println("nohup ./" + currentFileName + " &");
 			}
 			writer.close();
-			Runtime.getRuntime().exec("cmd /c start " + script);
+			new ProcessBuilder("cmd", "/c", "start", script).start();
 			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();

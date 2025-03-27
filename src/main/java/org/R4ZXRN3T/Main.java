@@ -14,7 +14,7 @@ import static org.R4ZXRN3T.Icons.*;
 
 class Main {
 
-	public static final String CURRENT_VERSION = "2.0.5";
+	public static final String CURRENT_VERSION = "2.0.6";
 
 	// global variables, important for not having to pass them around
 	public static ArrayList<Account> accountList = new ArrayList<>();
@@ -31,7 +31,7 @@ class Main {
 	public static void main(String[] args) {
 
 		portableVersion = Main.class.getResource("/assets/firstpass_icon.png") != null;
-		if (Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0) updateAvailable = true;
+		updateAvailable = Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0;
 
 		new Thread(() -> {
 			// delete installer files if existing
@@ -119,7 +119,7 @@ class Main {
 		if (option == JOptionPane.OK_OPTION) {
 			Account newAccount = new Account(providerField.getText(), usernameField.getText(), passwordField.getText(), URLField.getText(), commentField.getText());
 			accountList.add(newAccount);
-			refreshFrame();
+			refreshTable();
 			changeMade = true;
 		}
 	}
@@ -131,7 +131,7 @@ class Main {
 		if (rowIndex >= 0 && rowIndex < table.getRowCount()) {
 
 			// get correct account to put into undo stack
-			Account removedAccount = table.getAccountAt(rowIndex);
+			Account removedAccount = table.getAccount(rowIndex);
 			// set index of removed account, in order to get correct results from undoDeletion()
 			removedAccount.setIndex(accountList.indexOf(removedAccount));
 			// remove account from ArrayList if row index is valid
@@ -139,7 +139,7 @@ class Main {
 			// add removed account to undo stack
 			undoStack.push(removedAccount);
 			// refresh stuff
-			refreshFrame();
+			refreshTable();
 			BottomToolBar.refreshUndoButton();
 			changeMade = true;
 		} else {
@@ -152,71 +152,56 @@ class Main {
 	public static void editAccount(int rowIndex) {
 
 		// check if row index is valid
-		if (rowIndex >= 0 && rowIndex < table.getRowCount()) {
-			// get account to edit
-			Account account = table.getAccountAt(rowIndex);
-			// set index of account, in order to put it back into the correct position in the ArrayList
-			account.setIndex(accountList.indexOf(account));
-
-			// initialize text fields
-			JTextField providerField = new JTextField(account.getProvider());
-			JTextField usernameField = new JTextField(account.getUsername());
-			JTextField passwordField = new JTextField(account.getPassword());
-			JTextField URLField = new JTextField(account.getUrl());
-			JTextField commentField = new JTextField(account.getComment());
-
-			// create message object
-			Object[] message = {"Provider:", providerField, "Username:", usernameField, "Password:", passwordField, "URL:", URLField, "Comment:", commentField};
-
-			// set correct icon
-			ImageIcon icon = darkMode ? EDIT_ICON_WHITE_SCALED : EDIT_ICON_SCALED;
-
-			// show dialog and edit account if OK is pressed
-			int option = JOptionPane.showConfirmDialog(null, message, "Edit Account", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon);
-			if (option == JOptionPane.OK_OPTION) {
-				account.setProvider(providerField.getText());
-				account.setUsername(usernameField.getText());
-				account.setPassword(passwordField.getText());
-				account.setUrl(URLField.getText());
-				account.setComment(commentField.getText());
-				removeAccount(rowIndex);
-				accountList.add(account.getIndex(), account);
-				refreshFrame();
-				changeMade = true;
-			}
-		} else {
+		if (rowIndex < 0 || rowIndex > table.getRowCount()) {
 			JOptionPane.showMessageDialog(null, "No row selected or invalid row index.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		// get account to edit
+		Account account = table.getAccount(rowIndex);
+		// set index of account, in order to put it back into the correct position in the ArrayList
+		account.setIndex(accountList.indexOf(account));
+
+		// initialize text fields
+		JTextField providerField = new JTextField(account.getProvider());
+		JTextField usernameField = new JTextField(account.getUsername());
+		JTextField passwordField = new JTextField(account.getPassword());
+		JTextField URLField = new JTextField(account.getUrl());
+		JTextField commentField = new JTextField(account.getComment());
+
+		// create message object
+		Object[] message = {"Provider:", providerField, "Username:", usernameField, "Password:", passwordField, "URL:", URLField, "Comment:", commentField};
+
+		// set correct icon
+		ImageIcon icon = darkMode ? EDIT_ICON_WHITE_SCALED : EDIT_ICON_SCALED;
+
+		// show dialog and edit account if OK is pressed
+		int option = JOptionPane.showConfirmDialog(null, message, "Edit Account", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon);
+		if (option == JOptionPane.OK_OPTION) {
+			account.setProvider(providerField.getText());
+			account.setUsername(usernameField.getText());
+			account.setPassword(passwordField.getText());
+			account.setUrl(URLField.getText());
+			account.setComment(commentField.getText());
+			removeAccount(rowIndex);
+			accountList.add(account.getIndex(), account);
+			refreshTable();
+			changeMade = true;
 		}
 	}
 
 	// undo the last deletion from the undo stack
 	public static void undoDeletion() {
-		if (!undoStack.isEmpty()) {
-			Account newAccount = undoStack.pop();
-			// get index from Account Object, in order to put it back into the correct position in the ArrayList
-			accountList.add(newAccount.getIndex(), newAccount);
-			// refresh stuff
-			refreshIndices();
-			refreshFrame();
-			BottomToolBar.refreshUndoButton();
-			changeMade = true;
-		} else {
-			// very unlikely error
+		if (undoStack.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "No deletions to undo.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
 		}
-	}
-
-	// sort using Bubblesort. expects a field for sorting, which is determined by the user clicking on the corresponding column
-	public static void sort(int sortField, boolean isDescending) {
-
-		accountList.sort((account1, account2) -> account1.compareTo(account2, sortField));
-
-		if (!isDescending) {
-			Collections.reverse(accountList);
-		}
-
-		refreshFrame();
+		Account newAccount = undoStack.pop();
+		// get index from Account Object, in order to put it back into the correct position in the ArrayList
+		accountList.add(newAccount.getIndex(), newAccount);
+		// refresh stuff
 		refreshIndices();
+		refreshTable();
 		changeMade = true;
 	}
 
@@ -263,7 +248,7 @@ class Main {
 	}
 
 	// adds position in main ArrayList to each Account object
-	private static void refreshIndices() {
+	public static void refreshIndices() {
 		for (int i = 0; i < accountList.size(); i++) {
 			accountList.get(i).setIndex(i);
 		}
@@ -278,7 +263,6 @@ class Main {
 	public static void refreshFrame(ArrayList<Account> accountsArr) {
 
 		table.setContent(accountsArr);       // populates the table
-		refreshIndices();                    // maybe unnecessary, but just to be sure :)
 
 		// create and initialize center panel
 		JPanel centerPanel = new JPanel();
@@ -318,6 +302,8 @@ class Main {
 		JLabel label = new JLabel();
 		String promptMessage = "Please Enter your password: ";
 		String title = "Firstpass Password Manager";
+		String currentSalt = Files.getConfig(Files.SALT);
+		String encodedPassword = Files.getConfig(Files.PASSWORD);
 
 		if (Files.getConfig(Files.PASSWORD) == null || Objects.equals(Files.getConfig(Files.PASSWORD), Tools.encodePassword(Files.getConfig(Files.SALT), "")) || Objects.equals(Files.getConfig(Files.PASSWORD), "")) {
 			return "";
@@ -338,7 +324,7 @@ class Main {
 			if (enteredPassword == null) {
 				System.exit(0);
 			}
-		} while (!Tools.encodePassword(enteredPassword, Files.getConfig(Files.SALT)).equals(Files.getConfig(Files.PASSWORD)));
+		} while (!Tools.encodePassword(enteredPassword, currentSalt).equals(encodedPassword));
 
 		return enteredPassword;
 	}

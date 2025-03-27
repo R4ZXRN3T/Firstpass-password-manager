@@ -14,8 +14,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Objects;
+
+import static java.util.Arrays.sort;
 
 class Tools {
 
@@ -61,7 +64,7 @@ class Tools {
 			if (!jarPath.contains(".jar")) jarPath = "Firstpass.jar";
 			jarPath = "\"" + jarPath + "\"";
 			System.out.println("Restarting with JAR path: " + jarPath);
-			Runtime.getRuntime().exec("java -jar " + jarPath);
+			new ProcessBuilder("java", "-jar", jarPath).start();
 			System.exit(0);
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
