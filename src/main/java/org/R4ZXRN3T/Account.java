@@ -40,6 +40,15 @@ public class Account {
 		index = 0;
 	}
 
+	public Account(String provider, String username, String password, String url, String comment, int index) {
+		this.provider = provider;
+		this.username = username;
+		this.password = password;
+		this.url = url;
+		this.comment = comment;
+		this.index = index;
+	}
+
 	public String getProvider() {
 		return provider;
 	}
@@ -215,9 +224,7 @@ public class Account {
 	}
 
 	public void encrypt(String encryptionPassword) {
-		if (isEmpty() || encryptionPassword == null || encryptionPassword.isEmpty()) {
-			return;
-		}
+		if (isEmpty() || encryptionPassword == null || encryptionPassword.isEmpty()) return;
 
 		StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
 		textEncryptor.setPasswordCharArray(encryptionPassword.toCharArray());

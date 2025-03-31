@@ -145,7 +145,6 @@ class SettingsMenu {
 		}
 
 		settingsFrame.dispose();
-		Main.refreshFrame();
 		Main.changeMade = true;
 	}
 

@@ -14,7 +14,7 @@ import static org.R4ZXRN3T.Icons.*;
 
 class Main {
 
-	public static final String CURRENT_VERSION = "2.0.6";
+	public static final String CURRENT_VERSION = "2.0.0";
 
 	// global variables, important for not having to pass them around
 	public static ArrayList<Account> accountList = new ArrayList<>();
@@ -31,7 +31,13 @@ class Main {
 	public static void main(String[] args) {
 
 		portableVersion = Main.class.getResource("/assets/firstpass_icon.png") != null;
-		updateAvailable = Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0;
+
+		new Thread(() -> {
+			// check whether an update is available
+			// in a separate thread, as on slow internet connection this might take a while
+			updateAvailable = Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0;
+			TopToolBar.updateButton.setVisible(updateAvailable);
+		}).start();
 
 		new Thread(() -> {
 			// delete installer files if existing
@@ -58,8 +64,6 @@ class Main {
 		if (correctPassword.isEmpty()) {
 			passwordSet = false;
 		}
-		accountList = Files.getAccounts(correctPassword);
-		table = new AccountTable(accountList);
 
 		// initialize frame
 		frame = new JFrame("Firstpass Password Manager v" + CURRENT_VERSION);
@@ -68,6 +72,13 @@ class Main {
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.setIconImage(FIRSTPASS_ICON.getImage());
+
+		table = new AccountTable(new ArrayList<>());
+
+		new Thread(() -> {
+			accountList = Files.getAccounts(correctPassword);
+			table.setContent(accountList);
+		}).start();
 
 		// add save prompt on exit
 		frame.addWindowListener(new WindowAdapter() {
@@ -95,7 +106,7 @@ class Main {
 				}
 			}
 		});
-		refreshFrame();
+		initializeFrame();
 	}
 
 	// add an account to the Account ArrayList
@@ -128,24 +139,29 @@ class Main {
 	public static void removeAccount(int rowIndex) {
 
 		// check if row index is valid
-		if (rowIndex >= 0 && rowIndex < table.getRowCount()) {
-
-			// get correct account to put into undo stack
-			Account removedAccount = table.getAccount(rowIndex);
-			// set index of removed account, in order to get correct results from undoDeletion()
-			removedAccount.setIndex(accountList.indexOf(removedAccount));
-			// remove account from ArrayList if row index is valid
-			accountList.removeIf(account -> account.equals(removedAccount));
-			// add removed account to undo stack
-			undoStack.push(removedAccount);
-			// refresh stuff
-			refreshTable();
-			BottomToolBar.refreshUndoButton();
-			changeMade = true;
-		} else {
+		if (rowIndex < 0 || rowIndex > table.getRowCount()) {
 			// very unlikely error
 			JOptionPane.showMessageDialog(null, "No row selected or invalid row index.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
 		}
+
+		// add account for deletion to undo stack
+		undoStack.push(new Account(
+				accountList.get(rowIndex).getProvider(),
+				accountList.get(rowIndex).getUsername(),
+				accountList.get(rowIndex).getPassword(),
+				accountList.get(rowIndex).getUrl(),
+				accountList.get(rowIndex).getComment(),
+				rowIndex
+		));
+
+		accountList.remove(rowIndex);
+
+		// finish up
+		refreshIndices();
+		refreshTable();
+		BottomToolBar.refreshUndoButton();
+		changeMade = true;
 	}
 
 	// edit an account in the Account ArrayList
@@ -177,17 +193,19 @@ class Main {
 
 		// show dialog and edit account if OK is pressed
 		int option = JOptionPane.showConfirmDialog(null, message, "Edit Account", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon);
-		if (option == JOptionPane.OK_OPTION) {
-			account.setProvider(providerField.getText());
-			account.setUsername(usernameField.getText());
-			account.setPassword(passwordField.getText());
-			account.setUrl(URLField.getText());
-			account.setComment(commentField.getText());
-			removeAccount(rowIndex);
-			accountList.add(account.getIndex(), account);
-			refreshTable();
-			changeMade = true;
+		if (option != JOptionPane.OK_OPTION) {
+			return;
 		}
+
+		account.setProvider(providerField.getText());
+		account.setUsername(usernameField.getText());
+		account.setPassword(passwordField.getText());
+		account.setUrl(URLField.getText());
+		account.setComment(commentField.getText());
+		removeAccount(rowIndex);
+		accountList.add(account.getIndex(), account);
+		refreshTable();
+		changeMade = true;
 	}
 
 	// undo the last deletion from the undo stack
@@ -254,15 +272,8 @@ class Main {
 		}
 	}
 
-	// refreshes the frame with the current Account ArrayList
-	public static void refreshFrame() {
-		refreshFrame(accountList);
-	}
-
 	// redraws the entire frame with the given Account ArrayList
-	public static void refreshFrame(ArrayList<Account> accountsArr) {
-
-		table.setContent(accountsArr);       // populates the table
+	public static void initializeFrame() {
 
 		// create and initialize center panel
 		JPanel centerPanel = new JPanel();
@@ -279,7 +290,6 @@ class Main {
 		frame.revalidate();
 		frame.repaint();
 		frame.setVisible(true);
-		frame.setEnabled(true);
 	}
 
 	// refreshes only the table with the current Account ArrayList

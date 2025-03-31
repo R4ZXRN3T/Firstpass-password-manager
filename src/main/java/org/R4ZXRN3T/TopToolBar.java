@@ -5,6 +5,8 @@ import java.awt.*;
 
 class TopToolBar {
 
+	public static JButton updateButton = new JButton("New version available!");
+
 	public static JMenuBar getTopToolBar() {
 		JMenuBar toolBar = new JMenuBar();
 
@@ -38,12 +40,12 @@ class TopToolBar {
 		fileItem.add(settingsItem);
 		fileItem.add(exitItem);
 
-		JButton updateButton = new JButton("New version available!");
 		updateButton.setForeground(new Color(0, 180, 255));
 		updateButton.addActionListener(e -> Updater.update());
+		updateButton.setVisible(Main.updateAvailable);
 
 		toolBar.add(fileItem);
-		if (Main.updateAvailable) toolBar.add(updateButton);
+		toolBar.add(updateButton);
 
 		return toolBar;
 	}
