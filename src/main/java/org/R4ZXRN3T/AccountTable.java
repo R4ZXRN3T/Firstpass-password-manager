@@ -40,7 +40,7 @@ public class AccountTable extends JTable {
 		setRowSorter(sorter);
 
 		sorter.addRowSorterListener(e -> {
-			if (e.getType() == RowSorterEvent.Type.SORT_ORDER_CHANGED) {
+			if (e.getType() == RowSorterEvent.Type.SORTED) {
 				setMainData();
 			}
 		});
@@ -98,7 +98,7 @@ public class AccountTable extends JTable {
 		Main.accountList.clear();
 		Main.accountList.ensureCapacity(this.getRowCount());
 		// WHY THE FUCK DO I HAVE TO REVERSE THIS?!?!?!?!
-		for (int i = this.getRowCount() - 1; i > 0; i--) {
+		for (int i = this.getRowCount() - 1; i > -1; i--) {
 			Main.accountList.add(new Account(
 					getValueAt(i, 0).toString(),
 					getValueAt(i, 1).toString(),
