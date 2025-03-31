@@ -97,8 +97,14 @@ public class AccountTable extends JTable {
 	private void setMainData() {
 		Main.accountList.clear();
 		Main.accountList.ensureCapacity(this.getRowCount());
-		for (int i = 0; i < this.getRowCount(); i++) {
-			Main.accountList.add(new Account(data[i][0], data[i][1], data[i][2], data[i][3], data[i][4]));
+		// WHY THE FUCK DO I HAVE TO REVERSE THIS?!?!?!?!
+		for (int i = this.getRowCount() - 1; i > 0; i--) {
+			Main.accountList.add(new Account(
+					getValueAt(i, 0).toString(),
+					getValueAt(i, 1).toString(),
+					getValueAt(i, 2).toString(),
+					getValueAt(i, 3).toString(),
+					getValueAt(i, 4).toString()));
 		}
 		Main.refreshIndices();
 		Main.changeMade = true;
