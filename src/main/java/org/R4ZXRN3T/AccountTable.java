@@ -41,17 +41,9 @@ public class AccountTable extends JTable {
 
 		sorter.addRowSorterListener(e -> {
 			if (e.getType() == RowSorterEvent.Type.SORT_ORDER_CHANGED) {
-				Main.accountList.clear();
-				Main.accountList.ensureCapacity(this.getRowCount());
-				for (int i = 0; i < this.getRowCount(); i++) {
-					Main.accountList.add(this.getAccount(i));
-				}
-				Main.refreshIndices();
-				Main.changeMade = true;
+				setMainData();
 			}
 		});
-
-		// Add MouseListener to the table header for sorting
 	}
 
 	// puts the table into a JScrollPane
@@ -98,15 +90,18 @@ public class AccountTable extends JTable {
 
 		sorter.addRowSorterListener(e -> {
 			if (e.getType() == RowSorterEvent.Type.SORT_ORDER_CHANGED) {
-				Main.accountList.clear();
-				Main.accountList.ensureCapacity(this.getRowCount());
-				for (int i = 0; i < this.getRowCount(); i++) {
-					Main.accountList.add(this.getAccount(i));
-				}
-				Main.refreshIndices();
-				Main.changeMade = true;
-			}
+				setMainData();			}
 		});
+	}
+
+	private void setMainData() {
+		Main.accountList.clear();
+		Main.accountList.ensureCapacity(this.getRowCount());
+		for (int i = 0; i < this.getRowCount(); i++) {
+			Main.accountList.add(new Account(data[i][0], data[i][1], data[i][2], data[i][3], data[i][4]));
+		}
+		Main.refreshIndices();
+		Main.changeMade = true;
 	}
 
 	// returns the content of a given row as an Account object
