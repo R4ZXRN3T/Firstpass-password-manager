@@ -17,19 +17,21 @@ class TopToolBar {
 		});
 		saveItem.setIcon(Main.darkMode ? Icons.SAVE_ICON_WHITE_SCALED : Icons.SAVE_ICON_SCALED);
 
-		JMenuItem exportAsItem = new JMenuItem("Export as...");
+		JMenuItem exportAsItem = new JMenuItem("Export");
 		exportAsItem.addActionListener(e -> Files.exportData());
 		exportAsItem.setIcon(Main.darkMode ? Icons.EXPORT_ICON_WHITE_SCALED : Icons.EXPORT_ICON_SCALED);
 
-		JMenuItem importAsItem = new JMenuItem("Import...");
+		JMenuItem importAsItem = new JMenuItem("Import");
 		importAsItem.setIcon(Main.darkMode ? Icons.IMPORT_ICON_WHITE_SCALED : Icons.IMPORT_ICON_SCALED);
 		importAsItem.addActionListener(e -> Files.importData());
 
-		JMenuItem settingsItem = new JMenuItem("Settings");
-		settingsItem.addActionListener(e -> SettingsMenu.showSettings());
-		settingsItem.setIcon(Main.darkMode ? Icons.SETTINGS_ICON_WHITE_SCALED : Icons.SETTINGS_ICON_SCALED);
+		JButton settingsButton = new JButton("Settings");
+		settingsButton.addActionListener(e -> SettingsMenu.showSettings());
+		settingsButton.setBackground(Main.frame.getBackground());
+		settingsButton.setBorderPainted(false);
+		settingsButton.setFocusable(false);
 
-		JMenuItem exitItem = new JMenuItem("Exit");
+		JMenuItem exitItem = new JMenuItem("Save & Exit");
 		exitItem.addActionListener(e -> Main.exit());
 		exitItem.setIcon(Main.darkMode ? Icons.EXIT_ICON_WHITE_SCALED : Icons.EXIT_ICON_SCALED);
 
@@ -37,14 +39,15 @@ class TopToolBar {
 		fileItem.add(saveItem);
 		fileItem.add(exportAsItem);
 		fileItem.add(importAsItem);
-		fileItem.add(settingsItem);
 		fileItem.add(exitItem);
 
 		updateButton.setForeground(new Color(0, 180, 255));
+		updateButton.setBorderPainted(true);
 		updateButton.addActionListener(e -> Updater.update());
 		updateButton.setVisible(Main.updateAvailable);
 
 		toolBar.add(fileItem);
+		toolBar.add(settingsButton);
 		toolBar.add(updateButton);
 
 		return toolBar;

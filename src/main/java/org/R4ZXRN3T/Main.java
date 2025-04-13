@@ -14,7 +14,7 @@ import static org.R4ZXRN3T.Icons.*;
 
 class Main {
 
-	public static final String CURRENT_VERSION = "2.0.8";
+	public static final String CURRENT_VERSION = "2.0.9";
 
 	// global variables, important for not having to pass them around
 	public static ArrayList<Account> accountList = new ArrayList<>();
@@ -32,12 +32,16 @@ class Main {
 
 		portableVersion = Main.class.getResource("/assets/firstpass_icon.png") != null;
 
-		new Thread(() -> {
-			// check whether an update is available
-			// in a separate thread, as on slow internet connection this might take a while
-			updateAvailable = Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0;
-			TopToolBar.updateButton.setVisible(updateAvailable);
-		}).start();
+		// general initialization
+		Locale.setDefault(Locale.ENGLISH);
+		darkMode = setLookAndFeel(Objects.requireNonNull(Files.getConfig(Files.LOOK_AND_FEEL)));
+		Tools.checkConfig();
+
+		// check whether an update is available
+		// in a separate thread, as on slow internet connection this might take a while
+		if (Boolean.parseBoolean(Files.getConfig(Files.CHECK_FOR_UPDATES))) {
+			new Thread(Main::setUpdateAvailable).start();
+		}
 
 		new Thread(() -> {
 			// delete installer files if existing
@@ -54,10 +58,6 @@ class Main {
 			new File("rename.sh").delete();
 		}).start();
 
-		// general initialization
-		Locale.setDefault(Locale.ENGLISH);
-		darkMode = setLookAndFeel(Objects.requireNonNull(Files.getConfig(Files.LOOK_AND_FEEL)));
-		Tools.checkConfig();
 
 		// load and decrypt accounts
 		correctPassword = checkPassword();
@@ -129,6 +129,17 @@ class Main {
 		int option = JOptionPane.showConfirmDialog(frame, message, "Add Account", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon);
 		if (option == JOptionPane.OK_OPTION) {
 			Account newAccount = new Account(providerField.getText(), usernameField.getText(), passwordField.getText(), URLField.getText(), commentField.getText());
+			boolean exists = false;
+			for (Account account : accountList) {
+				if (account.getProvider().equals(newAccount.getProvider())) {
+					int keepOption = JOptionPane.showConfirmDialog(frame, "Account already exists! Do you still want to add it?", "Account already exists", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+					if (keepOption == JOptionPane.NO_OPTION) {
+						return;
+					} else {
+						break;
+					}
+				}
+			}
 			accountList.add(newAccount);
 			refreshTable();
 			changeMade = true;
@@ -239,11 +250,9 @@ class Main {
 
 	public static void fullDelete() {
 		accountList.clear();
-		File accountsFile = new File("accounts.txt");
-		accountsFile.delete();
-		File configFile = new File("config.json");
-		configFile.delete();
-		Tools.restart();
+		new File("accounts.txt").delete();
+		new File("config.json").delete();
+		System.exit(0);
 	}
 
 	// actually filters not searches, but we're not so picky with terminology :)
@@ -315,7 +324,16 @@ class Main {
 		String currentSalt = Files.getConfig(Files.SALT);
 		String encodedPassword = Files.getConfig(Files.PASSWORD);
 
+		JFrame tempFrame = new JFrame("Firstpass Password Manager");
+
+		tempFrame.setUndecorated(true);
+		tempFrame.setVisible(true);
+		tempFrame.setLocationRelativeTo(null);
+		tempFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		tempFrame.setIconImage(FIRSTPASS_ICON.getImage());
+
 		if (Files.getConfig(Files.PASSWORD) == null || Objects.equals(Files.getConfig(Files.PASSWORD), Tools.encodePassword(Files.getConfig(Files.SALT), "")) || Objects.equals(Files.getConfig(Files.PASSWORD), "")) {
+			tempFrame.dispose();
 			return "";
 		}
 
@@ -328,7 +346,7 @@ class Main {
 			}
 			// finally show the input dialog
 			label.setText(promptMessage);
-			enteredPassword = (String) JOptionPane.showInputDialog(null, label, title, JOptionPane.PLAIN_MESSAGE, null, null, null);
+			enteredPassword = (String) JOptionPane.showInputDialog(tempFrame, label, title, JOptionPane.PLAIN_MESSAGE, null, null, null);
 
 			// exit if user presses cancel
 			if (enteredPassword == null) {
@@ -336,6 +354,7 @@ class Main {
 			}
 		} while (!Tools.encodePassword(enteredPassword, currentSalt).equals(encodedPassword));
 
+		tempFrame.dispose();
 		return enteredPassword;
 	}
 
@@ -385,5 +404,10 @@ class Main {
 			System.exit(1);
 		}
 		return false;
+	}
+
+	public static void setUpdateAvailable() {
+		updateAvailable = Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0;
+		TopToolBar.updateButton.setVisible(updateAvailable);
 	}
 }

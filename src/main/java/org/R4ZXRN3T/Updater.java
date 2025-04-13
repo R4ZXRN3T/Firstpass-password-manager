@@ -30,6 +30,7 @@ class Updater {
 			conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
 
 			if (conn.getResponseCode() != 200) {
+				JOptionPane.showMessageDialog(null, "Github Version Not Found", "Error", JOptionPane.ERROR_MESSAGE);
 				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
 			}
 
@@ -47,11 +48,12 @@ class Updater {
 			e.printStackTrace();
 		}
 
-		return (latestVersion);
+		return latestVersion;
 	}
 
 	public static void update() {
-		int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to update Firstpass?", "Update", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		JLabel versionAvailableLabel = new JLabel("<html> <font color=\"#00b3ff\">Version " + checkVersion() + " is available.<br></font> Are you sure you want to update Firstpass?</html>");
+		int option = JOptionPane.showConfirmDialog(null, versionAvailableLabel, "Update", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if (option != JOptionPane.YES_OPTION) return;
 
 		SwingUtilities.invokeLater(() -> {
@@ -158,7 +160,12 @@ class Updater {
 				writer.println("nohup ./" + currentFileName + " &");
 			}
 			writer.close();
-			new ProcessBuilder("cmd", "/c", "start", script).start();
+			if (System.getProperty("os.name").toLowerCase().contains("win")) {
+				new ProcessBuilder("cmd", "/c", "start", script).start();
+			} else {
+				new File(script).setExecutable(true);
+				new ProcessBuilder("bash", "./" + script).start();
+			}
 			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();
