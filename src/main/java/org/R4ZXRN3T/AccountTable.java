@@ -89,22 +89,26 @@ public class AccountTable extends JTable {
 		setRowSorter(sorter);
 
 		sorter.addRowSorterListener(e -> {
-			if (e.getType() == RowSorterEvent.Type.SORT_ORDER_CHANGED) {
-				setMainData();			}
+			if (e.getType() == RowSorterEvent.Type.SORTED) {
+				// boolean reversed = sorter.getSortKeys().get(0).getSortOrder() == SortOrder.DESCENDING;
+				setMainData();
+			}
 		});
 	}
 
 	private void setMainData() {
 		Main.accountList.clear();
 		Main.accountList.ensureCapacity(this.getRowCount());
-		// WHY THE FUCK DO I HAVE TO REVERSE THIS?!?!?!?!
-		for (int i = this.getRowCount() - 1; i > -1; i--) {
+
+		// Iterate through rows and directly use view indices
+		for (int i = 0; i < this.getRowCount(); i++) {
 			Main.accountList.add(new Account(
 					getValueAt(i, 0).toString(),
 					getValueAt(i, 1).toString(),
 					getValueAt(i, 2).toString(),
 					getValueAt(i, 3).toString(),
-					getValueAt(i, 4).toString()));
+					getValueAt(i, 4).toString()
+			));
 		}
 		Main.refreshIndices();
 		Main.changeMade = true;

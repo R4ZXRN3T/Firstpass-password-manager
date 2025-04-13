@@ -27,6 +27,7 @@ class Files {
 	public static final String LOOK_AND_FEEL = "lookAndFeel";
 	public static final String LAST_EXPORT_LOCATION = "export";
 	public static final String LAST_IMPORT_LOCATION = "import";
+	public static final String CHECK_FOR_UPDATES = "checkForUpdates";
 
 	// retrieve Accounts ArrayList from accounts.txt. Only called on program launch
 	public static ArrayList<Account> getAccounts(String decryptionKey) {
@@ -187,7 +188,7 @@ class Files {
 			value = jsonObject.get(key).toString();
 
 		} catch (JSONException e) {
-			Tools.setDefaultLaf(key);
+			Tools.setDefault(key);
 			return getConfig(key);
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -10,7 +10,7 @@ class BottomToolBar {
 
 	// took 10 minutes to get right
 	public final static Color DARK_MODE_COLOR = new Color(50, 50, 50);
-	private final static Dimension DEFAULT_BUTTON_SIZE = new Dimension(100, 35);
+	private final static Dimension DEFAULT_BUTTON_SIZE = new Dimension(105, 35);
 
 	// only here to be able to refresh the button
 	private static CustomButton undoButton;
@@ -40,7 +40,7 @@ class BottomToolBar {
 		buttonPanel.add(new CustomButton("Generator", Main.darkMode ? GENERATE_ICON_WHITE_SCALED : GENERATE_ICON_SCALED, e -> Tools.passwordGeneratorDialog(), DEFAULT_BUTTON_SIZE));
 		// exitButton
 		JPanel exitPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		exitPanel.add(new CustomButton("Exit", Main.darkMode ? EXIT_ICON_WHITE_SCALED : EXIT_ICON_SCALED, e -> Main.exit(), DEFAULT_BUTTON_SIZE), BorderLayout.EAST);
+		exitPanel.add(new CustomButton("Save & Exit", Main.darkMode ? EXIT_ICON_WHITE_SCALED : EXIT_ICON_SCALED, e -> Main.exit(), new Dimension(125, 35)), BorderLayout.EAST);
 
 		toolBar.add(buttonPanel, BorderLayout.WEST);
 		toolBar.add(exitPanel, BorderLayout.EAST);

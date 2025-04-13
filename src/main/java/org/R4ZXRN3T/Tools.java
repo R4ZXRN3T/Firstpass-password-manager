@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Objects;
 
@@ -61,10 +60,12 @@ class Tools {
 	public static void restart() {
 		try {
 			String jarPath = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
-			if (!jarPath.contains(".jar")) jarPath = "Firstpass.jar";
-			jarPath = "\"" + jarPath + "\"";
+			if (!jarPath.endsWith(".jar")) jarPath = "./Firstpass.jar";
 			System.out.println("Restarting with JAR path: " + jarPath);
-			new ProcessBuilder("java", "-jar", jarPath).start();
+
+			// Use an array to execute the command
+			new ProcessBuilder("java", "-jar", jarPath).inheritIO().start();
+
 			System.exit(0);
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
@@ -86,6 +87,7 @@ class Tools {
 			configString.put(Files.LOOK_AND_FEEL, DEFAULT_LAF);
 			configString.put(Files.LAST_EXPORT_LOCATION, DEFAULT_EXPORT_LOCATION);
 			configString.put(Files.LAST_IMPORT_LOCATION, DEFAULT_IMPORT_LOCATION);
+			configString.put(Files.CHECK_FOR_UPDATES, "true");
 
 			FileWriter writer = new FileWriter(configFile);
 			writer.write(configString.toString(4));
@@ -97,7 +99,7 @@ class Tools {
 		}
 	}
 
-	public static void setDefaultLaf(String key) {
+	public static void setDefault(String key) {
 		try {
 			File configFile = new File("config.json");
 			if (!configFile.exists() || configFile.length() == 0) {
@@ -122,6 +124,9 @@ class Tools {
 				case Files.LAST_IMPORT_LOCATION:
 					jsonObject.put(key, DEFAULT_IMPORT_LOCATION);
 					break;
+				case Files.CHECK_FOR_UPDATES:
+					jsonObject.put(key, "true");
+					break;
 				default:
 					break;
 			}
@@ -140,24 +145,28 @@ class Tools {
 
 	public static void checkConfig() {
 		String tempPassword = Files.getConfig(Files.PASSWORD);
-		if (tempPassword == null || tempPassword.length() != PASSWORD_LENGTH)
-			setDefaultLaf(Files.PASSWORD);
+		if (tempPassword == null || tempPassword.length() != PASSWORD_LENGTH) setDefault(Files.PASSWORD);
+
 		String tempSalt = Files.getConfig(Files.SALT);
-		if (tempSalt == null || tempSalt.length() != SALT_LENGTH)
-			setDefaultLaf(Files.SALT);
+		if (tempSalt == null || tempSalt.length() != SALT_LENGTH) setDefault(Files.SALT);
+
 		try {
 			int tempLaF = Integer.parseInt(Objects.requireNonNull(Files.getConfig(Files.LOOK_AND_FEEL)));
 			if (tempLaF < 0 || tempLaF > 7)
-				setDefaultLaf(Files.LOOK_AND_FEEL);
+				setDefault(Files.LOOK_AND_FEEL);
 		} catch (NumberFormatException e) {
-			setDefaultLaf(Files.LOOK_AND_FEEL);
+			setDefault(Files.LOOK_AND_FEEL);
 		}
+
 		String tempExportLocation = Files.getConfig(Files.LAST_EXPORT_LOCATION);
-		if (tempExportLocation == null || tempExportLocation.isEmpty())
-			setDefaultLaf(Files.LAST_EXPORT_LOCATION);
+		if (tempExportLocation == null || tempExportLocation.isEmpty()) setDefault(Files.LAST_EXPORT_LOCATION);
+
 		String tempImportLocation = Files.getConfig(Files.LAST_IMPORT_LOCATION);
-		if (tempImportLocation == null || tempImportLocation.isEmpty())
-			setDefaultLaf(Files.LAST_IMPORT_LOCATION);
+		if (tempImportLocation == null || tempImportLocation.isEmpty()) setDefault(Files.LAST_IMPORT_LOCATION);
+
+		if (Files.getConfig(Files.CHECK_FOR_UPDATES) == null) setDefault(Files.CHECK_FOR_UPDATES);
+		if (!Files.getConfig(Files.CHECK_FOR_UPDATES).equals("true") && !Files.getConfig(Files.CHECK_FOR_UPDATES).equals("false"))
+			setDefault(Files.CHECK_FOR_UPDATES);
 	}
 
 	public static String validateForXML(String input) {
@@ -185,7 +194,7 @@ class Tools {
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setLayout(new BorderLayout(10, 10));
 		frame.setIconImage(Icons.FIRSTPASS_ICON.getImage());
-		frame.setSize(420, 250);
+		frame.setSize(450, 250);
 		frame.setLocationRelativeTo(Main.frame);
 		frame.setResizable(false);
 
@@ -228,16 +237,19 @@ class Tools {
 		scrollPane.setBackground(new Color(0, 0, 0, 0));
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 
-		CustomButton copyButton = new CustomButton("", Main.darkMode ? Icons.COPY_ICON_WHITE_SCALED : Icons.COPY_ICON_SCALED, e -> {
+		JButton copyButton = new JButton();
+		copyButton.setIcon(Main.darkMode ? Icons.COPY_ICON_WHITE_SCALED : Icons.COPY_ICON_SCALED);
+		copyButton.setToolTipText("Copy password to clipboard");
+		copyButton.addActionListener(e -> {
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(passwordField.getText()), null);
 			JOptionPane.showMessageDialog(frame, "Password copied to clipboard", "Success", JOptionPane.INFORMATION_MESSAGE);
-		}, new Dimension(35, 35));
-		copyButton.setToolTipText("Copy password to clipboard");
+		});
+		copyButton.setPreferredSize(new Dimension(40, 40));
 
 		outputPanel.add(scrollPane, BorderLayout.CENTER);
 		outputPanel.add(copyButton, BorderLayout.EAST);
 
-		CustomButton generateButton = new CustomButton("Generate",
+		CustomButton generateButton = new CustomButton("Generate!",
 				e -> passwordField.setText(generatePassword(lengthSlider.getValue(), uppercase.isSelected(), lowercase.isSelected(), numbers.isSelected(), specialCharacters.isSelected())),
 				new Dimension(100, 35));
 		generateButton.setToolTipText("Generate a new password");

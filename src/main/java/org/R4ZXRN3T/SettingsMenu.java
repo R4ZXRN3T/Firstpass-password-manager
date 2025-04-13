@@ -38,6 +38,7 @@ class SettingsMenu {
 	private static void setCurrentSettings() {
 		currentSettings.put(0, Main.correctPassword);
 		currentSettings.put(1, Files.getConfig(Files.LOOK_AND_FEEL));
+		currentSettings.put(2, Files.getConfig(Files.CHECK_FOR_UPDATES));
 	}
 
 	// get the panel for theme settings
@@ -64,9 +65,9 @@ class SettingsMenu {
 		changePasswordButton = new CustomButton("Change Password", e -> {
 			changePassword();
 			refreshButton();
-		}, new Dimension(130, 30));
+		}, new Dimension(140, 30));
 		passwordPanel.add(changePasswordButton);
-		removePasswordButton = new CustomButton("Remove Password", e -> removePasswordDialog(), new Dimension(130, 30));
+		removePasswordButton = new CustomButton("Remove Password", e -> removePasswordDialog(), new Dimension(140, 30));
 		passwordPanel.add(removePasswordButton);
 		refreshButton();
 		return passwordPanel;
@@ -75,10 +76,27 @@ class SettingsMenu {
 	private static JPanel getFullDeletePane() {
 		JPanel deletePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		deletePanel.setBorder(BorderFactory.createTitledBorder("Delete"));
-		deletePanel.add(new CustomButton("Delete Everything", null, e -> SettingsMenu.fullDeleteDialog(), false, true, new Dimension(130, 30), null, Color.RED, null));
+		deletePanel.add(new CustomButton("Delete Everything", null, e -> SettingsMenu.fullDeleteDialog(), false, true, new Dimension(140, 30), null, Color.RED, null));
 		JLabel deleteLabel = new JLabel("Delete all data");
 		deletePanel.add(deleteLabel);
 		return deletePanel;
+	}
+
+	private static JPanel getUpdatePanel() {
+		JPanel updatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		updatePanel.setBorder(BorderFactory.createTitledBorder("Update"));
+		updatePanel.add(new CustomButton("Check for Updates", e -> {
+			Main.setUpdateAvailable();
+			if (Main.updateAvailable) Updater.update();
+		}, new Dimension(140, 30)));
+		JCheckBox updateCheckBox = new JCheckBox("Check for updates on startup");
+		updateCheckBox.setSelected(Boolean.parseBoolean(currentSettings.get(2)));
+		updateCheckBox.addActionListener(e -> {
+			currentSettings.replace(2, String.valueOf(updateCheckBox.isSelected()));
+		});
+		updatePanel.add(updateCheckBox);
+
+		return updatePanel;
 	}
 
 	// get the toolbar with apply and cancel buttons
@@ -101,8 +119,9 @@ class SettingsMenu {
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 		mainPanel.add(getThemePanel());
 		mainPanel.add(getPasswordPanel());
+		mainPanel.add(getUpdatePanel());
 		mainPanel.add(getFullDeletePane());
-		mainPanel.add(new Box.Filler(new Dimension(0, 0), new Dimension(0, 0), new Dimension(0, 2147483647)));
+		mainPanel.add(new Box.Filler(new Dimension(0, 0), new Dimension(0, 0), new Dimension(0, Integer.MAX_VALUE)));
 		return mainPanel;
 	}
 
@@ -134,6 +153,7 @@ class SettingsMenu {
 	private static void applySettings() {
 		Main.correctPassword = currentSettings.get(0);
 		Files.setConfig(Files.LOOK_AND_FEEL, currentSettings.get(1));
+		Files.setConfig(Files.CHECK_FOR_UPDATES, currentSettings.get(2));
 
 		if (needsRestart) {
 			String message = "The program needs to be restarted in order to apply the new settings. Do you want to restart now?";
@@ -150,7 +170,7 @@ class SettingsMenu {
 
 	private static void fullDeleteDialog() {
 		JLabel warningLabel = new JLabel("Are you sure you want to delete all data?");
-		JLabel warningLabel2 = new JLabel("Warning: This action will delete all saved accounts and then restart the program. This action cannot be undone.");
+		JLabel warningLabel2 = new JLabel("Warning: This action will delete all saved accounts and then close the program. This action cannot be undone.");
 		warningLabel2.setForeground(Color.RED);
 		int option = JOptionPane.showConfirmDialog(null, new Object[]{warningLabel, warningLabel2}, "Delete all data", JOptionPane.YES_NO_OPTION);
 		if (option == JOptionPane.YES_OPTION) {
