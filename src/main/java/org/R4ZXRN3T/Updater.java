@@ -164,7 +164,7 @@ class Updater {
 				new ProcessBuilder("cmd", "/c", "start", script).start();
 			} else {
 				new File(script).setExecutable(true);
-				new ProcessBuilder("bash", "./" + script).start();
+				new ProcessBuilder("./" + script).start();
 			}
 			System.exit(0);
 		} catch (IOException e) {
