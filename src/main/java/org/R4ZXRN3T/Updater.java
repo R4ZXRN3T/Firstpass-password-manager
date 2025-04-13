@@ -157,7 +157,7 @@ class Updater {
 				writer.println("rm " + currentFileName);
 				writer.println("mv " + tempFileName + " " + currentFileName);
 				writer.println("chmod +x " + currentFileName);
-				writer.println("nohup ./" + currentFileName + " &");
+				writer.println("java -jar " + currentFileName);
 			}
 			writer.close();
 			if (System.getProperty("os.name").toLowerCase().contains("win")) {
