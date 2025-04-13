@@ -232,6 +232,7 @@ class Main {
 		refreshIndices();
 		refreshTable();
 		changeMade = true;
+		BottomToolBar.refreshUndoButton();
 	}
 
 	// save accounts and config and exit the program
