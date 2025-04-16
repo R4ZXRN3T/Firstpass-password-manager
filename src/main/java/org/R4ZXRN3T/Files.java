@@ -104,7 +104,6 @@ class Files {
 			System.out.println("Error reading accounts.");
 			accountsArr = null;
 		} finally {
-			Main.frame.setEnabled(true);
 			frame.dispose();
 		}
 		return accountsArr;
