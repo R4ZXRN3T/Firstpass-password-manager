@@ -85,10 +85,13 @@ class SettingsMenu {
 	private static JPanel getUpdatePanel() {
 		JPanel updatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		updatePanel.setBorder(BorderFactory.createTitledBorder("Update"));
+
 		updatePanel.add(new CustomButton("Check for Updates", e -> {
-			Main.setUpdateAvailable();
+			Main.updateAvailable = Updater.checkVersion(true).compareToIgnoreCase(Main.CURRENT_VERSION) > 0;
+			TopToolBar.updateButton.setVisible(Main.updateAvailable);
 			if (Main.updateAvailable) Updater.update();
 		}, new Dimension(140, 30)));
+
 		JCheckBox updateCheckBox = new JCheckBox("Check for updates on startup");
 		updateCheckBox.setSelected(Boolean.parseBoolean(currentSettings.get(2)));
 		updateCheckBox.addActionListener(e -> {
