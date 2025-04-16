@@ -184,17 +184,12 @@ class Main {
 			return;
 		}
 
-		// get account to edit
-		Account account = table.getAccount(rowIndex);
-		// set index of account, in order to put it back into the correct position in the ArrayList
-		account.setIndex(accountList.indexOf(account));
-
 		// initialize text fields
-		JTextField providerField = new JTextField(account.getProvider());
-		JTextField usernameField = new JTextField(account.getUsername());
-		JTextField passwordField = new JTextField(account.getPassword());
-		JTextField URLField = new JTextField(account.getUrl());
-		JTextField commentField = new JTextField(account.getComment());
+		JTextField providerField = new JTextField(accountList.get(rowIndex).getProvider());
+		JTextField usernameField = new JTextField(accountList.get(rowIndex).getUsername());
+		JTextField passwordField = new JTextField(accountList.get(rowIndex).getPassword());
+		JTextField URLField = new JTextField(accountList.get(rowIndex).getUrl());
+		JTextField commentField = new JTextField(accountList.get(rowIndex).getComment());
 
 		// create message object
 		Object[] message = {"Provider:", providerField, "Username:", usernameField, "Password:", passwordField, "URL:", URLField, "Comment:", commentField};
@@ -208,13 +203,11 @@ class Main {
 			return;
 		}
 
-		account.setProvider(providerField.getText());
-		account.setUsername(usernameField.getText());
-		account.setPassword(passwordField.getText());
-		account.setUrl(URLField.getText());
-		account.setComment(commentField.getText());
-		removeAccount(rowIndex);
-		accountList.add(account.getIndex(), account);
+		accountList.get(rowIndex).setProvider(providerField.getText());
+		accountList.get(rowIndex).setUsername(usernameField.getText());
+		accountList.get(rowIndex).setPassword(passwordField.getText());
+		accountList.get(rowIndex).setUrl(URLField.getText());
+		accountList.get(rowIndex).setComment(commentField.getText());
 		refreshTable();
 		changeMade = true;
 	}
