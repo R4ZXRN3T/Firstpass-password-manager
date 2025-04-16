@@ -40,7 +40,10 @@ class Main {
 		// check whether an update is available
 		// in a separate thread, as on slow internet connection this might take a while
 		if (Boolean.parseBoolean(Files.getConfig(Files.CHECK_FOR_UPDATES))) {
-			new Thread(Main::setUpdateAvailable).start();
+			new Thread(() -> {
+				updateAvailable = Updater.checkVersion(false).compareToIgnoreCase(CURRENT_VERSION) > 0;
+				TopToolBar.updateButton.setVisible(updateAvailable);
+			}).start();
 		}
 
 		new Thread(() -> {
@@ -58,12 +61,9 @@ class Main {
 			new File("rename.sh").delete();
 		}).start();
 
-
 		// load and decrypt accounts
 		correctPassword = checkPassword();
-		if (correctPassword.isEmpty()) {
-			passwordSet = false;
-		}
+		if (correctPassword.isEmpty()) passwordSet = false;
 
 		// initialize frame
 		frame = new JFrame("Firstpass Password Manager v" + CURRENT_VERSION);
@@ -129,7 +129,6 @@ class Main {
 		int option = JOptionPane.showConfirmDialog(frame, message, "Add Account", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, icon);
 		if (option == JOptionPane.OK_OPTION) {
 			Account newAccount = new Account(providerField.getText(), usernameField.getText(), passwordField.getText(), URLField.getText(), commentField.getText());
-			boolean exists = false;
 			for (Account account : accountList) {
 				if (account.getProvider().equals(newAccount.getProvider())) {
 					int keepOption = JOptionPane.showConfirmDialog(frame, "Account already exists! Do you still want to add it?", "Account already exists", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
@@ -398,10 +397,5 @@ class Main {
 			System.exit(1);
 		}
 		return false;
-	}
-
-	public static void setUpdateAvailable() {
-		updateAvailable = Updater.checkVersion().compareToIgnoreCase(CURRENT_VERSION) > 0;
-		TopToolBar.updateButton.setVisible(updateAvailable);
 	}
 }

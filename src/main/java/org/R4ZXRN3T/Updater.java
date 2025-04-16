@@ -19,7 +19,7 @@ class Updater {
 	private static final String FILE_NAME = Main.portableVersion ? "Firstpass_portable.jar" : "Firstpass_setup.msi";
 
 
-	public static String checkVersion() {
+	public static String checkVersion(boolean showError) {
 
 		String latestVersion = null;
 
@@ -46,13 +46,16 @@ class Updater {
 			latestVersion = jsonResponse.getString("tag_name");
 		} catch (Exception e) {
 			e.printStackTrace();
+			if (showError) {
+				JOptionPane.showMessageDialog(null, "<html>Update check failed.<br>Please check your internet connection</html>", "Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 
 		return latestVersion;
 	}
 
 	public static void update() {
-		JLabel versionAvailableLabel = new JLabel("<html> <font color=\"#00b3ff\">Version " + checkVersion() + " is available.<br></font> Are you sure you want to update Firstpass?</html>");
+		JLabel versionAvailableLabel = new JLabel("<html> <font color=\"#00b3ff\">Version " + checkVersion(true) + " is available.<br></font> Are you sure you want to update Firstpass?</html>");
 		int option = JOptionPane.showConfirmDialog(null, versionAvailableLabel, "Update", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if (option != JOptionPane.YES_OPTION) return;
 
@@ -79,7 +82,7 @@ class Updater {
 
 			new Thread(() -> {
 				try {
-					String newestVersion = checkVersion();
+					String newestVersion = checkVersion(true);
 
 					String link = DOWNLOAD_URL + newestVersion + "/" + FILE_NAME;
 					String fileName = Main.portableVersion ? "Firstpass_portable.jar.tmp" : "Firstpass_setup.msi.tmp";
