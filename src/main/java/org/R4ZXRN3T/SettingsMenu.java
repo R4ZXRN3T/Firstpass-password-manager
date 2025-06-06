@@ -89,7 +89,11 @@ class SettingsMenu {
 		updatePanel.add(new CustomButton("Check for Updates", e -> {
 			Main.updateAvailable = Updater.checkVersion(true).compareToIgnoreCase(Main.CURRENT_VERSION) > 0;
 			TopToolBar.updateButton.setVisible(Main.updateAvailable);
-			if (Main.updateAvailable) Updater.update();
+			if (Main.updateAvailable) {
+				Updater.update();
+			} else {
+				JOptionPane.showMessageDialog(settingsFrame, "You are already using the latest version.", "No Updates Available", JOptionPane.INFORMATION_MESSAGE);
+			}
 		}, new Dimension(140, 30)));
 
 		JCheckBox updateCheckBox = new JCheckBox("Check for updates on startup");
