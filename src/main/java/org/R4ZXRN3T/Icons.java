@@ -21,6 +21,8 @@ class Icons {
 	}
 
 	public static final ImageIcon FIRSTPASS_ICON = new ImageIcon(getFile("assets/firstpass_icon.png"));
+	public static final ImageIcon LOADING_INDICATOR = new ImageIcon(getFile("assets/loading_indicator.gif"));
+	public static final ImageIcon LOADING_INDICATOR_SCALED = new ImageIcon(LOADING_INDICATOR.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
 
 	public static final ImageIcon ADD_ICON = new ImageIcon(getFile("assets/add_icon.png"));
 	public static final ImageIcon ADD_ICON_SCALED = new ImageIcon(ADD_ICON.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));

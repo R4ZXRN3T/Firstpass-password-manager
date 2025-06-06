@@ -219,6 +219,7 @@ class Files {
 
 	public static void exportData() {
 		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
 		fileChooser.setDialogTitle("Specify a file to save");
 		fileChooser.setPreferredSize(new Dimension(800, 600));
 		fileChooser.setLocation(0, 0);
@@ -307,6 +308,7 @@ class Files {
 
 	public static void importData() {
 		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
 		fileChooser.setDialogTitle("Specify a file to import");
 		fileChooser.setPreferredSize(new Dimension(800, 600));
 		fileChooser.setLocation(0, 0);
@@ -398,13 +400,12 @@ class Files {
 						Account newAccount = new Account();
 						while (!line.contains("</account>")) {
 							line = fileReader.nextLine();
-							String substring = line.substring(12, line.length() - 11);
 							if (line.contains("<provider>")) {
-								newAccount.setProvider(returnOriginalValue(substring));
+								newAccount.setProvider(returnOriginalValue(line.substring(12, line.length() - 11)));
 							} else if (line.contains("<username>")) {
-								newAccount.setUsername(returnOriginalValue(substring));
+								newAccount.setUsername(returnOriginalValue(line.substring(12, line.length() - 11)));
 							} else if (line.contains("<password>")) {
-								newAccount.setPassword(returnOriginalValue(substring));
+								newAccount.setPassword(returnOriginalValue(line.substring(12, line.length() - 11)));
 							} else if (line.contains("<url>")) {
 								newAccount.setUrl(returnOriginalValue(line.substring(7, line.length() - 6)));
 							} else if (line.contains("<comment>")) {
