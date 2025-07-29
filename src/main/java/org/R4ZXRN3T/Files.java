@@ -22,12 +22,26 @@ import static org.R4ZXRN3T.Tools.validateForXML;
 // all file shit in here
 class Files {
 
-	public static final String PASSWORD = "password";
-	public static final String SALT = "salt";
-	public static final String LOOK_AND_FEEL = "lookAndFeel";
-	public static final String LAST_EXPORT_LOCATION = "export";
-	public static final String LAST_IMPORT_LOCATION = "import";
-	public static final String CHECK_FOR_UPDATES = "checkForUpdates";
+	public enum configField {
+		ALL("all"),
+		PASSWORD("password"),
+		SALT("salt"),
+		LOOK_AND_FEEL("lookAndFeel"),
+		LAST_EXPORT_LOCATION("export"),
+		LAST_IMPORT_LOCATION("import"),
+		CHECK_FOR_UPDATES("checkForUpdates");
+
+		private final String value;
+
+		@Override
+		public String toString() {
+			return value;
+		}
+
+		configField(String value) {
+			this.value = value;
+		}
+	}
 
 	// retrieve Accounts ArrayList from accounts.txt. Only called on program launch
 	public static ArrayList<Account> getAccounts(String decryptionKey) {
@@ -55,9 +69,7 @@ class Files {
 		frame.setLocationRelativeTo(null);
 		frame.requestFocus();
 
-		new Thread(() -> {
-			frame.setVisible(true);
-		}).start();
+		new Thread(() -> frame.setVisible(true)).start();
 
 		try {
 			System.out.println("\nFinding file...");
@@ -173,8 +185,7 @@ class Files {
 	}
 
 	// get values from the config.json. Initially separate methods, now combined
-	public static String getConfig(String key) {
-
+	public static String getConfig(configField key) {
 		String value;
 		try {
 			File configFile = new File("config.json");
@@ -184,20 +195,22 @@ class Files {
 
 			String content = new String(java.nio.file.Files.readAllBytes(Paths.get("config.json")));
 			JSONObject jsonObject = new JSONObject(content);
-			value = jsonObject.get(key).toString();
+			value = jsonObject.get(key.toString()).toString();
 
 		} catch (JSONException e) {
 			Tools.setDefault(key);
 			return getConfig(key);
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			System.err.println("Failed to read config file: " + e.getMessage());
+			JOptionPane.showMessageDialog(Main.frame, "Error reading config.json", "Error", JOptionPane.ERROR_MESSAGE);
+			// Return appropriate default based on key
+			return Tools.getDefaultConfigValue(key);
 		}
 		return value;
 	}
 
 	// same as with getConfig
-	public static void setConfig(String key, String value) {
+	public static void setConfig(configField key, String value) {
 		try {
 			File passwordFile = new File("config.json");
 			if (!passwordFile.exists() || passwordFile.length() == 0) {
@@ -206,7 +219,7 @@ class Files {
 
 			String content = new String(java.nio.file.Files.readAllBytes(Paths.get("config.json")));
 			JSONObject jsonObject = new JSONObject(content);
-			jsonObject.put(key, value);
+			jsonObject.put(key.toString(), value);
 
 			java.io.FileWriter writer = new java.io.FileWriter(passwordFile);
 			writer.write(jsonObject.toString(4));
@@ -226,7 +239,7 @@ class Files {
 		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setCurrentDirectory(new File(Files.getConfig(Files.LAST_EXPORT_LOCATION)));
+		fileChooser.setCurrentDirectory(new File(Files.getConfig(configField.LAST_EXPORT_LOCATION)));
 		Action details = fileChooser.getActionMap().get("viewTypeDetails");
 		details.actionPerformed(null);
 
@@ -298,7 +311,7 @@ class Files {
 				writer.println("</accounts>");
 			}
 			writer.close();
-			Files.setConfig(Files.LAST_EXPORT_LOCATION, exportFile.getParent());
+			Files.setConfig(configField.LAST_EXPORT_LOCATION, exportFile.getParent());
 			JOptionPane.showMessageDialog(null, "Data successfully exported under:\n" + exportFile.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -315,7 +328,7 @@ class Files {
 		fileChooser.setAcceptAllFileFilterUsed(true);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setCurrentDirectory(new File(Files.getConfig(Files.LAST_IMPORT_LOCATION)));
+		fileChooser.setCurrentDirectory(new File(Files.getConfig(configField.LAST_IMPORT_LOCATION)));
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Supported file types (*.txt, *.csv, *.json, *.xml)", "txt", "csv", "json", "xml");
 		fileChooser.addChoosableFileFilter(filter);
@@ -423,7 +436,7 @@ class Files {
 				accountList = importedAccounts;
 			}
 
-			Files.setConfig(Files.LAST_IMPORT_LOCATION, importFile.getParent());
+			Files.setConfig(configField.LAST_IMPORT_LOCATION, importFile.getParent());
 
 			JOptionPane.showMessageDialog(null, "Data successfully imported", "Success", JOptionPane.INFORMATION_MESSAGE);
 			Main.refreshTable();
