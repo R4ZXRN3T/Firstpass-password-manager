@@ -15,34 +15,6 @@ public class Account {
 	private String comment;
 	private int index;
 
-	public enum SearchableField {
-		ALL(0),
-		PROVIDER(1),
-		USERNAME(2),
-		PASSWORD(3),
-		URL(4),
-		COMMENT(5);
-
-		private final int value;
-
-		SearchableField(int value) {
-			this.value = value;
-		}
-
-		public int getValue() {
-			return this.value;
-		}
-
-		public static SearchableField fromValue(int value) {
-			for (SearchableField field : SearchableField.values()) {
-				if (field.value == value) {
-					return field;
-				}
-			}
-			throw new IllegalArgumentException("Invalid value: " + value);
-		}
-	}
-
 	public Account() {
 		provider = null;
 		username = null;
@@ -70,48 +42,52 @@ public class Account {
 		this.index = index;
 	}
 
+	private static boolean stringContainsIgnoreCase(String string1, String string2) {
+		return string1.toLowerCase().contains(string2.toLowerCase());
+	}
+
 	public String getProvider() {
 		return provider;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public String getComment() {
-		return comment;
-	}
-
-	public int getIndex() {
-		return index;
 	}
 
 	public void setProvider(String provider) {
 		this.provider = provider;
 	}
 
+	public String getUsername() {
+		return username;
+	}
+
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
 	}
 
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	public String getUrl() {
+		return url;
+	}
+
 	public void setUrl(String url) {
 		this.url = url;
 	}
 
+	public String getComment() {
+		return comment;
+	}
+
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+
+	public int getIndex() {
+		return index;
 	}
 
 	public void setIndex(int index) {
@@ -290,13 +266,37 @@ public class Account {
 		}
 	}
 
-	private static boolean stringContainsIgnoreCase(String string1, String string2) {
-		return string1.toLowerCase().contains(string2.toLowerCase());
-	}
-
 	public boolean isEmpty() {
 		if ((provider == null && username == null && password == null && url == null && comment == null)) return true;
 		assert provider != null;
 		return provider.isEmpty() && username.isEmpty() && password.isEmpty() && url.isEmpty() && comment.isEmpty();
+	}
+
+	public enum SearchableField {
+		ALL(0),
+		PROVIDER(1),
+		USERNAME(2),
+		PASSWORD(3),
+		URL(4),
+		COMMENT(5);
+
+		private final int value;
+
+		SearchableField(int value) {
+			this.value = value;
+		}
+
+		public static SearchableField fromValue(int value) {
+			for (SearchableField field : SearchableField.values()) {
+				if (field.value == value) {
+					return field;
+				}
+			}
+			throw new IllegalArgumentException("Invalid value: " + value);
+		}
+
+		public int getValue() {
+			return this.value;
+		}
 	}
 }

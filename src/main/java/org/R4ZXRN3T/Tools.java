@@ -1,7 +1,9 @@
 package org.R4ZXRN3T;
 
+import org.R4ZXRN3T.Files.ConfigKey;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,8 +14,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Objects;
-
-import org.R4ZXRN3T.Files.ConfigKey;
 
 class Tools {
 

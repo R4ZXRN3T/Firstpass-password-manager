@@ -1,9 +1,11 @@
 package org.R4ZXRN3T;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
 import org.R4ZXRN3T.Files.ConfigKey;
+
+import java.awt.*;
+import java.util.HashMap;
+
+import javax.swing.*;
 
 class SettingsMenu {
 
