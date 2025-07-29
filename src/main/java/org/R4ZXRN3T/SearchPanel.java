@@ -6,14 +6,14 @@ import javax.swing.event.DocumentListener;
 
 import java.awt.*;
 
-import org.R4ZXRN3T.Account.SearchField;
+import org.R4ZXRN3T.Account.SearchableField;
 
 // wierd shit happens here
 class SearchPanel extends JPanel {
 
 	// selected search option with enum from the Accounts class
 	// I can't decide whether it's good practice or not
-	private static SearchField selectedSearchOption = SearchField.ALL;
+	private static SearchableField selectedSearchOption = SearchableField.ALL;
 
 	static class SearchBar extends JTextField {
 
@@ -65,7 +65,7 @@ class SearchPanel extends JPanel {
 		searchOptions.setSelectedIndex(0);
 		searchOptions.setFocusable(false);
 		searchOptions.setBackground(Main.darkMode ? BottomToolBar.DARK_MODE_COLOR : new Color(230, 230, 230));
-		searchOptions.addActionListener(e -> selectedSearchOption = SearchField.fromValue(searchOptions.getSelectedIndex()));
+		searchOptions.addActionListener(e -> selectedSearchOption = SearchableField.fromValue(searchOptions.getSelectedIndex()));
 
 		// add stuff again
 		this.add(searchOptions, BorderLayout.EAST);
@@ -73,7 +73,7 @@ class SearchPanel extends JPanel {
 	}
 
 	// get the selected search option
-	public static SearchField getSelectedSearchOption() {
+	public static SearchableField getSelectedSearchOption() {
 		return selectedSearchOption;
 	}
 }

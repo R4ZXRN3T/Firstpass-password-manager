@@ -11,7 +11,7 @@ import java.awt.event.WindowEvent;
 import java.util.*;
 import java.io.File;
 
-import org.R4ZXRN3T.Files.configField;
+import org.R4ZXRN3T.Files.ConfigKey;
 
 import static org.R4ZXRN3T.Icons.*;
 
@@ -37,12 +37,12 @@ class Main {
 
 		// general initialization
 		Locale.setDefault(Locale.ENGLISH);
-		darkMode = setLookAndFeel(Objects.requireNonNull(Files.getConfig(configField.LOOK_AND_FEEL)));
+		darkMode = setLookAndFeel(Objects.requireNonNull(Files.getConfig(ConfigKey.LOOK_AND_FEEL)));
 		Tools.checkConfig();
 
 		// check whether an update is available
 		// in a separate thread, as on slow internet connection this might take a while
-		if (Boolean.parseBoolean(Files.getConfig(configField.CHECK_FOR_UPDATES))) {
+		if (Boolean.parseBoolean(Files.getConfig(ConfigKey.CHECK_FOR_UPDATES))) {
 			new Thread(() -> {
 				updateAvailable = Updater.checkVersion(false).compareToIgnoreCase(CURRENT_VERSION) > 0;
 				TopToolBar.updateButton.setVisible(updateAvailable);
@@ -240,8 +240,8 @@ class Main {
 		Files.saveAccounts(accountList, correctPassword);
 		// generate new salt and thus also new encoded password; *VERY* important for security :)
 		String newSalt = Tools.generateRandomString(16);
-		Files.setConfig(configField.SALT, newSalt);
-		Files.setConfig(configField.PASSWORD, Tools.encodePassword(correctPassword, newSalt));
+		Files.setConfig(ConfigKey.SALT, newSalt);
+		Files.setConfig(ConfigKey.PASSWORD, Tools.encodePassword(correctPassword, newSalt));
 	}
 
 	public static void fullDelete() {
@@ -317,8 +317,8 @@ class Main {
 		JLabel label = new JLabel();
 		String promptMessage = "Please Enter your password: ";
 		String title = "Firstpass Password Manager";
-		String currentSalt = Files.getConfig(configField.SALT);
-		String encodedPassword = Files.getConfig(configField.PASSWORD);
+		String currentSalt = Files.getConfig(ConfigKey.SALT);
+		String encodedPassword = Files.getConfig(ConfigKey.PASSWORD);
 
 		JFrame tempFrame = new JFrame("Firstpass Password Manager");
 
@@ -328,7 +328,7 @@ class Main {
 		tempFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		tempFrame.setIconImage(FIRSTPASS_ICON.getImage());
 
-		if (Files.getConfig(configField.PASSWORD) == null || Objects.equals(Files.getConfig(configField.PASSWORD), Tools.encodePassword(Files.getConfig(configField.SALT), "")) || Objects.equals(Files.getConfig(configField.PASSWORD), "")) {
+		if (Files.getConfig(ConfigKey.PASSWORD) == null || Objects.equals(Files.getConfig(ConfigKey.PASSWORD), Tools.encodePassword(Files.getConfig(ConfigKey.SALT), "")) || Objects.equals(Files.getConfig(ConfigKey.PASSWORD), "")) {
 			tempFrame.dispose();
 			return "";
 		}

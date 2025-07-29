@@ -15,7 +15,7 @@ public class Account {
 	private String comment;
 	private int index;
 
-	public enum SearchField {
+	public enum SearchableField {
 		ALL(0),
 		PROVIDER(1),
 		USERNAME(2),
@@ -25,7 +25,7 @@ public class Account {
 
 		private final int value;
 
-		SearchField(int value) {
+		SearchableField(int value) {
 			this.value = value;
 		}
 
@@ -33,8 +33,8 @@ public class Account {
 			return this.value;
 		}
 
-		public static SearchField fromValue(int value) {
-			for (SearchField field : SearchField.values()) {
+		public static SearchableField fromValue(int value) {
+			for (SearchableField field : SearchableField.values()) {
 				if (field.value == value) {
 					return field;
 				}
@@ -138,8 +138,8 @@ public class Account {
 				comment.contains(s);
 	}
 
-	public boolean contains(String s, SearchField searchField) {
-		switch (searchField) {
+	public boolean contains(String s, SearchableField searchableField) {
+		switch (searchableField) {
 			case ALL:
 				return contains(s);
 			case PROVIDER:
@@ -158,11 +158,11 @@ public class Account {
 	}
 
 	public boolean containsIgnoreCase(String s) {
-		return containsIgnoreCase(s, SearchField.ALL);
+		return containsIgnoreCase(s, SearchableField.ALL);
 	}
 
-	public boolean containsIgnoreCase(String s, SearchField searchField) {
-		switch (searchField) {
+	public boolean containsIgnoreCase(String s, SearchableField searchableField) {
+		switch (searchableField) {
 			case ALL:
 				return stringContainsIgnoreCase(provider, s) ||
 						stringContainsIgnoreCase(username, s) ||
@@ -186,11 +186,11 @@ public class Account {
 	}
 
 	public int compareTo(Account accountToCompareWith) {
-		return compareTo(accountToCompareWith, SearchField.ALL);
+		return compareTo(accountToCompareWith, SearchableField.ALL);
 	}
 
-	public int compareTo(Account accountToCompareWith, SearchField searchField) {
-		switch (searchField) {
+	public int compareTo(Account accountToCompareWith, SearchableField searchableField) {
+		switch (searchableField) {
 			case PROVIDER:
 				return provider.compareTo(accountToCompareWith.getProvider());
 			case USERNAME:
@@ -207,11 +207,11 @@ public class Account {
 	}
 
 	public int compareToIgnoreCase(Account accountToCompareWith) {
-		return compareToIgnoreCase(accountToCompareWith, SearchField.ALL);
+		return compareToIgnoreCase(accountToCompareWith, SearchableField.ALL);
 	}
 
-	public int compareToIgnoreCase(Account accountToCompareWith, SearchField searchField) {
-		switch (searchField) {
+	public int compareToIgnoreCase(Account accountToCompareWith, SearchableField searchableField) {
+		switch (searchableField) {
 			case PROVIDER:
 				return provider.compareToIgnoreCase(accountToCompareWith.getProvider());
 			case USERNAME:
