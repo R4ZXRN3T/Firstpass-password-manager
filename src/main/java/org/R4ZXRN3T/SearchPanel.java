@@ -3,14 +3,17 @@ package org.R4ZXRN3T;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+
 import java.awt.*;
+
+import org.R4ZXRN3T.Account.SearchField;
 
 // wierd shit happens here
 class SearchPanel extends JPanel {
 
 	// selected search option with enum from the Accounts class
 	// I can't decide whether it's good practice or not
-	private static int selectedSearchOption = 0;
+	private static SearchField selectedSearchOption = SearchField.ALL;
 
 	static class SearchBar extends JTextField {
 
@@ -62,7 +65,7 @@ class SearchPanel extends JPanel {
 		searchOptions.setSelectedIndex(0);
 		searchOptions.setFocusable(false);
 		searchOptions.setBackground(Main.darkMode ? BottomToolBar.DARK_MODE_COLOR : new Color(230, 230, 230));
-		searchOptions.addActionListener(e -> selectedSearchOption = searchOptions.getSelectedIndex());
+		searchOptions.addActionListener(e -> selectedSearchOption = SearchField.fromValue(searchOptions.getSelectedIndex()));
 
 		// add stuff again
 		this.add(searchOptions, BorderLayout.EAST);
@@ -70,7 +73,7 @@ class SearchPanel extends JPanel {
 	}
 
 	// get the selected search option
-	public static int getSelectedSearchOption() {
+	public static SearchField getSelectedSearchOption() {
 		return selectedSearchOption;
 	}
 }

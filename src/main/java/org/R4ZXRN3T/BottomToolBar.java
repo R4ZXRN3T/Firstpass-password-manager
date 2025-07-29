@@ -37,7 +37,7 @@ class BottomToolBar {
 		buttonPanel.add(undoButton);
 		refreshUndoButton();
 		// settingsButton
-		buttonPanel.add(new CustomButton("Generator", Main.darkMode ? GENERATE_ICON_WHITE_SCALED : GENERATE_ICON_SCALED, e -> Tools.passwordGeneratorDialog(), DEFAULT_BUTTON_SIZE));
+		buttonPanel.add(new CustomButton("Generator", Main.darkMode ? GENERATE_ICON_WHITE_SCALED : GENERATE_ICON_SCALED, e -> PasswordGenerator.showPasswordGeneratorDialog(), DEFAULT_BUTTON_SIZE));
 		// exitButton
 		JPanel exitPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		exitPanel.add(new CustomButton("Save & Exit", Main.darkMode ? EXIT_ICON_WHITE_SCALED : EXIT_ICON_SCALED, e -> Main.exit(), new Dimension(125, 35)), BorderLayout.EAST);

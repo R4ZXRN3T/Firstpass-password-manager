@@ -15,12 +15,33 @@ public class Account {
 	private String comment;
 	private int index;
 
-	public final int ALL = 0;
-	public final int PROVIDER = 1;
-	public final int USERNAME = 2;
-	public final int PASSWORD = 3;
-	public final int URL = 4;
-	public final int COMMENT = 5;
+	public enum SearchField {
+		ALL(0),
+		PROVIDER(1),
+		USERNAME(2),
+		PASSWORD(3),
+		URL(4),
+		COMMENT(5);
+
+		private final int value;
+
+		public int getValue() {
+			return this.value;
+		}
+
+		public static SearchField fromValue(int value) {
+			for (SearchField field : SearchField.values()) {
+				if (field.value == value) {
+					return field;
+				}
+			}
+			throw new IllegalArgumentException("Invalid value: " + value);
+		}
+
+		SearchField(int value) {
+			this.value = value;
+		}
+	}
 
 	public Account() {
 		provider = null;
@@ -117,7 +138,7 @@ public class Account {
 				comment.contains(s);
 	}
 
-	public boolean contains(String s, int searchField) {
+	public boolean contains(String s, SearchField searchField) {
 		switch (searchField) {
 			case ALL:
 				return contains(s);
@@ -137,17 +158,17 @@ public class Account {
 	}
 
 	public boolean containsIgnoreCase(String s) {
-		return stringContainsIgnoreCase(provider, s) ||
-				stringContainsIgnoreCase(username, s) ||
-				stringContainsIgnoreCase(password, s) ||
-				stringContainsIgnoreCase(url, s) ||
-				stringContainsIgnoreCase(comment, s);
+		return containsIgnoreCase(s, SearchField.ALL);
 	}
 
-	public boolean containsIgnoreCase(String s, int searchField) {
+	public boolean containsIgnoreCase(String s, SearchField searchField) {
 		switch (searchField) {
 			case ALL:
-				return containsIgnoreCase(s);
+				return stringContainsIgnoreCase(provider, s) ||
+						stringContainsIgnoreCase(username, s) ||
+						stringContainsIgnoreCase(password, s) ||
+						stringContainsIgnoreCase(url, s) ||
+						stringContainsIgnoreCase(comment, s);
 			case PROVIDER:
 				return stringContainsIgnoreCase(provider, s);
 			case USERNAME:
@@ -165,10 +186,10 @@ public class Account {
 	}
 
 	public int compareTo(Account accountToCompareWith) {
-		return compareTo(accountToCompareWith, 0);
+		return compareTo(accountToCompareWith, SearchField.ALL);
 	}
 
-	public int compareTo(Account accountToCompareWith, int searchField) {
+	public int compareTo(Account accountToCompareWith, SearchField searchField) {
 		switch (searchField) {
 			case PROVIDER:
 				return provider.compareTo(accountToCompareWith.getProvider());
@@ -186,10 +207,10 @@ public class Account {
 	}
 
 	public int compareToIgnoreCase(Account accountToCompareWith) {
-		return compareToIgnoreCase(accountToCompareWith, 0);
+		return compareToIgnoreCase(accountToCompareWith, SearchField.ALL);
 	}
 
-	public int compareToIgnoreCase(Account accountToCompareWith, int searchField) {
+	public int compareToIgnoreCase(Account accountToCompareWith, SearchField searchField) {
 		switch (searchField) {
 			case PROVIDER:
 				return provider.compareToIgnoreCase(accountToCompareWith.getProvider());
@@ -274,6 +295,8 @@ public class Account {
 	}
 
 	public boolean isEmpty() {
-		return (provider == null && username == null && password == null && url == null && comment == null) || (provider.isEmpty() && username.isEmpty() && password.isEmpty() && url.isEmpty() && comment.isEmpty());
+		if ((provider == null && username == null && password == null && url == null && comment == null)) return true;
+		assert provider != null;
+		return provider.isEmpty() && username.isEmpty() && password.isEmpty() && url.isEmpty() && comment.isEmpty();
 	}
 }
