@@ -64,11 +64,6 @@ class Icons {
 	public static final ImageIcon CANCEL_ICON_WHITE = new ImageIcon(getFile("assets/cancel_icon_white.png"));
 	public static final ImageIcon CANCEL_ICON_WHITE_SCALED = new ImageIcon(CANCEL_ICON_WHITE.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
 
-	public static final ImageIcon SETTINGS_ICON = new ImageIcon(getFile("assets/settings_icon.png"));
-	public static final ImageIcon SETTINGS_ICON_SCALED = new ImageIcon(SETTINGS_ICON.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
-	public static final ImageIcon SETTINGS_ICON_WHITE = new ImageIcon(getFile("assets/settings_icon_white.png"));
-	public static final ImageIcon SETTINGS_ICON_WHITE_SCALED = new ImageIcon(SETTINGS_ICON_WHITE.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
-
 	public static final ImageIcon SAVE_ICON = new ImageIcon(getFile("assets/save_icon.png"));
 	public static final ImageIcon SAVE_ICON_SCALED = new ImageIcon(SAVE_ICON.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
 	public static final ImageIcon SAVE_ICON_WHITE = new ImageIcon(getFile("assets/save_icon_white.png"));
