@@ -262,10 +262,10 @@ class Main {
 	public static void search(String searchQuery) {
 		// creates new ArrayList to store search results for the table
 		ArrayList<Account> searchResults = new ArrayList<>();
-		if (searchQuery != null) {
+		if (!searchQuery.isEmpty()) {
 			// adds results to searchResults ArrayList
 			for (Account account : accountList) {
-				if (account.contains(searchQuery, SearchPanel.getSelectedSearchOption())) {
+				if (account.containsIgnoreCase(searchQuery, SearchPanel.getSelectedSearchOption())) {
 					searchResults.add(account);
 				}
 			}
