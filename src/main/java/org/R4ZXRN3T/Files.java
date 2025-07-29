@@ -22,7 +22,7 @@ import static org.R4ZXRN3T.Tools.validateForXML;
 // all file shit in here
 class Files {
 
-	public enum configField {
+	public enum ConfigKey {
 		ALL("all"),
 		PASSWORD("password"),
 		SALT("salt"),
@@ -33,7 +33,7 @@ class Files {
 
 		private final String value;
 
-		configField(String value) {
+		ConfigKey(String value) {
 			this.value = value;
 		}
 
@@ -185,7 +185,7 @@ class Files {
 	}
 
 	// get values from the config.json. Initially separate methods, now combined
-	public static String getConfig(configField key) {
+	public static String getConfig(ConfigKey key) {
 		String value;
 		try {
 			File configFile = new File("config.json");
@@ -210,7 +210,7 @@ class Files {
 	}
 
 	// same as with getConfig
-	public static void setConfig(configField key, String value) {
+	public static void setConfig(ConfigKey key, String value) {
 		try {
 			File passwordFile = new File("config.json");
 			if (!passwordFile.exists() || passwordFile.length() == 0) {
@@ -239,7 +239,7 @@ class Files {
 		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setCurrentDirectory(new File(Files.getConfig(configField.LAST_EXPORT_LOCATION)));
+		fileChooser.setCurrentDirectory(new File(Files.getConfig(ConfigKey.LAST_EXPORT_LOCATION)));
 		Action details = fileChooser.getActionMap().get("viewTypeDetails");
 		details.actionPerformed(null);
 
@@ -311,7 +311,7 @@ class Files {
 				writer.println("</accounts>");
 			}
 			writer.close();
-			Files.setConfig(configField.LAST_EXPORT_LOCATION, exportFile.getParent());
+			Files.setConfig(ConfigKey.LAST_EXPORT_LOCATION, exportFile.getParent());
 			JOptionPane.showMessageDialog(null, "Data successfully exported under:\n" + exportFile.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -328,7 +328,7 @@ class Files {
 		fileChooser.setAcceptAllFileFilterUsed(true);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setCurrentDirectory(new File(Files.getConfig(configField.LAST_IMPORT_LOCATION)));
+		fileChooser.setCurrentDirectory(new File(Files.getConfig(ConfigKey.LAST_IMPORT_LOCATION)));
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Supported file types (*.txt, *.csv, *.json, *.xml)", "txt", "csv", "json", "xml");
 		fileChooser.addChoosableFileFilter(filter);
@@ -436,7 +436,7 @@ class Files {
 				accountList = importedAccounts;
 			}
 
-			Files.setConfig(configField.LAST_IMPORT_LOCATION, importFile.getParent());
+			Files.setConfig(ConfigKey.LAST_IMPORT_LOCATION, importFile.getParent());
 
 			JOptionPane.showMessageDialog(null, "Data successfully imported", "Success", JOptionPane.INFORMATION_MESSAGE);
 			Main.refreshTable();

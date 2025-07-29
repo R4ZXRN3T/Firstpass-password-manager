@@ -3,7 +3,7 @@ package org.R4ZXRN3T;
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
-import org.R4ZXRN3T.Files.configField;
+import org.R4ZXRN3T.Files.ConfigKey;
 
 class SettingsMenu {
 
@@ -38,8 +38,8 @@ class SettingsMenu {
 	// write the current settings to the HashMap
 	private static void setCurrentSettings() {
 		currentSettings.put(0, Main.correctPassword);
-		currentSettings.put(1, Files.getConfig(configField.LOOK_AND_FEEL));
-		currentSettings.put(2, Files.getConfig(configField.CHECK_FOR_UPDATES));
+		currentSettings.put(1, Files.getConfig(ConfigKey.LOOK_AND_FEEL));
+		currentSettings.put(2, Files.getConfig(ConfigKey.CHECK_FOR_UPDATES));
 	}
 
 	// get the panel for theme settings
@@ -160,8 +160,8 @@ class SettingsMenu {
 	// apply the settings and restart the program if necessary
 	private static void applySettings() {
 		Main.correctPassword = currentSettings.get(0);
-		Files.setConfig(configField.LOOK_AND_FEEL, currentSettings.get(1));
-		Files.setConfig(configField.CHECK_FOR_UPDATES, currentSettings.get(2));
+		Files.setConfig(ConfigKey.LOOK_AND_FEEL, currentSettings.get(1));
+		Files.setConfig(ConfigKey.CHECK_FOR_UPDATES, currentSettings.get(2));
 
 		if (needsRestart) {
 			String message = "The program needs to be restarted in order to apply the new settings. Do you want to restart now?";

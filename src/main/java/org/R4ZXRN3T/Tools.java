@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Objects;
 
-import org.R4ZXRN3T.Files.configField;
+import org.R4ZXRN3T.Files.ConfigKey;
 
 class Tools {
 
@@ -90,16 +90,16 @@ class Tools {
 
 	private static JSONObject getDefaultConfigJSON(String defaultPassword, String defaultSalt) {
 		JSONObject configString = new JSONObject();
-		configString.put(configField.PASSWORD.toString(), defaultPassword);
-		configString.put(configField.SALT.toString(), defaultSalt);
-		configString.put(configField.LOOK_AND_FEEL.toString(), DEFAULT_LAF);
-		configString.put(configField.LAST_EXPORT_LOCATION.toString(), DEFAULT_EXPORT_LOCATION);
-		configString.put(configField.LAST_IMPORT_LOCATION.toString(), DEFAULT_IMPORT_LOCATION);
-		configString.put(configField.CHECK_FOR_UPDATES.toString(), "true");
+		configString.put(ConfigKey.PASSWORD.toString(), defaultPassword);
+		configString.put(ConfigKey.SALT.toString(), defaultSalt);
+		configString.put(ConfigKey.LOOK_AND_FEEL.toString(), DEFAULT_LAF);
+		configString.put(ConfigKey.LAST_EXPORT_LOCATION.toString(), DEFAULT_EXPORT_LOCATION);
+		configString.put(ConfigKey.LAST_IMPORT_LOCATION.toString(), DEFAULT_IMPORT_LOCATION);
+		configString.put(ConfigKey.CHECK_FOR_UPDATES.toString(), "true");
 		return configString;
 	}
 
-	public static String getDefaultConfigValue(configField key) {
+	public static String getDefaultConfigValue(ConfigKey key) {
 		switch (key) {
 			case PASSWORD:
 				return encodePassword("", generateRandomString(SALT_LENGTH));
@@ -118,7 +118,7 @@ class Tools {
 		}
 	}
 
-	public static void setDefault(configField key) {
+	public static void setDefault(ConfigKey key) {
 		try {
 			File configFile = new File("config.json");
 			if (!configFile.exists() || configFile.length() == 0) {
@@ -132,11 +132,11 @@ class Tools {
 					return;
 				case PASSWORD:
 					String tempSalt = generateRandomString(SALT_LENGTH);
-					jsonObject.put(configField.PASSWORD.toString(), encodePassword("", tempSalt));
-					jsonObject.put(configField.SALT.toString(), tempSalt);
+					jsonObject.put(ConfigKey.PASSWORD.toString(), encodePassword("", tempSalt));
+					jsonObject.put(ConfigKey.SALT.toString(), tempSalt);
 					break;
 				case SALT:
-					key = configField.PASSWORD;
+					key = ConfigKey.PASSWORD;
 				case LOOK_AND_FEEL:
 					jsonObject.put(key.toString(), DEFAULT_LAF);
 					break;
@@ -166,30 +166,30 @@ class Tools {
 	}
 
 	public static void checkConfig() {
-		String tempPassword = Files.getConfig(configField.PASSWORD);
-		if (tempPassword == null || tempPassword.length() != PASSWORD_LENGTH) setDefault(configField.PASSWORD);
+		String tempPassword = Files.getConfig(ConfigKey.PASSWORD);
+		if (tempPassword == null || tempPassword.length() != PASSWORD_LENGTH) setDefault(ConfigKey.PASSWORD);
 
-		String tempSalt = Files.getConfig(configField.SALT);
-		if (tempSalt == null || tempSalt.length() != SALT_LENGTH) setDefault(configField.SALT);
+		String tempSalt = Files.getConfig(ConfigKey.SALT);
+		if (tempSalt == null || tempSalt.length() != SALT_LENGTH) setDefault(ConfigKey.SALT);
 
 		try {
-			int tempLaF = Integer.parseInt(Objects.requireNonNull(Files.getConfig(configField.LOOK_AND_FEEL)));
+			int tempLaF = Integer.parseInt(Objects.requireNonNull(Files.getConfig(ConfigKey.LOOK_AND_FEEL)));
 			if (tempLaF < 0 || tempLaF > 7)
-				setDefault(configField.LOOK_AND_FEEL);
+				setDefault(ConfigKey.LOOK_AND_FEEL);
 		} catch (NumberFormatException e) {
-			setDefault(configField.LOOK_AND_FEEL);
+			setDefault(ConfigKey.LOOK_AND_FEEL);
 		}
 
-		String tempExportLocation = Files.getConfig(configField.LAST_EXPORT_LOCATION);
-		if (tempExportLocation == null || tempExportLocation.isEmpty()) setDefault(configField.LAST_EXPORT_LOCATION);
+		String tempExportLocation = Files.getConfig(ConfigKey.LAST_EXPORT_LOCATION);
+		if (tempExportLocation == null || tempExportLocation.isEmpty()) setDefault(ConfigKey.LAST_EXPORT_LOCATION);
 
-		String tempImportLocation = Files.getConfig(configField.LAST_IMPORT_LOCATION);
-		if (tempImportLocation == null || tempImportLocation.isEmpty()) setDefault(configField.LAST_IMPORT_LOCATION);
+		String tempImportLocation = Files.getConfig(ConfigKey.LAST_IMPORT_LOCATION);
+		if (tempImportLocation == null || tempImportLocation.isEmpty()) setDefault(ConfigKey.LAST_IMPORT_LOCATION);
 
-		String tempCheckForUpdates = Files.getConfig(configField.CHECK_FOR_UPDATES);
-		if (tempCheckForUpdates == null) setDefault(configField.CHECK_FOR_UPDATES);
+		String tempCheckForUpdates = Files.getConfig(ConfigKey.CHECK_FOR_UPDATES);
+		if (tempCheckForUpdates == null) setDefault(ConfigKey.CHECK_FOR_UPDATES);
 		else if (!tempCheckForUpdates.equals("true") && !tempCheckForUpdates.equals("false"))
-			setDefault(configField.CHECK_FOR_UPDATES);
+			setDefault(ConfigKey.CHECK_FOR_UPDATES);
 	}
 
 	public static String validateForXML(String input) {
