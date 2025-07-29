@@ -2,7 +2,6 @@ package org.R4ZXRN3T;
 
 import org.json.JSONObject;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -10,6 +9,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.*;
 
 // It's not your time yet
 

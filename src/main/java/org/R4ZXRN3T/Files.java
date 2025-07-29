@@ -1,47 +1,30 @@
 package org.R4ZXRN3T;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.*;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.List;
-
 import static org.R4ZXRN3T.Main.accountList;
 import static org.R4ZXRN3T.Tools.returnOriginalValue;
 import static org.R4ZXRN3T.Tools.validateForXML;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 // all file shit in here
 class Files {
-
-	public enum ConfigKey {
-		ALL("all"),
-		PASSWORD("password"),
-		SALT("salt"),
-		LOOK_AND_FEEL("lookAndFeel"),
-		LAST_EXPORT_LOCATION("export"),
-		LAST_IMPORT_LOCATION("import"),
-		CHECK_FOR_UPDATES("checkForUpdates");
-
-		private final String value;
-
-		ConfigKey(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return value;
-		}
-	}
 
 	// retrieve Accounts ArrayList from accounts.txt. Only called on program launch
 	public static ArrayList<Account> getAccounts(String decryptionKey) {
@@ -444,6 +427,27 @@ class Files {
 		} catch (IOException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "An error occurred while importing the data", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	public enum ConfigKey {
+		ALL("all"),
+		PASSWORD("password"),
+		SALT("salt"),
+		LOOK_AND_FEEL("lookAndFeel"),
+		LAST_EXPORT_LOCATION("export"),
+		LAST_IMPORT_LOCATION("import"),
+		CHECK_FOR_UPDATES("checkForUpdates");
+
+		private final String value;
+
+		ConfigKey(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return value;
 		}
 	}
 }

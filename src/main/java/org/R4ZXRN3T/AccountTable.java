@@ -1,16 +1,18 @@
 package org.R4ZXRN3T;
 
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 
 public class AccountTable extends JTable {
 
@@ -55,6 +57,18 @@ public class AccountTable extends JTable {
 				}
 			}
 		});
+	}
+
+	// converts an ArrayList of Account objects to a 2D String array, only used in this class for conversion
+	// maybe I'll move this to the Tools class if I need it elsewhere
+	private static String[][] AccountArrayListToArray(ArrayList<Account> inputArrayList) {
+
+		String[][] finalArray = new String[inputArrayList.size()][5];
+
+		for (int i = 0; i < inputArrayList.size(); i++) {
+			finalArray[i] = inputArrayList.get(i).toArray();
+		}
+		return finalArray;
 	}
 
 	// puts the table into a JScrollPane
@@ -128,17 +142,5 @@ public class AccountTable extends JTable {
 	// returns the content of a given row as an Account object
 	public Account getAccount(int rowIndex) {
 		return new Account(data[rowIndex][0], data[rowIndex][1], data[rowIndex][2], data[rowIndex][3], data[rowIndex][4]);
-	}
-
-	// converts an ArrayList of Account objects to a 2D String array, only used in this class for conversion
-	// maybe I'll move this to the Tools class if I need it elsewhere
-	private static String[][] AccountArrayListToArray(ArrayList<Account> inputArrayList) {
-
-		String[][] finalArray = new String[inputArrayList.size()][5];
-
-		for (int i = 0; i < inputArrayList.size(); i++) {
-			finalArray[i] = inputArrayList.get(i).toArray();
-		}
-		return finalArray;
 	}
 }
