@@ -33,13 +33,13 @@ class Files {
 
 		private final String value;
 
+		configField(String value) {
+			this.value = value;
+		}
+
 		@Override
 		public String toString() {
 			return value;
-		}
-
-		configField(String value) {
-			this.value = value;
 		}
 	}
 
