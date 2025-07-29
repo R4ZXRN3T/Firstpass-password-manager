@@ -25,6 +25,10 @@ public class Account {
 
 		private final int value;
 
+		SearchField(int value) {
+			this.value = value;
+		}
+
 		public int getValue() {
 			return this.value;
 		}
@@ -36,10 +40,6 @@ public class Account {
 				}
 			}
 			throw new IllegalArgumentException("Invalid value: " + value);
-		}
-
-		SearchField(int value) {
-			this.value = value;
 		}
 	}
 
