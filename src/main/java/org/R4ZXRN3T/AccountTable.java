@@ -3,11 +3,13 @@ package org.R4ZXRN3T;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 public class AccountTable extends JTable {
@@ -42,6 +44,15 @@ public class AccountTable extends JTable {
 		sorter.addRowSorterListener(e -> {
 			if (e.getType() == RowSorterEvent.Type.SORTED) {
 				setMainData();
+			}
+		});
+
+		addMouseListener(new MouseInputAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getClickCount() == 2 && getSelectedRow() >= 0) {
+					Main.editAccount(getSelectedRow());
+				}
 			}
 		});
 	}
