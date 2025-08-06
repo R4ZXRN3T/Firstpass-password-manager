@@ -1,11 +1,10 @@
 package org.R4ZXRN3T;
 
-import static org.R4ZXRN3T.Icons.*;
-import static org.R4ZXRN3T.Main.addAccount;
-
+import javax.swing.*;
 import java.awt.*;
 
-import javax.swing.*;
+import static org.R4ZXRN3T.Icons.*;
+import static org.R4ZXRN3T.Main.addAccount;
 
 class BottomToolBar {
 

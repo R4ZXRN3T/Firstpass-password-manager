@@ -1,13 +1,11 @@
 package org.R4ZXRN3T;
 
-import static org.R4ZXRN3T.Main.accountList;
-import static org.R4ZXRN3T.Tools.returnOriginalValue;
-import static org.R4ZXRN3T.Tools.validateForXML;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -20,8 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import static org.R4ZXRN3T.Main.accountList;
+import static org.R4ZXRN3T.Tools.returnOriginalValue;
+import static org.R4ZXRN3T.Tools.validateForXML;
 
 // all file shit in here
 class Files {

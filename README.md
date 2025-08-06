@@ -6,8 +6,8 @@ Welcome to my very own password manager!
 
 - [Project Overview](#project-overview)
 - [Installation](#installation)
-	- [Prerequisites](#prerequisites)
-	- [Installation Steps](#installation-steps)
+    - [Prerequisites](#prerequisites)
+    - [Installation Steps](#installation-steps)
 - [Usage](#usage)
 - [Notes](#notes)
 - [License](#license)
@@ -64,4 +64,3 @@ Contributions are welcome! Please open an issue or a pull request if you have an
 ![Screenshot 2025-03-19 200253](https://github.com/user-attachments/assets/352a382c-82bc-4a2b-867e-f1642fc742a5)
 ![Screenshot 2025-03-19 200219](https://github.com/user-attachments/assets/cab845fa-6d78-4bb6-a215-5c71ac2c2d65)
 ![Screenshot 2025-03-19 200324](https://github.com/user-attachments/assets/9d9bc1a0-f58a-4bb4-97fd-9790cc4b59ba)
-

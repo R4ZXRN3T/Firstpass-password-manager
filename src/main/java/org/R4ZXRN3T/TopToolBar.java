@@ -1,8 +1,7 @@
 package org.R4ZXRN3T;
 
-import java.awt.*;
-
 import javax.swing.*;
+import java.awt.*;
 
 class TopToolBar {
 

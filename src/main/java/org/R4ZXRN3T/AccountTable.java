@@ -1,9 +1,5 @@
 package org.R4ZXRN3T;
 
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -13,6 +9,9 @@ import javax.swing.event.RowSorterEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 public class AccountTable extends JTable {
 

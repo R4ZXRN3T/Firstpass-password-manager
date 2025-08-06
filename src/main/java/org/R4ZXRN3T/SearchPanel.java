@@ -2,11 +2,10 @@ package org.R4ZXRN3T;
 
 import org.R4ZXRN3T.Account.SearchableField;
 
-import java.awt.*;
-
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.awt.*;
 
 // wierd shit happens here
 class SearchPanel extends JPanel {
