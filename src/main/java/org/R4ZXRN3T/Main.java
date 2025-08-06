@@ -1,16 +1,14 @@
 package org.R4ZXRN3T;
 
-import static org.R4ZXRN3T.Icons.*;
-
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
-
 import org.R4ZXRN3T.Files.ConfigKey;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -20,7 +18,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Stack;
 
-import javax.swing.*;
+import static org.R4ZXRN3T.Icons.*;
 
 class Main {
 

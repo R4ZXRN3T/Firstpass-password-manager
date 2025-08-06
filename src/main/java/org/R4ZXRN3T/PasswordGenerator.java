@@ -1,9 +1,8 @@
 package org.R4ZXRN3T;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
-
-import javax.swing.*;
 
 public class PasswordGenerator {
 

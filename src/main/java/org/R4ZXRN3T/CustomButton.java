@@ -1,9 +1,8 @@
 package org.R4ZXRN3T;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-
-import javax.swing.*;
 
 class CustomButton extends JButton {
 
