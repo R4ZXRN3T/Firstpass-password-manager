@@ -1,49 +1,39 @@
 package org.R4ZXRN3T;
 
-import java.awt.*;
 import javax.swing.*;
+import java.awt.*;
 
-class TopToolBar extends JMenuBar {
+class TopToolBar {
 
-	public JButton updateButton = new JButton("New version available!");
+	public static JButton updateButton = new JButton("New version available!");
 
-	public TopToolBar(Firstpass firstpass, ExportImportManager exportImportManager) {
-		super();
+	public static JMenuBar getTopToolBar() {
+		JMenuBar toolBar = new JMenuBar();
+
 		JMenuItem saveItem = new JMenuItem("Save");
-		saveItem.addActionListener(_ -> {
-			firstpass.save();
+		saveItem.addActionListener(e -> {
+			Main.save();
 			Main.changeMade = false;
 		});
-		saveItem.setIcon(Config.getDarkMode() ? Icons.SAVE_ICON_WHITE_SCALED : Icons.SAVE_ICON_SCALED);
+		saveItem.setIcon(Main.darkMode ? Icons.SAVE_ICON_WHITE_SCALED : Icons.SAVE_ICON_SCALED);
 
 		JMenuItem exportAsItem = new JMenuItem("Export");
-		exportAsItem.addActionListener(_ -> exportImportManager.exportData(firstpass.accountService.getAccounts()));
-		exportAsItem.setIcon(Config.getDarkMode() ? Icons.EXPORT_ICON_WHITE_SCALED : Icons.EXPORT_ICON_SCALED);
+		exportAsItem.addActionListener(e -> Files.exportData());
+		exportAsItem.setIcon(Main.darkMode ? Icons.EXPORT_ICON_WHITE_SCALED : Icons.EXPORT_ICON_SCALED);
 
 		JMenuItem importAsItem = new JMenuItem("Import");
-		importAsItem.setIcon(Config.getDarkMode() ? Icons.IMPORT_ICON_WHITE_SCALED : Icons.IMPORT_ICON_SCALED);
-		importAsItem.addActionListener(_ -> {
-			var updated = exportImportManager.importData(firstpass.accountService.getAccounts());
-			if (updated != null) {
-				firstpass.accountService.setAccounts(updated);
-				firstpass.refreshTable();
-				firstpass.setChangeMade(true);
-			}
-		});
+		importAsItem.setIcon(Main.darkMode ? Icons.IMPORT_ICON_WHITE_SCALED : Icons.IMPORT_ICON_SCALED);
+		importAsItem.addActionListener(e -> Files.importData());
 
 		JButton settingsButton = new JButton("Settings");
-		settingsButton.addActionListener(_ -> {
-			SettingsMenu settingsMenu = new SettingsMenu(this);
-			settingsMenu.showSettings();
-			settingsMenu.close();
-		});
-		settingsButton.setBackground(firstpass.frame.getBackground());
+		settingsButton.addActionListener(e -> SettingsMenu.showSettings());
+		settingsButton.setBackground(Main.frame.getBackground());
 		settingsButton.setBorderPainted(false);
 		settingsButton.setFocusable(false);
 
 		JMenuItem exitItem = new JMenuItem("Save & Exit");
-		exitItem.addActionListener(_ -> firstpass.exit());
-		exitItem.setIcon(Config.getDarkMode() ? Icons.EXIT_ICON_WHITE_SCALED : Icons.EXIT_ICON_SCALED);
+		exitItem.addActionListener(e -> Main.exit());
+		exitItem.setIcon(Main.darkMode ? Icons.EXIT_ICON_WHITE_SCALED : Icons.EXIT_ICON_SCALED);
 
 		JMenu fileItem = new JMenu("File");
 		fileItem.add(saveItem);
@@ -53,11 +43,13 @@ class TopToolBar extends JMenuBar {
 
 		updateButton.setForeground(new Color(0, 180, 255));
 		updateButton.setBorderPainted(true);
-		updateButton.addActionListener(_ -> Updater.update());
+		updateButton.addActionListener(e -> Updater.update());
 		updateButton.setVisible(Main.updateAvailable);
 
-		this.add(fileItem);
-		this.add(settingsButton);
-		this.add(updateButton);
+		toolBar.add(fileItem);
+		toolBar.add(settingsButton);
+		toolBar.add(updateButton);
+
+		return toolBar;
 	}
 }
