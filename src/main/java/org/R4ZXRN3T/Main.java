@@ -24,19 +24,25 @@ class Main {
 
 	public static final String CURRENT_VERSION = "2.0.9";
 
-	// global variables, important for not having to pass them around
-	public static ArrayList<Account> accountList = new ArrayList<>();
-	public static Stack<Account> undoStack = new Stack<>();
-	public static JFrame frame;
-	public static boolean darkMode;
-	public static String correctPassword;
-	public static AccountTable table;
-	public static boolean changeMade = false;
-	public static boolean passwordSet = true;
-	public static boolean updateAvailable = false;
-	public static boolean portableVersion = false;
+	// Instance variables - no longer static
+	private final ArrayList<Account> accountList = new ArrayList<>();
+	private final Stack<Account> undoStack = new Stack<>();
+	private JFrame frame;
+	private boolean darkMode;
+	private String correctPassword;
+	private AccountTable table;
+	private boolean changeMade = false;
+	private boolean passwordSet = true;
+	private boolean updateAvailable = false;
+	private boolean portableVersion = false;
+	private BottomToolBar bottomToolBar;
+	private TopToolBar topToolBar;
 
 	public static void main(String[] args) {
+		new Main().run(args);
+	}
+
+	private void run(String[] args) {
 
 		portableVersion = Main.class.getResource("/assets/firstpass_icon.png") != null;
 
@@ -50,7 +56,7 @@ class Main {
 		if (Boolean.parseBoolean(Files.getConfig(ConfigKey.CHECK_FOR_UPDATES))) {
 			new Thread(() -> {
 				updateAvailable = Updater.checkVersion(false).compareToIgnoreCase(CURRENT_VERSION) > 0;
-				TopToolBar.updateButton.setVisible(updateAvailable);
+				// Will be set after topToolBar is created
 			}).start();
 		}
 
@@ -83,8 +89,15 @@ class Main {
 
 		table = new AccountTable(new ArrayList<>());
 
+		bottomToolBar = new BottomToolBar(this);
+		topToolBar = new TopToolBar(this);
+		
+		// Initialize Updater with this instance
+		Updater.initialize(this);
+
 		new Thread(() -> {
-			accountList = Files.getAccounts(correctPassword);
+			accountList.addAll(Files.getAccounts(correctPassword));
+			table.setMain(this);
 			table.setContent(accountList);
 		}).start();
 
@@ -118,7 +131,7 @@ class Main {
 	}
 
 	// add an account to the Account ArrayList
-	public static void addAccount() {
+	public void addAccount() {
 
 		// initialize text fields
 		JTextField providerField = new JTextField();
@@ -154,7 +167,7 @@ class Main {
 	}
 
 	// removes an account from the Account ArrayList
-	public static void removeAccount(int rowIndex) {
+	public void removeAccount(int rowIndex) {
 
 		// check if row index is valid
 		if (rowIndex < 0 || rowIndex > table.getRowCount()) {
@@ -178,12 +191,12 @@ class Main {
 		// finish up
 		refreshIndices();
 		refreshTable();
-		BottomToolBar.refreshUndoButton();
+		bottomToolBar.refreshUndoButton();
 		changeMade = true;
 	}
 
 	// edit an account in the Account ArrayList
-	public static void editAccount(int rowIndex) {
+	public void editAccount(int rowIndex) {
 
 		// check if row index is valid
 		if (rowIndex < 0 || rowIndex > table.getRowCount()) {
@@ -220,7 +233,7 @@ class Main {
 	}
 
 	// undo the last deletion from the undo stack
-	public static void undoDeletion() {
+	public void undoDeletion() {
 		if (undoStack.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "No deletions to undo.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
@@ -232,16 +245,16 @@ class Main {
 		refreshIndices();
 		refreshTable();
 		changeMade = true;
-		BottomToolBar.refreshUndoButton();
+		bottomToolBar.refreshUndoButton();
 	}
 
 	// save accounts and config and exit the program
-	public static void exit() {
+	public void exit() {
 		save();
 		System.exit(0);
 	}
 
-	public static void save() {
+	public void save() {
 		Files.saveAccounts(accountList, correctPassword);
 		// generate new salt and thus also new encoded password; *VERY* important for security :)
 		String newSalt = Tools.generateRandomString(16);
@@ -249,7 +262,7 @@ class Main {
 		Files.setConfig(ConfigKey.PASSWORD, Tools.encodePassword(correctPassword, newSalt));
 	}
 
-	public static void fullDelete() {
+	public void fullDelete() {
 		accountList.clear();
 		new File("accounts.txt").delete();
 		new File("config.json").delete();
@@ -257,7 +270,7 @@ class Main {
 	}
 
 	// actually filters not searches, but we're not so picky with terminology :)
-	public static void search(String searchQuery) {
+	public void search(String searchQuery) {
 		// creates new ArrayList to store search results for the table
 		ArrayList<Account> searchResults = new ArrayList<>();
 		if (!searchQuery.isEmpty()) {
@@ -276,26 +289,26 @@ class Main {
 	}
 
 	// adds position in main ArrayList to each Account object
-	public static void refreshIndices() {
+	public void refreshIndices() {
 		for (int i = 0; i < accountList.size(); i++) {
 			accountList.get(i).setIndex(i);
 		}
 	}
 
 	// redraws the entire frame with the given Account ArrayList
-	public static void initializeFrame() {
+	public void initializeFrame() {
 
 		// create and initialize center panel
 		JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new BorderLayout(4, 4));
 		centerPanel.setBorder(BorderFactory.createEmptyBorder(8, 16, 32, 16));
 		centerPanel.add(table.getScrollPane(), BorderLayout.CENTER);
-		centerPanel.add(BottomToolBar.getToolBar(), BorderLayout.SOUTH);
-		centerPanel.add(new SearchPanel(), BorderLayout.NORTH);
+		centerPanel.add(bottomToolBar.getToolBar(), BorderLayout.SOUTH);
+		centerPanel.add(new SearchPanel(this), BorderLayout.NORTH);
 
 		// re-add stuff to frame
 		frame.getContentPane().removeAll();
-		frame.setJMenuBar(TopToolBar.getTopToolBar());
+		frame.setJMenuBar(topToolBar.getTopToolBar());
 		frame.add(centerPanel);
 		frame.revalidate();
 		frame.repaint();
@@ -303,19 +316,19 @@ class Main {
 	}
 
 	// refreshes only the table with the current Account ArrayList
-	public static void refreshTable() {
+	public void refreshTable() {
 		refreshTable(accountList);
 	}
 
 	// redraws only the table with the given Account ArrayList
-	public static void refreshTable(ArrayList<Account> accountsArr) {
+	public void refreshTable(ArrayList<Account> accountsArr) {
 		table.setContent(accountsArr);
 		table.revalidate();                        // self-explanatory
 		table.repaint();
 	}
 
 	// provides input dialog for password and checks if it's correct. AiO basically :)
-	private static String checkPassword() {
+	private String checkPassword() {
 
 		// initialize variables for inputDialog, in order to make the code more readable
 		String enteredPassword = "[placeholder]";
@@ -360,7 +373,7 @@ class Main {
 	}
 
 	// sets the look and feel of the program. Also returns whether the look and feel is a dark mode theme
-	private static boolean setLookAndFeel(String LaFIndex) {
+	private boolean setLookAndFeel(String LaFIndex) {
 		boolean isDarkTheme = false;
 		System.out.println("\nSetting Look and Feel...");
 		try {
@@ -405,5 +418,66 @@ class Main {
 			System.exit(1);
 		}
 		return false;
+	}
+
+	// Getters for encapsulation
+	public ArrayList<Account> getAccountList() {
+		return accountList;
+	}
+
+	public Stack<Account> getUndoStack() {
+		return undoStack;
+	}
+
+	public JFrame getFrame() {
+		return frame;
+	}
+
+	public boolean isDarkMode() {
+		return darkMode;
+	}
+
+	public String getCorrectPassword() {
+		return correctPassword;
+	}
+
+	public void setCorrectPassword(String correctPassword) {
+		this.correctPassword = correctPassword;
+	}
+
+	public AccountTable getTable() {
+		return table;
+	}
+
+	public boolean isChangeMade() {
+		return changeMade;
+	}
+
+	public void setChangeMade(boolean changeMade) {
+		this.changeMade = changeMade;
+	}
+
+	public boolean isPasswordSet() {
+		return passwordSet;
+	}
+
+	public void setPasswordSet(boolean passwordSet) {
+		this.passwordSet = passwordSet;
+	}
+
+	public boolean isUpdateAvailable() {
+		return updateAvailable;
+	}
+
+	public void setUpdateAvailable(boolean updateAvailable) {
+		this.updateAvailable = updateAvailable;
+	}
+
+	public boolean isPortableVersion() {
+		return portableVersion;
+	}
+
+	public TopToolBar getTopToolBar() {
+		return topToolBar;
 	}
 }

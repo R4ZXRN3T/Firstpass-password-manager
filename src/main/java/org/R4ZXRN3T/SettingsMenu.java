@@ -8,18 +8,23 @@ import java.util.HashMap;
 
 class SettingsMenu {
 
-	private static final HashMap<Integer, String> currentSettings = new HashMap<>();
-	private static JDialog settingsFrame;
-	private static boolean needsRestart = false;
-	private static CustomButton changePasswordButton;
-	private static CustomButton removePasswordButton;
+	private final HashMap<Integer, String> currentSettings = new HashMap<>();
+	private JDialog settingsFrame;
+	private boolean needsRestart = false;
+	private CustomButton changePasswordButton;
+	private CustomButton removePasswordButton;
+	private final Main main;
 
-	public static void showSettings() {
+	public SettingsMenu(Main main) {
+		this.main = main;
+	}
+
+	public void showSettings() {
 
 		setCurrentSettings();
 
 		// set up frame
-		settingsFrame = new JDialog(Main.frame, "Firstpass Settings", true);
+		settingsFrame = new JDialog(main.getFrame(), "Firstpass Settings", true);
 		settingsFrame.setLayout(new BorderLayout(16, 16));
 		settingsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -30,21 +35,21 @@ class SettingsMenu {
 		// set up the frame
 		settingsFrame.setSize(500, 400);
 		settingsFrame.setResizable(false);
-		settingsFrame.setLocationRelativeTo(Main.frame);
+		settingsFrame.setLocationRelativeTo(main.getFrame());
 		settingsFrame.setIconImage(Icons.FIRSTPASS_ICON.getImage());
 		settingsFrame.requestFocus();
 		settingsFrame.setVisible(true);
 	}
 
 	// write the current settings to the HashMap
-	private static void setCurrentSettings() {
-		currentSettings.put(0, Main.correctPassword);
+	private void setCurrentSettings() {
+		currentSettings.put(0, main.getCorrectPassword());
 		currentSettings.put(1, Files.getConfig(ConfigKey.LOOK_AND_FEEL));
 		currentSettings.put(2, Files.getConfig(ConfigKey.CHECK_FOR_UPDATES));
 	}
 
 	// get the panel for theme settings
-	private static JPanel getThemePanel() {
+	private JPanel getThemePanel() {
 		JPanel themePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		themePanel.setBorder(BorderFactory.createTitledBorder("Theme"));
 		JLabel themeLabel = new JLabel("Theme:");
@@ -61,7 +66,7 @@ class SettingsMenu {
 	}
 
 	// get panel with password settings
-	private static JPanel getPasswordPanel() {
+	private JPanel getPasswordPanel() {
 		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		passwordPanel.setBorder(BorderFactory.createTitledBorder("Password"));
 		changePasswordButton = new CustomButton("Change Password", e -> {
@@ -75,23 +80,23 @@ class SettingsMenu {
 		return passwordPanel;
 	}
 
-	private static JPanel getFullDeletePane() {
+	private JPanel getFullDeletePane() {
 		JPanel deletePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		deletePanel.setBorder(BorderFactory.createTitledBorder("Delete"));
-		deletePanel.add(new CustomButton("Delete Everything", null, e -> SettingsMenu.fullDeleteDialog(), false, true, new Dimension(140, 30), null, Color.RED, null));
+		deletePanel.add(new CustomButton("Delete Everything", null, e -> fullDeleteDialog(), false, true, new Dimension(140, 30), null, Color.RED, null));
 		JLabel deleteLabel = new JLabel("Delete all data");
 		deletePanel.add(deleteLabel);
 		return deletePanel;
 	}
 
-	private static JPanel getUpdatePanel() {
+	private JPanel getUpdatePanel() {
 		JPanel updatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		updatePanel.setBorder(BorderFactory.createTitledBorder("Update"));
 
 		updatePanel.add(new CustomButton("Check for Updates", e -> {
-			Main.updateAvailable = Updater.checkVersion(true).compareToIgnoreCase(Main.CURRENT_VERSION) > 0;
-			TopToolBar.updateButton.setVisible(Main.updateAvailable);
-			if (Main.updateAvailable) {
+			main.setUpdateAvailable(Updater.checkVersion(true).compareToIgnoreCase(Main.CURRENT_VERSION) > 0);
+			main.getTopToolBar().getUpdateButton().setVisible(main.isUpdateAvailable());
+			if (main.isUpdateAvailable()) {
 				Updater.update();
 			} else {
 				JOptionPane.showMessageDialog(settingsFrame, "You are already using the latest version.", "No Updates Available", JOptionPane.INFORMATION_MESSAGE);
@@ -109,20 +114,20 @@ class SettingsMenu {
 	}
 
 	// get the toolbar with apply and cancel buttons
-	private static JToolBar getApplyCancelToolbar() {
+	private JToolBar getApplyCancelToolbar() {
 		JToolBar bottomToolbar = new JToolBar();
 		bottomToolbar.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		bottomToolbar.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-		bottomToolbar.add(new CustomButton("Apply", Main.darkMode ? Icons.APPLY_ICON_WHITE_SCALED : Icons.APPLY_ICON_SCALED, e -> SettingsMenu.applySettings(), false, false, new Dimension(90, 30), Main.darkMode ? new Color(50, 50, 50) : Color.lightGray, null, null));
-		bottomToolbar.add(new CustomButton("Cancel", Main.darkMode ? Icons.CANCEL_ICON_WHITE_SCALED : Icons.CANCEL_ICON_SCALED, e -> {
-			Main.frame.setEnabled(true);
+		bottomToolbar.add(new CustomButton("Apply", main.isDarkMode() ? Icons.APPLY_ICON_WHITE_SCALED : Icons.APPLY_ICON_SCALED, e -> applySettings(), false, false, new Dimension(90, 30), main.isDarkMode() ? new Color(50, 50, 50) : Color.lightGray, null, null));
+		bottomToolbar.add(new CustomButton("Cancel", main.isDarkMode() ? Icons.CANCEL_ICON_WHITE_SCALED : Icons.CANCEL_ICON_SCALED, e -> {
+			main.getFrame().setEnabled(true);
 			settingsFrame.dispose();
-		}, false, false, new Dimension(90, 30), Main.darkMode ? new Color(50, 50, 50) : Color.lightGray, null, null));
+		}, false, false, new Dimension(90, 30), main.isDarkMode() ? new Color(50, 50, 50) : Color.lightGray, null, null));
 		return bottomToolbar;
 	}
 
 	// get the main panel with all settings
-	private static JPanel getMainPanel() {
+	private JPanel getMainPanel() {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
@@ -135,21 +140,21 @@ class SettingsMenu {
 	}
 
 	// change the password
-	private static void changePassword() {
+	private void changePassword() {
 		JTextField oldPassword = new JTextField();
 		JTextField newPassword = new JTextField();
 
-		Object[] message = Main.passwordSet ? new Object[]{"Old Password:", oldPassword, "New Password:", newPassword} : new Object[]{"New Password:", newPassword};
+		Object[] message = main.isPasswordSet() ? new Object[]{"Old Password:", oldPassword, "New Password:", newPassword} : new Object[]{"New Password:", newPassword};
 
 		int option = JOptionPane.showConfirmDialog(settingsFrame, message, "Change Password", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION) {
-			if (!Main.passwordSet) {
+			if (!main.isPasswordSet()) {
 				currentSettings.replace(0, newPassword.getText());
-				Main.passwordSet = true;
+				main.setPasswordSet(true);
 				JOptionPane.showMessageDialog(settingsFrame, "Password successfully set", "Success", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
-			if (oldPassword.getText().equals(Main.correctPassword)) {
+			if (oldPassword.getText().equals(main.getCorrectPassword())) {
 				currentSettings.replace(0, newPassword.getText());
 				JOptionPane.showMessageDialog(settingsFrame, "Password successfully changed", "Success", JOptionPane.INFORMATION_MESSAGE);
 			} else {
@@ -159,8 +164,8 @@ class SettingsMenu {
 	}
 
 	// apply the settings and restart the program if necessary
-	private static void applySettings() {
-		Main.correctPassword = currentSettings.get(0);
+	private void applySettings() {
+		main.setCorrectPassword(currentSettings.get(0));
 		Files.setConfig(ConfigKey.LOOK_AND_FEEL, currentSettings.get(1));
 		Files.setConfig(ConfigKey.CHECK_FOR_UPDATES, currentSettings.get(2));
 
@@ -168,38 +173,38 @@ class SettingsMenu {
 			String message = "The program needs to be restarted in order to apply the new settings. Do you want to restart now?";
 			int option = JOptionPane.showConfirmDialog(null, message, "Restart to apply settings", JOptionPane.YES_NO_OPTION);
 			if (option == JOptionPane.YES_OPTION) {
-				Main.save();
+				main.save();
 				Tools.restart();
 			}
 		}
 
 		settingsFrame.dispose();
-		Main.changeMade = true;
+		main.setChangeMade(true);
 	}
 
-	private static void fullDeleteDialog() {
+	private void fullDeleteDialog() {
 		JLabel warningLabel = new JLabel("Are you sure you want to delete all data?");
 		JLabel warningLabel2 = new JLabel("Warning: This action will delete all saved accounts and then close the program. This action cannot be undone.");
 		warningLabel2.setForeground(Color.RED);
 		int option = JOptionPane.showConfirmDialog(null, new Object[]{warningLabel, warningLabel2}, "Delete all data", JOptionPane.YES_NO_OPTION);
 		if (option == JOptionPane.YES_OPTION) {
-			Main.fullDelete();
+			main.fullDelete();
 		}
 	}
 
-	private static void removePasswordDialog() {
+	private void removePasswordDialog() {
 		int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to remove the password?", "Remove Password", JOptionPane.YES_NO_OPTION);
 		if (option == JOptionPane.NO_OPTION) {
 			return;
 		}
 		currentSettings.replace(0, "");
-		Main.passwordSet = false;
+		main.setPasswordSet(false);
 		JOptionPane.showMessageDialog(null, "Password removed", "Success", JOptionPane.INFORMATION_MESSAGE);
 		refreshButton();
 	}
 
-	private static void refreshButton() {
-		changePasswordButton.setText(Main.passwordSet ? "Change Password" : "Set Password");
-		removePasswordButton.setEnabled(Main.passwordSet);
+	private void refreshButton() {
+		changePasswordButton.setText(main.isPasswordSet() ? "Change Password" : "Set Password");
+		removePasswordButton.setEnabled(main.isPasswordSet());
 	}
 }

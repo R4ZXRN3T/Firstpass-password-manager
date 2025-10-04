@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import static org.R4ZXRN3T.Main.accountList;
 import static org.R4ZXRN3T.Tools.returnOriginalValue;
 import static org.R4ZXRN3T.Tools.validateForXML;
 
@@ -33,7 +32,7 @@ class Files {
 		JLabel message = new JLabel("Loading and decrypting accounts...");
 		progressBar.setPreferredSize(new Dimension(240, 20));
 		progressBar.setStringPainted(true);
-		JDialog frame = new JDialog(Main.frame, "", true);
+		JDialog frame = new JDialog((JFrame) null, "", true);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
 		frame.addWindowListener(new WindowAdapter() {
@@ -112,7 +111,7 @@ class Files {
 		progressBar.setStringPainted(true);
 
 		// Create the dialog and set it to be a child of the main frame
-		JDialog frame = new JDialog(Main.frame, "Saving Accounts", true);
+		JDialog frame = new JDialog((JFrame) null, "Saving Accounts", true);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setSize(300, 100);
 		frame.setResizable(false);
@@ -184,7 +183,7 @@ class Files {
 			return getConfig(key);
 		} catch (IOException e) {
 			System.err.println("Failed to read config file: " + e.getMessage());
-			JOptionPane.showMessageDialog(Main.frame, "Error reading config.json", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Error reading config.json", "Error", JOptionPane.ERROR_MESSAGE);
 			// Return appropriate default based on key
 			return Tools.getDefaultConfigValue(key);
 		}
@@ -212,7 +211,7 @@ class Files {
 		}
 	}
 
-	public static void exportData() {
+	public static void exportData(Main main) {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
 		fileChooser.setDialogTitle("Specify a file to save");
@@ -261,7 +260,7 @@ class Files {
 			exportFile.createNewFile();
 			PrintWriter writer = new PrintWriter(exportFile);
 			if (fileName.endsWith(".txt")) {
-				for (Account account : accountList) {
+				for (Account account : main.getAccountList()) {
 					writer.println(account.getProvider());
 					writer.println(account.getUsername());
 					writer.println(account.getPassword());
@@ -269,19 +268,19 @@ class Files {
 					writer.println(account.getComment());
 				}
 			} else if (fileName.endsWith(".csv")) {
-				for (Account account : accountList) {
+				for (Account account : main.getAccountList()) {
 					writer.println(account.getProvider() + ", " + account.getUsername() + ", " + account.getPassword() + ", " + account.getUrl() + ", " + account.getComment());
 				}
 			} else if (fileName.endsWith(".json")) {
 				JSONObject jsonObject = new JSONObject();
-				for (Account account : accountList) {
+				for (Account account : main.getAccountList()) {
 					jsonObject.put(account.getProvider(), new String[]{account.getUsername(), account.getPassword(), account.getUrl(), account.getComment()});
 				}
 				writer.println(jsonObject.toString(4));
 			} else if (fileName.endsWith(".xml")) {
 				writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 				writer.println("<accounts>");
-				for (Account account : accountList) {
+				for (Account account : main.getAccountList()) {
 					writer.println("\t<account>");
 					writer.println("\t\t<provider>" + validateForXML(account.getProvider()) + "</provider>");
 					writer.println("\t\t<username>" + validateForXML(account.getUsername()) + "</username>");
@@ -301,7 +300,7 @@ class Files {
 		}
 	}
 
-	public static void importData() {
+	public static void importData(Main main) {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
 		fileChooser.setDialogTitle("Specify a file to import");
@@ -413,16 +412,17 @@ class Files {
 			}
 
 			if (option == 0) {
-				accountList.addAll(importedAccounts);
+				main.getAccountList().addAll(importedAccounts);
 			} else {
-				accountList = importedAccounts;
+				main.getAccountList().clear();
+				main.getAccountList().addAll(importedAccounts);
 			}
 
 			Files.setConfig(ConfigKey.LAST_IMPORT_LOCATION, importFile.getParent());
 
 			JOptionPane.showMessageDialog(null, "Data successfully imported", "Success", JOptionPane.INFORMATION_MESSAGE);
-			Main.refreshTable();
-			Main.changeMade = true;
+			main.refreshTable();
+			main.setChangeMade(true);
 		} catch (IOException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "An error occurred while importing the data", "Error", JOptionPane.ERROR_MESSAGE);
