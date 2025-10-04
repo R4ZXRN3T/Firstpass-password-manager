@@ -1,10 +1,11 @@
 package org.R4ZXRN3T;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import javax.swing.*;
 
 class Icons {
 

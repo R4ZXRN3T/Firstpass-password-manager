@@ -58,7 +58,7 @@ class CustomButton extends JButton {
 
 		if (listenForTableSelection) {
 			this.setEnabled(Main.table.isRowSelected() && Main.table.isFocused());
-			Main.table.addRowSelectionListener(e -> this.setEnabled(Main.table.isRowSelected() && Main.table.isFocused()));
+			Main.table.addRowSelectionListener(_ -> this.setEnabled(Main.table.isRowSelected() && Main.table.isFocused()));
 		}
 
 		// add stuff
