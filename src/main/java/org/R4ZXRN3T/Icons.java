@@ -68,7 +68,10 @@ class Icons {
 	// The icons are stored in the assets folder
 	// non-scaled versions are 128x128, but might be irrelevant as they are not used in the program yet
 	private static URL getFile(String path) {
-		if (Main.portableVersion) return Main.class.getResource("/" + path);
+		// Check if resource exists as portable version
+		if (Icons.class.getResource("/" + path) != null) {
+			return Icons.class.getResource("/" + path);
+		}
 		try {
 			return new File(path).toURI().toURL();
 		} catch (MalformedURLException e) {

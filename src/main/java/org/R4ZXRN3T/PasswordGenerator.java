@@ -6,19 +6,19 @@ import java.awt.datatransfer.StringSelection;
 
 public class PasswordGenerator {
 
-	private static JDialog frame = new JDialog(Main.frame, "Password Generator", true);
+	private static JDialog frame = null;
 
-	public static void showPasswordGeneratorDialog() {
-		if (frame.isVisible()) {
+	public static void showPasswordGeneratorDialog(JFrame parentFrame, boolean darkMode) {
+		if (frame != null && frame.isVisible()) {
 			frame.requestFocus();
 			return;
 		}
-		frame = new JDialog(Main.frame, "Password Generator", true);
+		frame = new JDialog(parentFrame, "Password Generator", true);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setLayout(new BorderLayout(10, 10));
 		frame.setIconImage(Icons.FIRSTPASS_ICON.getImage());
 		frame.setSize(450, 250);
-		frame.setLocationRelativeTo(Main.frame);
+		frame.setLocationRelativeTo(parentFrame);
 		frame.setResizable(false);
 
 		JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -60,7 +60,7 @@ public class PasswordGenerator {
 		scrollPane.setBackground(new Color(0, 0, 0, 0));
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 
-		JButton copyButton = getCopyButton(passwordField);
+		JButton copyButton = getCopyButton(passwordField, darkMode);
 
 		outputPanel.add(scrollPane, BorderLayout.CENTER);
 		outputPanel.add(copyButton, BorderLayout.EAST);
@@ -81,9 +81,9 @@ public class PasswordGenerator {
 		frame.setVisible(true);
 	}
 
-	private static JButton getCopyButton(JTextField passwordField) {
+	private static JButton getCopyButton(JTextField passwordField, boolean darkMode) {
 		JButton copyButton = new JButton();
-		copyButton.setIcon(Main.darkMode ? Icons.COPY_ICON_WHITE_SCALED : Icons.COPY_ICON_SCALED);
+		copyButton.setIcon(darkMode ? Icons.COPY_ICON_WHITE_SCALED : Icons.COPY_ICON_SCALED);
 		copyButton.setToolTipText("Copy password to clipboard");
 		copyButton.addActionListener(e -> {
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(passwordField.getText()), null);

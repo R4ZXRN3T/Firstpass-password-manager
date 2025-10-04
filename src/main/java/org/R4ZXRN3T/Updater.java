@@ -16,7 +16,17 @@ import java.util.Map;
 class Updater {
 	private static final String REPO_URL = "https://api.github.com/repos/R4ZXRN3T/Firstpass-password-manager/releases/latest";
 	private static final String DOWNLOAD_URL = "https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/download/";
-	private static final String FILE_NAME = Main.portableVersion ? "Firstpass_portable.jar" : "Firstpass_setup.msi";
+	private static boolean portableVersion = false;
+	private static Main mainInstance = null;
+
+	public static void initialize(Main main) {
+		mainInstance = main;
+		portableVersion = main.isPortableVersion();
+	}
+
+	private static String getFileName() {
+		return portableVersion ? "Firstpass_portable.jar" : "Firstpass_setup.msi";
+	}
 
 
 	public static String checkVersion(boolean showError) {
@@ -84,8 +94,8 @@ class Updater {
 				try {
 					String newestVersion = checkVersion(true);
 
-					String link = DOWNLOAD_URL + newestVersion + "/" + FILE_NAME;
-					String fileName = Main.portableVersion ? "Firstpass_portable.jar.tmp" : "Firstpass_setup.msi.tmp";
+					String link = DOWNLOAD_URL + newestVersion + "/" + getFileName();
+					String fileName = portableVersion ? "Firstpass_portable.jar.tmp" : "Firstpass_setup.msi.tmp";
 
 					URL url = new URL(link);
 					HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -115,7 +125,9 @@ class Updater {
 
 					output.close();
 					input.close();
-					Main.save();
+					if (mainInstance != null) {
+						mainInstance.save();
+					}
 					updateFrame.dispose();
 					installUpdate();
 				} catch (IOException e) {
@@ -126,7 +138,7 @@ class Updater {
 	}
 
 	private static void installUpdate() {
-		if (!Main.portableVersion) {
+		if (!portableVersion) {
 			File tmp = new File("Firstpass_setup.msi.tmp");
 			File current = new File("Firstpass_setup.msi");
 			if (current.exists()) {
