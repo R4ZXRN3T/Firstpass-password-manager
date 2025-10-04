@@ -1,5 +1,9 @@
 package org.R4ZXRN3T;
 
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -9,17 +13,18 @@ import javax.swing.event.RowSorterEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+
+import org.R4ZXRN3T.interfaces.AccountService;
 
 public class AccountTable extends JTable {
 
 	private final String[] columns = {"Provider", "Username", "Password", "URL", "Comment"};
 	private String[][] data;
+	private final AccountService accountService;
 
-	public AccountTable(ArrayList<Account> accounts) {
+	public AccountTable(ArrayList<Account> accounts, AccountService accountService) {
 		super();
+		this.accountService = accountService;
 		data = AccountArrayListToArray(accounts);
 
 		// make table uneditable, unfortunately this is the only way to do it
@@ -38,7 +43,7 @@ public class AccountTable extends JTable {
 		setRowSelectionAllowed(true);
 		setColumnSelectionAllowed(false);
 		setFillsViewportHeight(true);
-		getTableHeader().setBackground(Main.darkMode ? new Color(48, 48, 48) : new Color(200, 200, 200));
+		getTableHeader().setBackground(Config.getDarkMode() ? new Color(48, 48, 48) : new Color(200, 200, 200));
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(this.getModel());
 		setRowSorter(sorter);
 
@@ -52,7 +57,7 @@ public class AccountTable extends JTable {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if (e.getClickCount() == 2 && getSelectedRow() >= 0) {
-					Main.editAccount(getSelectedRow());
+					accountService.editAccount(getSelectedRow());
 				}
 			}
 		});
@@ -121,12 +126,11 @@ public class AccountTable extends JTable {
 	}
 
 	private void setMainData() {
-		Main.accountList.clear();
-		Main.accountList.ensureCapacity(this.getRowCount());
+		ArrayList<Account> accounts = new ArrayList<>();
+		accounts.ensureCapacity(this.getRowCount());
 
-		// Iterate through rows and directly use view indices
 		for (int i = 0; i < this.getRowCount(); i++) {
-			Main.accountList.add(new Account(
+			accounts.add(new Account(
 					getValueAt(i, 0).toString(),
 					getValueAt(i, 1).toString(),
 					getValueAt(i, 2).toString(),
@@ -134,8 +138,9 @@ public class AccountTable extends JTable {
 					getValueAt(i, 4).toString()
 			));
 		}
-		Main.refreshIndices();
-		Main.changeMade = true;
+		accountService.setAccounts(accounts);
+		accountService.refreshIndices();
+		// If you need to notify changeMade, do it via the main class or service
 	}
 
 	// returns the content of a given row as an Account object
