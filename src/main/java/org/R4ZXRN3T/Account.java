@@ -106,17 +106,6 @@ public class Account {
 				Objects.equals(comment, account.comment);
 	}
 
-	public boolean equalsField(Account accountToCompareWith, SearchableField searchableField) {
-		return switch (searchableField) {
-			case ALL -> equals(accountToCompareWith);
-			case PROVIDER -> Objects.equals(provider, accountToCompareWith.getProvider());
-			case USERNAME -> Objects.equals(username, accountToCompareWith.getUsername());
-			case PASSWORD -> Objects.equals(password, accountToCompareWith.getPassword());
-			case URL -> Objects.equals(url, accountToCompareWith.getUrl());
-			case COMMENT -> Objects.equals(comment, accountToCompareWith.getComment());
-		};
-	}
-
 	public boolean contains(String s) {
 		return provider.contains(s) ||
 				username.contains(s) ||
@@ -126,14 +115,22 @@ public class Account {
 	}
 
 	public boolean contains(String s, SearchableField searchableField) {
-		return switch (searchableField) {
-			case ALL -> contains(s);
-			case PROVIDER -> provider.contains(s);
-			case USERNAME -> username.contains(s);
-			case PASSWORD -> password.contains(s);
-			case URL -> url.contains(s);
-			case COMMENT -> comment.contains(s);
-		};
+		switch (searchableField) {
+			case ALL:
+				return contains(s);
+			case PROVIDER:
+				return provider.contains(s);
+			case USERNAME:
+				return username.contains(s);
+			case PASSWORD:
+				return password.contains(s);
+			case URL:
+				return url.contains(s);
+			case COMMENT:
+				return comment.contains(s);
+			default:
+				return false;
+		}
 	}
 
 	public boolean containsIgnoreCase(String s) {
@@ -141,18 +138,27 @@ public class Account {
 	}
 
 	public boolean containsIgnoreCase(String s, SearchableField searchableField) {
-		return switch (searchableField) {
-			case ALL -> stringContainsIgnoreCase(provider, s) ||
-					stringContainsIgnoreCase(username, s) ||
-					stringContainsIgnoreCase(password, s) ||
-					stringContainsIgnoreCase(url, s) ||
-					stringContainsIgnoreCase(comment, s);
-			case PROVIDER -> stringContainsIgnoreCase(provider, s);
-			case USERNAME -> stringContainsIgnoreCase(username, s);
-			case PASSWORD -> stringContainsIgnoreCase(password, s);
-			case URL -> stringContainsIgnoreCase(url, s);
-			case COMMENT -> stringContainsIgnoreCase(comment, s);
-		};
+		switch (searchableField) {
+			case ALL:
+				return stringContainsIgnoreCase(provider, s) ||
+						stringContainsIgnoreCase(username, s) ||
+						stringContainsIgnoreCase(password, s) ||
+						stringContainsIgnoreCase(url, s) ||
+						stringContainsIgnoreCase(comment, s);
+			case PROVIDER:
+				return stringContainsIgnoreCase(provider, s);
+			case USERNAME:
+				return stringContainsIgnoreCase(username, s);
+			case PASSWORD:
+				return stringContainsIgnoreCase(password, s);
+			case URL:
+				return stringContainsIgnoreCase(url, s);
+			case COMMENT:
+				return stringContainsIgnoreCase(comment, s);
+
+			default:
+				return false;
+		}
 	}
 
 	public int compareTo(Account accountToCompareWith) {
@@ -160,14 +166,20 @@ public class Account {
 	}
 
 	public int compareTo(Account accountToCompareWith, SearchableField searchableField) {
-		return switch (searchableField) {
-			case PROVIDER -> provider.compareTo(accountToCompareWith.getProvider());
-			case USERNAME -> username.compareTo(accountToCompareWith.getUsername());
-			case PASSWORD -> password.compareTo(accountToCompareWith.getPassword());
-			case URL -> url.compareTo(accountToCompareWith.getUrl());
-			case COMMENT -> comment.compareTo(accountToCompareWith.getComment());
-			default -> 0;
-		};
+		switch (searchableField) {
+			case PROVIDER:
+				return provider.compareTo(accountToCompareWith.getProvider());
+			case USERNAME:
+				return username.compareTo(accountToCompareWith.getUsername());
+			case PASSWORD:
+				return password.compareTo(accountToCompareWith.getPassword());
+			case URL:
+				return url.compareTo(accountToCompareWith.getUrl());
+			case COMMENT:
+				return comment.compareTo(accountToCompareWith.getComment());
+			default:
+				return 0;
+		}
 	}
 
 	public int compareToIgnoreCase(Account accountToCompareWith) {
@@ -175,14 +187,20 @@ public class Account {
 	}
 
 	public int compareToIgnoreCase(Account accountToCompareWith, SearchableField searchableField) {
-		return switch (searchableField) {
-			case PROVIDER -> provider.compareToIgnoreCase(accountToCompareWith.getProvider());
-			case USERNAME -> username.compareToIgnoreCase(accountToCompareWith.getUsername());
-			case PASSWORD -> password.compareToIgnoreCase(accountToCompareWith.getPassword());
-			case URL -> url.compareToIgnoreCase(accountToCompareWith.getUrl());
-			case COMMENT -> comment.compareToIgnoreCase(accountToCompareWith.getComment());
-			default -> 0;
-		};
+		switch (searchableField) {
+			case PROVIDER:
+				return provider.compareToIgnoreCase(accountToCompareWith.getProvider());
+			case USERNAME:
+				return username.compareToIgnoreCase(accountToCompareWith.getUsername());
+			case PASSWORD:
+				return password.compareToIgnoreCase(accountToCompareWith.getPassword());
+			case URL:
+				return url.compareToIgnoreCase(accountToCompareWith.getUrl());
+			case COMMENT:
+				return comment.compareToIgnoreCase(accountToCompareWith.getComment());
+			default:
+				return 0;
+		}
 	}
 
 	public String[] toArray() {
@@ -275,31 +293,6 @@ public class Account {
 				}
 			}
 			throw new IllegalArgumentException("Invalid value: " + value);
-		}
-
-		@Override
-		public String toString() {
-			return switch (value) {
-				case 0 -> "All";
-				case 1 -> "Provider";
-				case 2 -> "Username";
-				case 3 -> "Password";
-				case 4 -> "URL";
-				case 5 -> "Comment";
-				default -> throw new RuntimeException("This shouldn't happen");
-			};
-		}
-
-		public static SearchableField fromString(String input) {
-			return switch (input) {
-				case "All" -> fromValue(0);
-				case "Provider" -> fromValue(1);
-				case "Username" -> fromValue(2);
-				case "Password" -> fromValue(3);
-				case "URL" -> fromValue(4);
-				case "Comment" -> fromValue(5);
-				default -> throw new IllegalArgumentException("Invalid input: " + input);
-			};
 		}
 
 		public int getValue() {

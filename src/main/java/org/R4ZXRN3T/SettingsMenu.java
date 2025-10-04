@@ -1,23 +1,24 @@
 package org.R4ZXRN3T;
 
+import org.R4ZXRN3T.Files.ConfigKey;
+
+import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-import javax.swing.*;
-
 class SettingsMenu {
 
-	private final TopToolBar topToolBar;
-	private final HashMap<Integer, String> currentSettings;
-	private final JDialog settingsFrame;
-	private boolean needsRestart = false;
-	private CustomButton changePasswordButton;
-	private CustomButton removePasswordButton;
+	private static final HashMap<Integer, String> currentSettings = new HashMap<>();
+	private static JDialog settingsFrame;
+	private static boolean needsRestart = false;
+	private static CustomButton changePasswordButton;
+	private static CustomButton removePasswordButton;
 
-	public SettingsMenu(TopToolBar topToolBar) {
-		this.topToolBar = topToolBar;
-		currentSettings = new HashMap<>();
+	public static void showSettings() {
+
 		setCurrentSettings();
+
+		// set up frame
 		settingsFrame = new JDialog(Main.frame, "Firstpass Settings", true);
 		settingsFrame.setLayout(new BorderLayout(16, 16));
 		settingsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -31,34 +32,26 @@ class SettingsMenu {
 		settingsFrame.setResizable(false);
 		settingsFrame.setLocationRelativeTo(Main.frame);
 		settingsFrame.setIconImage(Icons.FIRSTPASS_ICON.getImage());
-	}
-
-	public void showSettings() {
 		settingsFrame.requestFocus();
 		settingsFrame.setVisible(true);
 	}
 
-	public void close() {
-		settingsFrame.dispose();
-		currentSettings.clear();
-	}
-
 	// write the current settings to the HashMap
-	private void setCurrentSettings() {
+	private static void setCurrentSettings() {
 		currentSettings.put(0, Main.correctPassword);
-		currentSettings.put(1, Config.getConfig(Config.ConfigKey.LOOK_AND_FEEL));
-		currentSettings.put(2, Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES));
+		currentSettings.put(1, Files.getConfig(ConfigKey.LOOK_AND_FEEL));
+		currentSettings.put(2, Files.getConfig(ConfigKey.CHECK_FOR_UPDATES));
 	}
 
 	// get the panel for theme settings
-	private JPanel getThemePanel() {
+	private static JPanel getThemePanel() {
 		JPanel themePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		themePanel.setBorder(BorderFactory.createTitledBorder("Theme"));
 		JLabel themeLabel = new JLabel("Theme:");
 		String[] themeOptions = {"Flat Light", "Flat Dark", "Flat Mac Light", "Flat Mac Dark", "Flat IntelliJ", "Flat Darcula", "Swing Metal", "System Default"};
 		JComboBox<String> themeSelector = new JComboBox<>(themeOptions);
 		themeSelector.setSelectedIndex(Integer.parseInt(currentSettings.get(1)));
-		themeSelector.addActionListener(_ -> {
+		themeSelector.addActionListener(e -> {
 			currentSettings.replace(1, String.valueOf(themeSelector.getSelectedIndex()));
 			needsRestart = true;
 		});
@@ -68,36 +61,36 @@ class SettingsMenu {
 	}
 
 	// get panel with password settings
-	private JPanel getPasswordPanel() {
+	private static JPanel getPasswordPanel() {
 		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		passwordPanel.setBorder(BorderFactory.createTitledBorder("Password"));
-		changePasswordButton = new CustomButton("Change Password", _ -> {
+		changePasswordButton = new CustomButton("Change Password", e -> {
 			changePassword();
 			refreshButton();
 		}, new Dimension(140, 30));
 		passwordPanel.add(changePasswordButton);
-		removePasswordButton = new CustomButton("Remove Password", _ -> removePasswordDialog(), new Dimension(140, 30));
+		removePasswordButton = new CustomButton("Remove Password", e -> removePasswordDialog(), new Dimension(140, 30));
 		passwordPanel.add(removePasswordButton);
 		refreshButton();
 		return passwordPanel;
 	}
 
-	private JPanel getFullDeletePane() {
+	private static JPanel getFullDeletePane() {
 		JPanel deletePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		deletePanel.setBorder(BorderFactory.createTitledBorder("Delete"));
-		deletePanel.add(new CustomButton("Delete Everything", null, _ -> fullDeleteDialog(), false, true, new Dimension(140, 30), null, Color.RED, null));
+		deletePanel.add(new CustomButton("Delete Everything", null, e -> SettingsMenu.fullDeleteDialog(), false, true, new Dimension(140, 30), null, Color.RED, null));
 		JLabel deleteLabel = new JLabel("Delete all data");
 		deletePanel.add(deleteLabel);
 		return deletePanel;
 	}
 
-	private JPanel getUpdatePanel() {
+	private static JPanel getUpdatePanel() {
 		JPanel updatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		updatePanel.setBorder(BorderFactory.createTitledBorder("Update"));
 
-		updatePanel.add(new CustomButton("Check for Updates", _ -> {
-			Main.updateAvailable = Updater.checkVersion(true, true).compareToIgnoreCase(Main.CURRENT_VERSION) > 0;
-			topToolBar.updateButton.setVisible(Main.updateAvailable);
+		updatePanel.add(new CustomButton("Check for Updates", e -> {
+			Main.updateAvailable = Updater.checkVersion(true).compareToIgnoreCase(Main.CURRENT_VERSION) > 0;
+			TopToolBar.updateButton.setVisible(Main.updateAvailable);
 			if (Main.updateAvailable) {
 				Updater.update();
 			} else {
@@ -107,26 +100,29 @@ class SettingsMenu {
 
 		JCheckBox updateCheckBox = new JCheckBox("Check for updates on startup");
 		updateCheckBox.setSelected(Boolean.parseBoolean(currentSettings.get(2)));
-		updateCheckBox.addActionListener(_ -> currentSettings.replace(2, String.valueOf(updateCheckBox.isSelected())));
+		updateCheckBox.addActionListener(e -> {
+			currentSettings.replace(2, String.valueOf(updateCheckBox.isSelected()));
+		});
 		updatePanel.add(updateCheckBox);
 
 		return updatePanel;
 	}
 
 	// get the toolbar with apply and cancel buttons
-	private JToolBar getApplyCancelToolbar() {
+	private static JToolBar getApplyCancelToolbar() {
 		JToolBar bottomToolbar = new JToolBar();
 		bottomToolbar.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		bottomToolbar.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-		bottomToolbar.add(new CustomButton("Apply", Config.getDarkMode() ? Icons.APPLY_ICON_WHITE_SCALED : Icons.APPLY_ICON_SCALED, _ -> applySettings(), false, false, new Dimension(90, 30), Config.getDarkMode() ? new Color(50, 50, 50) : Color.lightGray, null, null));
-		bottomToolbar.add(new CustomButton("Cancel", Config.getDarkMode() ? Icons.CANCEL_ICON_WHITE_SCALED : Icons.CANCEL_ICON_SCALED, _ -> {
+		bottomToolbar.add(new CustomButton("Apply", Main.darkMode ? Icons.APPLY_ICON_WHITE_SCALED : Icons.APPLY_ICON_SCALED, e -> SettingsMenu.applySettings(), false, false, new Dimension(90, 30), Main.darkMode ? new Color(50, 50, 50) : Color.lightGray, null, null));
+		bottomToolbar.add(new CustomButton("Cancel", Main.darkMode ? Icons.CANCEL_ICON_WHITE_SCALED : Icons.CANCEL_ICON_SCALED, e -> {
+			Main.frame.setEnabled(true);
 			settingsFrame.dispose();
-		}, false, false, new Dimension(90, 30), Config.getDarkMode() ? new Color(50, 50, 50) : Color.lightGray, null, null));
+		}, false, false, new Dimension(90, 30), Main.darkMode ? new Color(50, 50, 50) : Color.lightGray, null, null));
 		return bottomToolbar;
 	}
 
 	// get the main panel with all settings
-	private JPanel getMainPanel() {
+	private static JPanel getMainPanel() {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
@@ -139,7 +135,7 @@ class SettingsMenu {
 	}
 
 	// change the password
-	private void changePassword() {
+	private static void changePassword() {
 		JTextField oldPassword = new JTextField();
 		JTextField newPassword = new JTextField();
 
@@ -163,11 +159,10 @@ class SettingsMenu {
 	}
 
 	// apply the settings and restart the program if necessary
-	private void applySettings() {
+	private static void applySettings() {
 		Main.correctPassword = currentSettings.get(0);
-		Config.setConfig(Config.ConfigKey.LOOK_AND_FEEL, currentSettings.get(1));
-		Config.setConfig(Config.ConfigKey.CHECK_FOR_UPDATES, currentSettings.get(2));
-		Config.saveConfig();
+		Files.setConfig(ConfigKey.LOOK_AND_FEEL, currentSettings.get(1));
+		Files.setConfig(ConfigKey.CHECK_FOR_UPDATES, currentSettings.get(2));
 
 		if (needsRestart) {
 			String message = "The program needs to be restarted in order to apply the new settings. Do you want to restart now?";
@@ -182,7 +177,7 @@ class SettingsMenu {
 		Main.changeMade = true;
 	}
 
-	private void fullDeleteDialog() {
+	private static void fullDeleteDialog() {
 		JLabel warningLabel = new JLabel("Are you sure you want to delete all data?");
 		JLabel warningLabel2 = new JLabel("Warning: This action will delete all saved accounts and then close the program. This action cannot be undone.");
 		warningLabel2.setForeground(Color.RED);
@@ -192,7 +187,7 @@ class SettingsMenu {
 		}
 	}
 
-	private void removePasswordDialog() {
+	private static void removePasswordDialog() {
 		int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to remove the password?", "Remove Password", JOptionPane.YES_NO_OPTION);
 		if (option == JOptionPane.NO_OPTION) {
 			return;
@@ -203,7 +198,7 @@ class SettingsMenu {
 		refreshButton();
 	}
 
-	private void refreshButton() {
+	private static void refreshButton() {
 		changePasswordButton.setText(Main.passwordSet ? "Change Password" : "Set Password");
 		removePasswordButton.setEnabled(Main.passwordSet);
 	}
