@@ -17,9 +17,15 @@ public class AccountTable extends JTable {
 
 	private final String[] columns = {"Provider", "Username", "Password", "URL", "Comment"};
 	private String[][] data;
+	private Main main;
 
 	public AccountTable(ArrayList<Account> accounts) {
+		this(accounts, null);
+	}
+
+	public AccountTable(ArrayList<Account> accounts, Main main) {
 		super();
+		this.main = main;
 		data = AccountArrayListToArray(accounts);
 
 		// make table uneditable, unfortunately this is the only way to do it
@@ -38,7 +44,7 @@ public class AccountTable extends JTable {
 		setRowSelectionAllowed(true);
 		setColumnSelectionAllowed(false);
 		setFillsViewportHeight(true);
-		getTableHeader().setBackground(Main.darkMode ? new Color(48, 48, 48) : new Color(200, 200, 200));
+		getTableHeader().setBackground((main != null && main.isDarkMode()) ? new Color(48, 48, 48) : new Color(200, 200, 200));
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(this.getModel());
 		setRowSorter(sorter);
 
@@ -51,11 +57,15 @@ public class AccountTable extends JTable {
 		addMouseListener(new MouseInputAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (e.getClickCount() == 2 && getSelectedRow() >= 0) {
-					Main.editAccount(getSelectedRow());
+				if (e.getClickCount() == 2 && getSelectedRow() >= 0 && main != null) {
+					main.editAccount(getSelectedRow());
 				}
 			}
 		});
+	}
+
+	public void setMain(Main main) {
+		this.main = main;
 	}
 
 	// converts an ArrayList of Account objects to a 2D String array, only used in this class for conversion
@@ -121,12 +131,15 @@ public class AccountTable extends JTable {
 	}
 
 	private void setMainData() {
-		Main.accountList.clear();
-		Main.accountList.ensureCapacity(this.getRowCount());
+		if (main == null) {
+			return;
+		}
+		main.getAccountList().clear();
+		main.getAccountList().ensureCapacity(this.getRowCount());
 
 		// Iterate through rows and directly use view indices
 		for (int i = 0; i < this.getRowCount(); i++) {
-			Main.accountList.add(new Account(
+			main.getAccountList().add(new Account(
 					getValueAt(i, 0).toString(),
 					getValueAt(i, 1).toString(),
 					getValueAt(i, 2).toString(),
@@ -134,8 +147,8 @@ public class AccountTable extends JTable {
 					getValueAt(i, 4).toString()
 			));
 		}
-		Main.refreshIndices();
-		Main.changeMade = true;
+		main.refreshIndices();
+		main.setChangeMade(true);
 	}
 
 	// returns the content of a given row as an Account object

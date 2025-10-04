@@ -20,11 +20,21 @@ class CustomButton extends JButton {
 
 	// only relevant for the remove and edit button
 	public CustomButton(String text, ImageIcon icon, ActionListener actionListener, boolean listenForTableSelection, Dimension size) {
-		this(text, icon, actionListener, listenForTableSelection, false, size, null, null, null);
+		this(text, icon, actionListener, listenForTableSelection, false, size, null, null, null, null);
+	}
+
+	// only relevant for the remove and edit button
+	public CustomButton(String text, ImageIcon icon, ActionListener actionListener, AccountTable table, Dimension size) {
+		this(text, icon, actionListener, false, false, size, null, null, null, table);
 	}
 
 	// default constructor for most customization
 	public CustomButton(String text, ImageIcon icon, ActionListener actionListener, boolean listenForTableSelection, boolean focusable, Dimension size, Color customBackground, Color customForeground, Insets margins) {
+		this(text, icon, actionListener, listenForTableSelection, focusable, size, customBackground, customForeground, margins, null);
+	}
+
+	// default constructor for most customization
+	public CustomButton(String text, ImageIcon icon, ActionListener actionListener, boolean listenForTableSelection, boolean focusable, Dimension size, Color customBackground, Color customForeground, Insets margins, AccountTable table) {
 		// add the action listener and set stuff
 		this.addActionListener(actionListener);
 		this.setPreferredSize(size);
@@ -56,9 +66,12 @@ class CustomButton extends JButton {
 			textLabel.setForeground(customForeground);
 		}
 
-		if (listenForTableSelection) {
-			this.setEnabled(Main.table.isRowSelected() && Main.table.isFocused());
-			Main.table.addRowSelectionListener(e -> this.setEnabled(Main.table.isRowSelected() && Main.table.isFocused()));
+		if (listenForTableSelection || table != null) {
+			AccountTable tableToUse = table;
+			this.setEnabled(tableToUse != null && tableToUse.isRowSelected() && tableToUse.isFocused());
+			if (tableToUse != null) {
+				tableToUse.addRowSelectionListener(e -> this.setEnabled(tableToUse.isRowSelected() && tableToUse.isFocused()));
+			}
 		}
 
 		// add stuff
