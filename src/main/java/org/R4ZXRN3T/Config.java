@@ -18,7 +18,7 @@ public class Config {
 
 	private static final String DEFAULT_LAF = "0";
 	private static final int PASSWORD_LENGTH = 64;
-	private static final int SALT_LENGTH = 16;
+	public static final int SALT_LENGTH = 64;
 	private static final String DEFAULT_EXPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
 	private static final String DEFAULT_IMPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
 	private static HashMap<String, String> configList;
