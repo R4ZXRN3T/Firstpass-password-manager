@@ -19,10 +19,6 @@ public class AccountTable extends JTable {
 	private String[][] data;
 	private Firstpass firstpass;
 
-	public AccountTable(ArrayList<Account> accounts) {
-		this(accounts, null);
-	}
-
 	public AccountTable(ArrayList<Account> accounts, Firstpass firstpass) {
 		super();
 		this.firstpass = firstpass;

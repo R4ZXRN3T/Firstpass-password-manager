@@ -117,29 +117,6 @@ public class Account {
 		};
 	}
 
-	public boolean contains(String s) {
-		return provider.contains(s) ||
-				username.contains(s) ||
-				password.contains(s) ||
-				url.contains(s) ||
-				comment.contains(s);
-	}
-
-	public boolean contains(String s, SearchableField searchableField) {
-		return switch (searchableField) {
-			case ALL -> contains(s);
-			case PROVIDER -> provider.contains(s);
-			case USERNAME -> username.contains(s);
-			case PASSWORD -> password.contains(s);
-			case URL -> url.contains(s);
-			case COMMENT -> comment.contains(s);
-		};
-	}
-
-	public boolean containsIgnoreCase(String s) {
-		return containsIgnoreCase(s, SearchableField.ALL);
-	}
-
 	public boolean containsIgnoreCase(String s, SearchableField searchableField) {
 		return switch (searchableField) {
 			case ALL -> stringContainsIgnoreCase(provider, s) ||
@@ -152,36 +129,6 @@ public class Account {
 			case PASSWORD -> stringContainsIgnoreCase(password, s);
 			case URL -> stringContainsIgnoreCase(url, s);
 			case COMMENT -> stringContainsIgnoreCase(comment, s);
-		};
-	}
-
-	public int compareTo(Account accountToCompareWith) {
-		return compareTo(accountToCompareWith, SearchableField.ALL);
-	}
-
-	public int compareTo(Account accountToCompareWith, SearchableField searchableField) {
-		return switch (searchableField) {
-			case PROVIDER -> provider.compareTo(accountToCompareWith.getProvider());
-			case USERNAME -> username.compareTo(accountToCompareWith.getUsername());
-			case PASSWORD -> password.compareTo(accountToCompareWith.getPassword());
-			case URL -> url.compareTo(accountToCompareWith.getUrl());
-			case COMMENT -> comment.compareTo(accountToCompareWith.getComment());
-			default -> 0;
-		};
-	}
-
-	public int compareToIgnoreCase(Account accountToCompareWith) {
-		return compareToIgnoreCase(accountToCompareWith, SearchableField.ALL);
-	}
-
-	public int compareToIgnoreCase(Account accountToCompareWith, SearchableField searchableField) {
-		return switch (searchableField) {
-			case PROVIDER -> provider.compareToIgnoreCase(accountToCompareWith.getProvider());
-			case USERNAME -> username.compareToIgnoreCase(accountToCompareWith.getUsername());
-			case PASSWORD -> password.compareToIgnoreCase(accountToCompareWith.getPassword());
-			case URL -> url.compareToIgnoreCase(accountToCompareWith.getUrl());
-			case COMMENT -> comment.compareToIgnoreCase(accountToCompareWith.getComment());
-			default -> 0;
 		};
 	}
 
@@ -275,10 +222,6 @@ public class Account {
 				}
 			}
 			throw new IllegalArgumentException("Invalid value: " + value);
-		}
-
-		public int getValue() {
-			return this.value;
 		}
 	}
 }

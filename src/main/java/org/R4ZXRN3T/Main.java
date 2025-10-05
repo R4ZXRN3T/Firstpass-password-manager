@@ -3,7 +3,7 @@ package org.R4ZXRN3T;
 import javax.swing.*;
 
 public class Main {
-	public static void main(String[] args) {
+	static void main() {
 		start();
 	}
 
