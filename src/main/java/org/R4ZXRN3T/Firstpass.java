@@ -80,6 +80,7 @@ public class Firstpass {
 
 	public void kill() {
 		if (frame != null) frame.dispose();
+		frame = null;
 		correctPassword = null;
 		accountList.clear();
 		undoStack.clear();
@@ -310,11 +311,13 @@ public class Firstpass {
 		String currentSalt = Config.getConfig(Config.ConfigKey.SALT);
 		String encodedPassword = Config.getConfig(Config.ConfigKey.PASSWORD);
 
-		if (Config.getConfig(Config.ConfigKey.PASSWORD) == null || Objects.equals(Config.getConfig(Config.ConfigKey.PASSWORD), Tools.encodePassword(Config.getConfig(Config.ConfigKey.SALT), "")) || Objects.equals(Config.getConfig(Config.ConfigKey.PASSWORD), ""))
-			return "";
+		// If no password is set (null, empty, or equals hash of empty password with current salt) skip prompt
+		if (encodedPassword == null || currentSalt == null || encodedPassword.isEmpty() || Objects.equals(encodedPassword, Tools.encodePassword("", currentSalt))) {
+			return ""; // no password set
+		}
 
 		// initialize variables for inputDialog, in order to make the code more readable
-		String enteredPassword = "[placeholder]";
+		String enteredPassword = null;
 		JLabel label = new JLabel();
 		String promptMessage = "Please Enter your password: ";
 		String title = "Firstpass Password Manager";
@@ -331,7 +334,7 @@ public class Firstpass {
 		// loop until correct password is entered or the user exits
 		do {
 			// set message to incorrect password message if run the second time
-			if (!enteredPassword.equals("[placeholder]")) {
+			if (enteredPassword != null) {
 				promptMessage = "Incorrect password. Please try again: ";
 				label.setForeground(Color.RED);
 			}
@@ -396,3 +399,4 @@ public class Firstpass {
 		return topToolBar;
 	}
 }
+
