@@ -1,6 +1,5 @@
 .idea/
 .mvn/
-ignore/
 target/
 temp.txt/
 Firstpass.jar
