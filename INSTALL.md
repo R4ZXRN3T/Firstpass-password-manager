@@ -17,13 +17,19 @@ Grab the latest release here:
 
 ## Portable JAR (Windows / Linux / macOS)
 
-1. Install a Java Runtime (JDK/JRE 25+ recommended).
+1. Install a Java Runtime (JDK/JRE 25+ required!).
 2. Download `Firstpass_portable.jar`.
-3. Run:
+3. Double click the jar
+
+or
+
+4. run:
 
 ```
 java -jar Firstpass_portable.jar
 ```
+
+(on linux you may need to `chmod +x Firstpass_portable.jar` first)
 
 ## Build From Source
 
