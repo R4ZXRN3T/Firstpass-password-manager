@@ -6,33 +6,48 @@ import java.security.NoSuchAlgorithmException;
 
 class Tools {
 
-	// encodes a String with SHA-256. Only used for password check and saving
-	public static String encodePassword(String initialPassword, String salt) {
-		initialPassword += salt;
-		MessageDigest digest;
+	private static final int HASH_ITERATIONS = 250_000;
 
+	// Backwards compatible: single iteration
+	public static String encodePassword(String initialPassword, String salt) {
+		return encodePassword(initialPassword, salt, HASH_ITERATIONS);
+	}
+
+	// Multi-iteration SHA-256 hashing matching the Rust logic
+	public static String encodePassword(String initialPassword, String salt, int iterations) {
+		if (iterations <= 0) return initialPassword;
+		MessageDigest digest = getSHA256Digest();
+		String current = initialPassword;
+		for (int i = 0; i < iterations; i++) {
+			digest.reset();
+			byte[] hashed = digest.digest((current + salt).getBytes(StandardCharsets.UTF_8));
+			current = toHex(hashed);
+		}
+		return current;
+	}
+
+	private static String toHex(byte[] bytes) {
+		StringBuilder sb = new StringBuilder(bytes.length * 2);
+		for (byte b : bytes) {
+			String hex = Integer.toHexString(b & 0xFF);
+			if (hex.length() == 1) sb.append('0');
+			sb.append(hex);
+		}
+		return sb.toString();
+	}
+
+	private static MessageDigest getSHA256Digest() {
 		try {
-			digest = MessageDigest.getInstance("SHA-256");
+			return MessageDigest.getInstance("SHA-256");
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
-		byte[] hashedPasswordAsByteArray = digest.digest(initialPassword.getBytes(StandardCharsets.UTF_8));
-
-		// Convert bytes to hexadecimal string
-		StringBuilder hexString = new StringBuilder();
-		for (byte b : hashedPasswordAsByteArray) {
-			String hex = Integer.toHexString(0xff & b);
-			if (hex.length() == 1) hexString.append('0');
-			hexString.append(hex);
-		}
-		return hexString.toString();
 	}
 
 	public static String generateRandomString(int length) {
 		return generateRandomString(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 	}
 
-	// generates a random String with a specified length. What else can I say?
 	public static String generateRandomString(int length, String characterSet) {
 		StringBuilder randomString = new StringBuilder();
 		for (int i = 0; i < length; i++)

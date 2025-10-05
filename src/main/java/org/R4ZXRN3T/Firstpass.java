@@ -218,7 +218,7 @@ public class Firstpass {
 	public void save() {
 		Files.saveAccounts(accountList, correctPassword);
 		// generate new salt and thus also new encoded password; *VERY* important for security :)
-		String newSalt = Tools.generateRandomString(16);
+		String newSalt = Tools.generateRandomString(Config.SALT_LENGTH);
 		Config.setConfig(Config.ConfigKey.SALT, newSalt);
 		Config.setConfig(Config.ConfigKey.PASSWORD, Tools.encodePassword(correctPassword, newSalt));
 		Config.saveConfig();
