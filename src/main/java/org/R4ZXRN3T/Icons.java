@@ -67,9 +67,7 @@ class Icons {
 	// non-scaled versions are 128x128, but might be irrelevant as they are not used in the program yet
 	private static URL getFile(String path) {
 		// Check if resource exists as portable version
-		if (Icons.class.getResource("/" + path) != null) {
-			return Icons.class.getResource("/" + path);
-		}
+		if (Icons.class.getResource("/" + path) != null) return Icons.class.getResource("/" + path);
 		try {
 			return new File(path).toURI().toURL();
 		} catch (MalformedURLException e) {

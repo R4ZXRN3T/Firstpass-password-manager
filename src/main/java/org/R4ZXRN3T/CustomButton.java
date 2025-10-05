@@ -35,11 +35,7 @@ class CustomButton extends JButton {
 		this.setPreferredSize(size);
 		this.setLayout(new BorderLayout(0, 0));
 		this.setBorderPainted(false);
-		if (margins == null) {
-			this.setMargin(new Insets(0, 10, 0, 10));
-		} else {
-			this.setMargin(margins);
-		}
+		this.setMargin(margins == null ? new Insets(0, 10, 0, 10) : margins);
 		this.setFocusable(focusable);
 		this.setFocusPainted(true);
 
@@ -53,19 +49,13 @@ class CustomButton extends JButton {
 
 		iconLabel.setIcon(icon);
 
-		if (customBackground != null) {
-			this.setBackground(customBackground);
-		}
-
-		if (customForeground != null) {
-			textLabel.setForeground(customForeground);
-		}
+		if (customBackground != null) this.setBackground(customBackground);
+		if (customForeground != null) textLabel.setForeground(customForeground);
 
 		if (listenForTableSelection || table != null) {
 			this.setEnabled(table != null && table.isRowSelected() && table.isFocused());
-			if (table != null) {
+			if (table != null)
 				table.addRowSelectionListener(_ -> this.setEnabled(table.isRowSelected() && table.isFocused()));
-			}
 		}
 
 		// add stuff

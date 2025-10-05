@@ -56,9 +56,8 @@ class Updater {
 			latestVersion = jsonResponse.getString("tag_name");
 		} catch (Exception e) {
 			e.printStackTrace();
-			if (showError) {
+			if (showError)
 				JOptionPane.showMessageDialog(null, "<html>Update check failed.<br>Please check your internet connection</html>", "Error", JOptionPane.ERROR_MESSAGE);
-			}
 		}
 
 		return latestVersion;
@@ -125,9 +124,7 @@ class Updater {
 
 					output.close();
 					input.close();
-					if (firstpassInstance != null) {
-						firstpassInstance.save();
-					}
+					if (firstpassInstance != null) firstpassInstance.save();
 					updateFrame.dispose();
 					installUpdate();
 				} catch (IOException e) {
@@ -141,9 +138,7 @@ class Updater {
 		if (!portableVersion) {
 			File tmp = new File("Firstpass_setup.msi.tmp");
 			File current = new File("Firstpass_setup.msi");
-			if (current.exists()) {
-				current.delete();
-			}
+			if (current.exists()) current.delete();
 			tmp.renameTo(current);
 			try {
 				new ProcessBuilder("cmd", "/c", "start", "Firstpass_setup.msi").start();
@@ -175,9 +170,9 @@ class Updater {
 				writer.println("java -jar " + currentFileName);
 			}
 			writer.close();
-			if (System.getProperty("os.name").toLowerCase().contains("win")) {
+			if (System.getProperty("os.name").toLowerCase().contains("win"))
 				new ProcessBuilder("cmd", "/c", "start", script).start();
-			} else {
+			else {
 				new File(script).setExecutable(true);
 				new ProcessBuilder("./" + script).start();
 			}
@@ -189,13 +184,7 @@ class Updater {
 	}
 
 	private static boolean isRedirected(Map<String, List<String>> header) {
-
-		for (String hv : header.get(null)) {
-			if (hv.contains(" 301 ") || hv.contains(" 302 ")) {
-				return true;
-			}
-		}
-
+		for (String hv : header.get(null)) if (hv.contains(" 301 ") || hv.contains(" 302 ")) return true;
 		return false;
 	}
 }

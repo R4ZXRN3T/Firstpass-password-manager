@@ -187,47 +187,37 @@ class Files {
 		while (true) {
 			int userSelection = fileChooser.showSaveDialog(null);
 
-			if (userSelection != JFileChooser.APPROVE_OPTION || fileChooser.getSelectedFile() == null || fileChooser.getSelectedFile().getAbsolutePath().isEmpty()) {
+			if (userSelection != JFileChooser.APPROVE_OPTION || fileChooser.getSelectedFile() == null || fileChooser.getSelectedFile().getAbsolutePath().isEmpty())
 				return;
-			}
 
 			fileName = fileChooser.getSelectedFile().getAbsolutePath();
-			if (!fileName.endsWith(".txt") && !fileName.endsWith(".csv") && !fileName.endsWith(".json") && !fileName.endsWith(".xml")) {
+			if (!fileName.endsWith(".txt") && !fileName.endsWith(".csv") && !fileName.endsWith(".json") && !fileName.endsWith(".xml"))
 				fileName += "." + ((FileNameExtensionFilter) fileChooser.getFileFilter()).getExtensions()[0];
-			}
 
 			exportFile = new File(fileName);
 
 			if (exportFile.exists()) {
 				int option = JOptionPane.showConfirmDialog(null, "File already exists. Do you want to overwrite it?", "File already exists", JOptionPane.YES_NO_OPTION);
-				if (option == JOptionPane.YES_OPTION) {
-					break;
-				}
-			} else {
-				break;
-			}
+				if (option == JOptionPane.YES_OPTION) break;
+			} else break;
 		}
 
 		try {
 			exportFile.createNewFile();
 			PrintWriter writer = new PrintWriter(exportFile);
-			if (fileName.endsWith(".txt")) {
-				for (Account account : firstpass.getAccountList()) {
-					writer.println(account.getProvider());
-					writer.println(account.getUsername());
-					writer.println(account.getPassword());
-					writer.println(account.getUrl());
-					writer.println(account.getComment());
-				}
-			} else if (fileName.endsWith(".csv")) {
-				for (Account account : firstpass.getAccountList()) {
-					writer.println(account.getProvider() + ", " + account.getUsername() + ", " + account.getPassword() + ", " + account.getUrl() + ", " + account.getComment());
-				}
-			} else if (fileName.endsWith(".json")) {
+			if (fileName.endsWith(".txt")) for (Account account : firstpass.getAccountList()) {
+				writer.println(account.getProvider());
+				writer.println(account.getUsername());
+				writer.println(account.getPassword());
+				writer.println(account.getUrl());
+				writer.println(account.getComment());
+			}
+			else if (fileName.endsWith(".csv")) for (Account account : firstpass.getAccountList())
+				writer.println(account.getProvider() + ", " + account.getUsername() + ", " + account.getPassword() + ", " + account.getUrl() + ", " + account.getComment());
+			else if (fileName.endsWith(".json")) {
 				JSONObject jsonObject = new JSONObject();
-				for (Account account : firstpass.getAccountList()) {
+				for (Account account : firstpass.getAccountList())
 					jsonObject.put(account.getProvider(), new String[]{account.getUsername(), account.getPassword(), account.getUrl(), account.getComment()});
-				}
 				writer.println(jsonObject.toString(4));
 			} else if (fileName.endsWith(".xml")) {
 				writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -271,9 +261,7 @@ class Files {
 
 		int userSelection = fileChooser.showSaveDialog(null);
 
-		if (userSelection != JFileChooser.APPROVE_OPTION) {
-			return;
-		}
+		if (userSelection != JFileChooser.APPROVE_OPTION) return;
 
 		if (fileChooser.getSelectedFile() == null
 				|| fileChooser.getSelectedFile().getAbsolutePath().isEmpty()
@@ -291,9 +279,7 @@ class Files {
 		String[] options = {"Merge", "Replace", "Cancel"};
 
 		int option = JOptionPane.showOptionDialog(null, message, "Import", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-		if (option == 2) {
-			return;
-		}
+		if (option == 2) return;
 
 		File importFile = fileChooser.getSelectedFile();
 		ArrayList<Account> importedAccounts = new ArrayList<>();
@@ -303,16 +289,11 @@ class Files {
 				Scanner fileReader = new Scanner(importFile);
 				while (fileReader.hasNextLine()) {
 					Account newAccount = new Account();
-					if (fileReader.hasNextLine())
-						newAccount.setProvider(fileReader.nextLine());
-					if (fileReader.hasNextLine())
-						newAccount.setUsername(fileReader.nextLine());
-					if (fileReader.hasNextLine())
-						newAccount.setPassword(fileReader.nextLine());
-					if (fileReader.hasNextLine())
-						newAccount.setUrl(fileReader.nextLine());
-					if (fileReader.hasNextLine())
-						newAccount.setComment(fileReader.nextLine());
+					if (fileReader.hasNextLine()) newAccount.setProvider(fileReader.nextLine());
+					if (fileReader.hasNextLine()) newAccount.setUsername(fileReader.nextLine());
+					if (fileReader.hasNextLine()) newAccount.setPassword(fileReader.nextLine());
+					if (fileReader.hasNextLine()) newAccount.setUrl(fileReader.nextLine());
+					if (fileReader.hasNextLine()) newAccount.setComment(fileReader.nextLine());
 					importedAccounts.add(newAccount);
 				}
 			} else if (fileChooser.getSelectedFile().getName().endsWith("csv")) {
