@@ -1,17 +1,14 @@
 package org.R4ZXRN3T;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.swing.*;
-
 class Icons {
 
 	public static final ImageIcon FIRSTPASS_ICON = new ImageIcon(getFile("assets/firstpass_icon.png"));
-	public static final ImageIcon LOADING_INDICATOR = new ImageIcon(getFile("assets/loading_indicator.gif"));
-	public static final ImageIcon LOADING_INDICATOR_SCALED = new ImageIcon(LOADING_INDICATOR.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
 	public static final ImageIcon ADD_ICON = new ImageIcon(getFile("assets/add_icon.png"));
 	public static final ImageIcon ADD_ICON_SCALED = new ImageIcon(ADD_ICON.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
 	public static final ImageIcon ADD_ICON_WHITE = new ImageIcon(getFile("assets/add_icon_white.png"));
@@ -69,7 +66,10 @@ class Icons {
 	// The icons are stored in the assets folder
 	// non-scaled versions are 128x128, but might be irrelevant as they are not used in the program yet
 	private static URL getFile(String path) {
-		if (Main.portableVersion) return Main.class.getResource("/" + path);
+		// Check if resource exists as portable version
+		if (Icons.class.getResource("/" + path) != null) {
+			return Icons.class.getResource("/" + path);
+		}
 		try {
 			return new File(path).toURI().toURL();
 		} catch (MalformedURLException e) {

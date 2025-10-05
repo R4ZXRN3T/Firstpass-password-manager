@@ -7,15 +7,14 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 
-import java.awt.*;
-
 import javax.swing.*;
+import java.awt.*;
 
 public class ThemeManager {
 	// sets the look and feel of the program. Also returns whether the look and feel is a dark mode theme
-	public static boolean setLookAndFeel(String LaFIndex) {
+	public boolean setLookAndFeel(String LaFIndex) {
 		boolean isDarkTheme = false;
-		IO.println("\nSetting Look and Feel...");
+		System.out.println("\nSetting Look and Feel...");
 		try {
 			switch (LaFIndex) {
 				case "0" -> UIManager.setLookAndFeel(new FlatLightLaf());

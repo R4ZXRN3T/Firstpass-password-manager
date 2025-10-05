@@ -2,6 +2,7 @@ package org.R4ZXRN3T;
 
 import org.json.JSONObject;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -10,20 +11,27 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.*;
-
 // It's not your time yet
 
 class Updater {
-
-	private static String latestVersion = null;
 	private static final String REPO_URL = "https://api.github.com/repos/R4ZXRN3T/Firstpass-password-manager/releases/latest";
 	private static final String DOWNLOAD_URL = "https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/download/";
-	private static final String FILE_NAME = Main.portableVersion ? "Firstpass_portable.jar" : "Firstpass_setup.msi";
+	private static boolean portableVersion = false;
+	private static Firstpass firstpassInstance = null;
 
-	public static String checkVersion(boolean showError, boolean forceCheck) {
+	public static void initialize(Firstpass firstpass) {
+		firstpassInstance = firstpass;
+		portableVersion = Config.isPortableVersion();
+	}
 
-		if (latestVersion != null && !forceCheck) return latestVersion;
+	private static String getFileName() {
+		return portableVersion ? "Firstpass_portable.jar" : "Firstpass_setup.msi";
+	}
+
+
+	public static String checkVersion(boolean showError) {
+
+		String latestVersion = null;
 
 		try {
 			URL url = new URL(REPO_URL);
@@ -52,11 +60,12 @@ class Updater {
 				JOptionPane.showMessageDialog(null, "<html>Update check failed.<br>Please check your internet connection</html>", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+
 		return latestVersion;
 	}
 
 	public static void update() {
-		JLabel versionAvailableLabel = new JLabel("<html> <font color=\"#00b3ff\">Version " + checkVersion(true, false) + " is available.<br></font> Are you sure you want to update Firstpass?</html>");
+		JLabel versionAvailableLabel = new JLabel("<html> <font color=\"#00b3ff\">Version " + checkVersion(true) + " is available.<br></font> Are you sure you want to update Firstpass?</html>");
 		int option = JOptionPane.showConfirmDialog(null, versionAvailableLabel, "Update", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if (option != JOptionPane.YES_OPTION) return;
 
@@ -83,17 +92,17 @@ class Updater {
 
 			new Thread(() -> {
 				try {
-					String newestVersion = checkVersion(true, false);
+					String newestVersion = checkVersion(true);
 
-					String link = DOWNLOAD_URL + newestVersion + "/" + FILE_NAME;
-					String fileName = Main.portableVersion ? "Firstpass_portable.jar.tmp" : "Firstpass_setup.msi.tmp";
+					String link = DOWNLOAD_URL + newestVersion + "/" + getFileName();
+					String fileName = portableVersion ? "Firstpass_portable.jar.tmp" : "Firstpass_setup.msi.tmp";
 
 					URL url = new URL(link);
 					HttpURLConnection http = (HttpURLConnection) url.openConnection();
 
 					Map<String, List<String>> header = http.getHeaderFields();
 					while (isRedirected(header)) {
-						link = header.get("Location").get(0);
+						link = header.get("Location").getFirst();
 						url = new URL(link);
 						http = (HttpURLConnection) url.openConnection();
 						header = http.getHeaderFields();
@@ -116,7 +125,9 @@ class Updater {
 
 					output.close();
 					input.close();
-					Main.save();
+					if (firstpassInstance != null) {
+						firstpassInstance.save();
+					}
 					updateFrame.dispose();
 					installUpdate();
 				} catch (IOException e) {
@@ -127,7 +138,7 @@ class Updater {
 	}
 
 	private static void installUpdate() {
-		if (!Main.portableVersion) {
+		if (!portableVersion) {
 			File tmp = new File("Firstpass_setup.msi.tmp");
 			File current = new File("Firstpass_setup.msi");
 			if (current.exists()) {

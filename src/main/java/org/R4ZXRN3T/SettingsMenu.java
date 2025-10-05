@@ -1,24 +1,28 @@
 package org.R4ZXRN3T;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-import javax.swing.*;
-
 class SettingsMenu {
 
-	private final TopToolBar topToolBar;
-	private final HashMap<Integer, String> currentSettings;
-	private final JDialog settingsFrame;
+	private final HashMap<Integer, String> currentSettings = new HashMap<>();
+	private JDialog settingsFrame;
 	private boolean needsRestart = false;
 	private CustomButton changePasswordButton;
 	private CustomButton removePasswordButton;
+	private final Firstpass firstpass;
 
-	public SettingsMenu(TopToolBar topToolBar) {
-		this.topToolBar = topToolBar;
-		currentSettings = new HashMap<>();
+	public SettingsMenu(Firstpass firstpass) {
+		this.firstpass = firstpass;
+	}
+
+	public void showSettings() {
+
 		setCurrentSettings();
-		settingsFrame = new JDialog(Main.frame, "Firstpass Settings", true);
+
+		// set up frame
+		settingsFrame = new JDialog(firstpass.getFrame(), "Firstpass Settings", true);
 		settingsFrame.setLayout(new BorderLayout(16, 16));
 		settingsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -29,23 +33,15 @@ class SettingsMenu {
 		// set up the frame
 		settingsFrame.setSize(500, 400);
 		settingsFrame.setResizable(false);
-		settingsFrame.setLocationRelativeTo(Main.frame);
+		settingsFrame.setLocationRelativeTo(firstpass.getFrame());
 		settingsFrame.setIconImage(Icons.FIRSTPASS_ICON.getImage());
-	}
-
-	public void showSettings() {
 		settingsFrame.requestFocus();
 		settingsFrame.setVisible(true);
 	}
 
-	public void close() {
-		settingsFrame.dispose();
-		currentSettings.clear();
-	}
-
 	// write the current settings to the HashMap
 	private void setCurrentSettings() {
-		currentSettings.put(0, Main.correctPassword);
+		currentSettings.put(0, firstpass.getCorrectPassword());
 		currentSettings.put(1, Config.getConfig(Config.ConfigKey.LOOK_AND_FEEL));
 		currentSettings.put(2, Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES));
 	}
@@ -96,9 +92,9 @@ class SettingsMenu {
 		updatePanel.setBorder(BorderFactory.createTitledBorder("Update"));
 
 		updatePanel.add(new CustomButton("Check for Updates", _ -> {
-			Main.updateAvailable = Updater.checkVersion(true, true).compareToIgnoreCase(Main.CURRENT_VERSION) > 0;
-			topToolBar.updateButton.setVisible(Main.updateAvailable);
-			if (Main.updateAvailable) {
+			firstpass.setUpdateAvailable(Updater.checkVersion(true).compareToIgnoreCase(Firstpass.CURRENT_VERSION) > 0);
+			firstpass.getTopToolBar().getUpdateButton().setVisible(firstpass.isUpdateAvailable());
+			if (firstpass.isUpdateAvailable()) {
 				Updater.update();
 			} else {
 				JOptionPane.showMessageDialog(settingsFrame, "You are already using the latest version.", "No Updates Available", JOptionPane.INFORMATION_MESSAGE);
@@ -120,6 +116,7 @@ class SettingsMenu {
 		bottomToolbar.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 		bottomToolbar.add(new CustomButton("Apply", Config.getDarkMode() ? Icons.APPLY_ICON_WHITE_SCALED : Icons.APPLY_ICON_SCALED, _ -> applySettings(), false, false, new Dimension(90, 30), Config.getDarkMode() ? new Color(50, 50, 50) : Color.lightGray, null, null));
 		bottomToolbar.add(new CustomButton("Cancel", Config.getDarkMode() ? Icons.CANCEL_ICON_WHITE_SCALED : Icons.CANCEL_ICON_SCALED, _ -> {
+			firstpass.getFrame().setEnabled(true);
 			settingsFrame.dispose();
 		}, false, false, new Dimension(90, 30), Config.getDarkMode() ? new Color(50, 50, 50) : Color.lightGray, null, null));
 		return bottomToolbar;
@@ -143,17 +140,17 @@ class SettingsMenu {
 		JTextField oldPassword = new JTextField();
 		JTextField newPassword = new JTextField();
 
-		Object[] message = Main.passwordSet ? new Object[]{"Old Password:", oldPassword, "New Password:", newPassword} : new Object[]{"New Password:", newPassword};
+		Object[] message = firstpass.isPasswordSet() ? new Object[]{"Old Password:", oldPassword, "New Password:", newPassword} : new Object[]{"New Password:", newPassword};
 
 		int option = JOptionPane.showConfirmDialog(settingsFrame, message, "Change Password", JOptionPane.OK_CANCEL_OPTION);
 		if (option == JOptionPane.OK_OPTION) {
-			if (!Main.passwordSet) {
+			if (!firstpass.isPasswordSet()) {
 				currentSettings.replace(0, newPassword.getText());
-				Main.passwordSet = true;
+				firstpass.setPasswordSet(true);
 				JOptionPane.showMessageDialog(settingsFrame, "Password successfully set", "Success", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
-			if (oldPassword.getText().equals(Main.correctPassword)) {
+			if (oldPassword.getText().equals(firstpass.getCorrectPassword())) {
 				currentSettings.replace(0, newPassword.getText());
 				JOptionPane.showMessageDialog(settingsFrame, "Password successfully changed", "Success", JOptionPane.INFORMATION_MESSAGE);
 			} else {
@@ -164,22 +161,21 @@ class SettingsMenu {
 
 	// apply the settings and restart the program if necessary
 	private void applySettings() {
-		Main.correctPassword = currentSettings.get(0);
+		firstpass.setCorrectPassword(currentSettings.get(0));
 		Config.setConfig(Config.ConfigKey.LOOK_AND_FEEL, currentSettings.get(1));
 		Config.setConfig(Config.ConfigKey.CHECK_FOR_UPDATES, currentSettings.get(2));
-		Config.saveConfig();
 
 		if (needsRestart) {
 			String message = "The program needs to be restarted in order to apply the new settings. Do you want to restart now?";
 			int option = JOptionPane.showConfirmDialog(null, message, "Restart to apply settings", JOptionPane.YES_NO_OPTION);
 			if (option == JOptionPane.YES_OPTION) {
-				Main.save();
-				Tools.restart();
+				firstpass.save();
+				Main.restart(firstpass);
 			}
 		}
 
 		settingsFrame.dispose();
-		Main.changeMade = true;
+		firstpass.setChangeMade(true);
 	}
 
 	private void fullDeleteDialog() {
@@ -188,7 +184,7 @@ class SettingsMenu {
 		warningLabel2.setForeground(Color.RED);
 		int option = JOptionPane.showConfirmDialog(null, new Object[]{warningLabel, warningLabel2}, "Delete all data", JOptionPane.YES_NO_OPTION);
 		if (option == JOptionPane.YES_OPTION) {
-			Main.fullDelete();
+			firstpass.fullDelete();
 		}
 	}
 
@@ -198,13 +194,13 @@ class SettingsMenu {
 			return;
 		}
 		currentSettings.replace(0, "");
-		Main.passwordSet = false;
+		firstpass.setPasswordSet(false);
 		JOptionPane.showMessageDialog(null, "Password removed", "Success", JOptionPane.INFORMATION_MESSAGE);
 		refreshButton();
 	}
 
 	private void refreshButton() {
-		changePasswordButton.setText(Main.passwordSet ? "Change Password" : "Set Password");
-		removePasswordButton.setEnabled(Main.passwordSet);
+		changePasswordButton.setText(firstpass.isPasswordSet() ? "Change Password" : "Set Password");
+		removePasswordButton.setEnabled(firstpass.isPasswordSet());
 	}
 }

@@ -1,43 +1,38 @@
 package org.R4ZXRN3T;
 
-import java.awt.*;
 import javax.swing.*;
+import java.awt.*;
 
-class TopToolBar extends JMenuBar {
+public class TopToolBar {
 
-	public JButton updateButton = new JButton("New version available!");
+	private final JButton updateButton = new JButton("New version available!");
+	private final Firstpass firstpass;
 
-	public TopToolBar(Firstpass firstpass, ExportImportManager exportImportManager) {
-		super();
+	public TopToolBar(Firstpass firstpass) {
+		this.firstpass = firstpass;
+	}
+
+	public JMenuBar getTopToolBar() {
+		JMenuBar toolBar = new JMenuBar();
+
 		JMenuItem saveItem = new JMenuItem("Save");
 		saveItem.addActionListener(_ -> {
 			firstpass.save();
-			Main.changeMade = false;
+			firstpass.setChangeMade(false);
 		});
 		saveItem.setIcon(Config.getDarkMode() ? Icons.SAVE_ICON_WHITE_SCALED : Icons.SAVE_ICON_SCALED);
 
 		JMenuItem exportAsItem = new JMenuItem("Export");
-		exportAsItem.addActionListener(_ -> exportImportManager.exportData(firstpass.accountService.getAccounts()));
+		exportAsItem.addActionListener(_ -> Files.exportData(firstpass));
 		exportAsItem.setIcon(Config.getDarkMode() ? Icons.EXPORT_ICON_WHITE_SCALED : Icons.EXPORT_ICON_SCALED);
 
 		JMenuItem importAsItem = new JMenuItem("Import");
 		importAsItem.setIcon(Config.getDarkMode() ? Icons.IMPORT_ICON_WHITE_SCALED : Icons.IMPORT_ICON_SCALED);
-		importAsItem.addActionListener(_ -> {
-			var updated = exportImportManager.importData(firstpass.accountService.getAccounts());
-			if (updated != null) {
-				firstpass.accountService.setAccounts(updated);
-				firstpass.refreshTable();
-				firstpass.setChangeMade(true);
-			}
-		});
+		importAsItem.addActionListener(_ -> Files.importData(firstpass));
 
 		JButton settingsButton = new JButton("Settings");
-		settingsButton.addActionListener(_ -> {
-			SettingsMenu settingsMenu = new SettingsMenu(this);
-			settingsMenu.showSettings();
-			settingsMenu.close();
-		});
-		settingsButton.setBackground(firstpass.frame.getBackground());
+		settingsButton.addActionListener(_ -> new SettingsMenu(firstpass).showSettings());
+		settingsButton.setBackground(firstpass.getFrame().getBackground());
 		settingsButton.setBorderPainted(false);
 		settingsButton.setFocusable(false);
 
@@ -54,10 +49,16 @@ class TopToolBar extends JMenuBar {
 		updateButton.setForeground(new Color(0, 180, 255));
 		updateButton.setBorderPainted(true);
 		updateButton.addActionListener(_ -> Updater.update());
-		updateButton.setVisible(Main.updateAvailable);
+		updateButton.setVisible(firstpass.isUpdateAvailable());
 
-		this.add(fileItem);
-		this.add(settingsButton);
-		this.add(updateButton);
+		toolBar.add(fileItem);
+		toolBar.add(settingsButton);
+		toolBar.add(updateButton);
+
+		return toolBar;
+	}
+
+	public JButton getUpdateButton() {
+		return updateButton;
 	}
 }

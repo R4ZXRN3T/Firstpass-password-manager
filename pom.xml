@@ -1,47 +1,131 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.R4ZXRN3T</groupId>
-    <artifactId>Firstpass</artifactId>
-    <version>2.0.8</version>
-    <packaging>jar</packaging>
+	<groupId>org.R4ZXRN3T</groupId>
+	<artifactId>Firstpass</artifactId>
+	<version>2.0.9</version>
+	<packaging>jar</packaging>
+	<name>Firstpass</name>
+	<description>A simple, secure password manager.</description>
+	<url>https://github.com/R4ZXRN3T/Firstpass-password-manager</url>
 
-    <name>Firstpass</name>
-    <url>https://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>25</maven.compiler.source>
+		<maven.compiler.target>25</maven.compiler.target>
+	</properties>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20250517</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jasypt</groupId>
+			<artifactId>jasypt</artifactId>
+			<version>1.9.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.formdev</groupId>
+			<artifactId>flatlaf</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+	</dependencies>
 
-    <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20250107</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jasypt</groupId>
-            <artifactId>jasypt</artifactId>
-            <version>1.9.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.formdev</groupId>
-            <artifactId>flatlaf</artifactId>
-            <version>3.5.4</version>
-        </dependency>
-    </dependencies>
 	<build>
+		<finalName>Firstpass</finalName>
 		<plugins>
+			<!-- Compiler -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+			</plugin>
+
+			<!-- Standard manifest (optional) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
 				<configuration>
-					<source>25</source>
-					<target>25</target>
+					<archive>
+						<manifestFile>${project.basedir}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
 				</configuration>
+			</plugin>
+
+			<!-- Shaded base jar: Firstpass.jar (includes dependencies, no assets) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.5.3</version>
+				<executions>
+					<execution>
+						<id>shade-base</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Portable jar with dependencies + assets: Firstpass_portable.jar -->
+			<!-- In pom.xml -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.7.1</version>
+				<executions>
+					<execution>
+						<id>portable</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<finalName>Firstpass_portable</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+							<archive>
+								<manifestFile>${project.basedir}/META-INF/MANIFEST.MF</manifestFile>
+							</archive>
+							<descriptors>
+								<descriptor>src/assembly/portable.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Copy both jars to project root -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>copy-to-root</id>
+						<phase>verify</phase>
+						<configuration>
+							<target>
+								<copy file="${project.build.directory}/Firstpass.jar"
+									  tofile="${project.basedir}/Firstpass.jar" overwrite="true"/>
+								<copy file="${project.build.directory}/Firstpass_portable.jar"
+									  tofile="${project.basedir}/Firstpass_portable.jar" overwrite="true"/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

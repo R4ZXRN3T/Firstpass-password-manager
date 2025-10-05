@@ -106,7 +106,7 @@ public class Account {
 				Objects.equals(comment, account.comment);
 	}
 
-	public boolean equalsField(Account accountToCompareWith, SearchableField searchableField) {
+	public boolean equals(Account accountToCompareWith, SearchableField searchableField) {
 		return switch (searchableField) {
 			case ALL -> equals(accountToCompareWith);
 			case PROVIDER -> Objects.equals(provider, accountToCompareWith.getProvider());
@@ -275,31 +275,6 @@ public class Account {
 				}
 			}
 			throw new IllegalArgumentException("Invalid value: " + value);
-		}
-
-		@Override
-		public String toString() {
-			return switch (value) {
-				case 0 -> "All";
-				case 1 -> "Provider";
-				case 2 -> "Username";
-				case 3 -> "Password";
-				case 4 -> "URL";
-				case 5 -> "Comment";
-				default -> throw new RuntimeException("This shouldn't happen");
-			};
-		}
-
-		public static SearchableField fromString(String input) {
-			return switch (input) {
-				case "All" -> fromValue(0);
-				case "Provider" -> fromValue(1);
-				case "Username" -> fromValue(2);
-				case "Password" -> fromValue(3);
-				case "URL" -> fromValue(4);
-				case "Comment" -> fromValue(5);
-				default -> throw new IllegalArgumentException("Invalid input: " + input);
-			};
 		}
 
 		public int getValue() {

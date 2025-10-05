@@ -1,8 +1,5 @@
 package org.R4ZXRN3T;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,22 +41,6 @@ class Tools {
 			randomString.append(characterSet.charAt((int) (Math.random() * characterSet.length())));
 		}
 		return randomString.toString();
-	}
-
-	// restarts the program. Used if the settings menu needs to save and restart
-	public static void restart() {
-		try {
-			String jarPath = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
-			if (!jarPath.endsWith(".jar")) jarPath = "./Firstpass.jar";
-			System.out.println("Restarting with JAR path: " + jarPath);
-
-			// Use an array to execute the command
-			new ProcessBuilder("java", "-jar", jarPath).inheritIO().start();
-
-			System.exit(0);
-		} catch (IOException | URISyntaxException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public static String validateForXML(String input) {
