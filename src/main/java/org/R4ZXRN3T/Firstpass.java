@@ -14,7 +14,13 @@ import static org.R4ZXRN3T.Icons.*;
 
 public class Firstpass {
 
-	public static final String CURRENT_VERSION = "2.0.9";
+	public static final String CURRENT_VERSION = resolveVersion();
+
+	private static String resolveVersion() {
+		Package pkg = Firstpass.class.getPackage();
+		String v = (pkg != null) ? pkg.getImplementationVersion() : null;
+		return (v != null) ? v : "DEV BUILD; NOT FOR PUBLIC USE";
+	}
 
 	// Instance variables - no longer static
 	private final ArrayList<Account> accountList = new ArrayList<>();
