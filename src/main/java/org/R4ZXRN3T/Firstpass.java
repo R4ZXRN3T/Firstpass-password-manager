@@ -266,6 +266,7 @@ public class Firstpass {
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.setIconImage(FIRSTPASS_ICON.getImage());
+		frame.setExtendedState(JFrame.NORMAL);
 
 		// add save prompt on exit
 		frame.addWindowListener(new WindowAdapter() {
