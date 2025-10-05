@@ -45,7 +45,7 @@ public class Config {
 			IO.println("Reading config from " + path);
 			File configFile = new File(path);
 			if (!configFile.exists() || configFile.length() == 0) {
-				setDefaultConfig();
+				setDefaultConfig(); // No restart here
 				return;
 			}
 			String fileContent = new String(java.nio.file.Files.readAllBytes(Paths.get(path)));
@@ -57,7 +57,7 @@ public class Config {
 			}
 		} catch (JSONException e) {
 			System.err.println("Config file is corrupted or invalid JSON: " + e.getMessage());
-			setDefaultConfig();
+			setDefaultConfig(); // No restart
 		} catch (IOException e) {
 			System.err.println("Failed to read config file: " + e.getMessage());
 			JOptionPane.showMessageDialog(firstpass.getFrame(), "Error reading config.json. Program will exit. Please try again later", "Error", JOptionPane.ERROR_MESSAGE);
@@ -81,73 +81,39 @@ public class Config {
 			String defaultSalt = generateRandomString(SALT_LENGTH);
 			String defaultPassword = encodePassword("", defaultSalt);
 
-			File configFile = new File("config.json");
-			if (configFile.exists()) configFile.delete();
-			JSONObject configJSON = getDefaultConfigJSON(defaultPassword, defaultSalt);
+			setConfig(ConfigKey.PASSWORD, defaultPassword);
+			setConfig(ConfigKey.SALT, defaultSalt);
+			setConfig(ConfigKey.LOOK_AND_FEEL, DEFAULT_LAF);
+			setConfig(ConfigKey.LAST_EXPORT_LOCATION, DEFAULT_EXPORT_LOCATION);
+			setConfig(ConfigKey.LAST_IMPORT_LOCATION, DEFAULT_IMPORT_LOCATION);
+			setConfig(ConfigKey.CHECK_FOR_UPDATES, "true");
 
-			FileWriter writer = new FileWriter(configFile);
-			writer.write(configJSON.toString(4));
-			writer.close();
+			saveConfig();
 			System.out.println("Default config set");
-			Main.restart(firstpass);
-		} catch (IOException e) {
+			// Removed Main.restart(firstpass);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static JSONObject getDefaultConfigJSON(String defaultPassword, String defaultSalt) {
-		JSONObject configString = new JSONObject();
-		configString.put(ConfigKey.PASSWORD.toString(), defaultPassword);
-		configString.put(ConfigKey.SALT.toString(), defaultSalt);
-		configString.put(ConfigKey.LOOK_AND_FEEL.toString(), DEFAULT_LAF);
-		configString.put(ConfigKey.LAST_EXPORT_LOCATION.toString(), DEFAULT_EXPORT_LOCATION);
-		configString.put(ConfigKey.LAST_IMPORT_LOCATION.toString(), DEFAULT_IMPORT_LOCATION);
-		configString.put(ConfigKey.CHECK_FOR_UPDATES.toString(), "true");
-		return configString;
-	}
-
 	private static void setDefault(ConfigKey key) {
 		try {
-			File configFile = new File("config.json");
-			if (!configFile.exists() || configFile.length() == 0) setDefaultConfig();
-			String content = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("config.json")));
-			JSONObject jsonObject = new JSONObject(content);
-
-			boolean needsRestart = false;
-
 			switch (key) {
-				case ALL -> {
-					setDefaultConfig();
-					needsRestart = true;
-				}
+				case ALL -> setDefaultConfig();
 				case PASSWORD, SALT -> {
 					String tempSalt = generateRandomString(SALT_LENGTH);
-					jsonObject.put(ConfigKey.PASSWORD.toString(), encodePassword("", tempSalt));
-					jsonObject.put(ConfigKey.SALT.toString(), tempSalt);
+					setConfig(ConfigKey.PASSWORD, encodePassword("", tempSalt));
+					setConfig(ConfigKey.SALT, tempSalt);
 				}
-				case LOOK_AND_FEEL -> {
-					jsonObject.put(key.toString(), DEFAULT_LAF);
-					needsRestart = true;
-				}
-				case LAST_EXPORT_LOCATION -> jsonObject.put(key.toString(), DEFAULT_EXPORT_LOCATION);
-				case LAST_IMPORT_LOCATION -> jsonObject.put(key.toString(), DEFAULT_IMPORT_LOCATION);
-				case CHECK_FOR_UPDATES -> jsonObject.put(key.toString(), "true");
+				case LOOK_AND_FEEL -> setConfig(key, DEFAULT_LAF);
+				case LAST_EXPORT_LOCATION -> setConfig(key, DEFAULT_EXPORT_LOCATION);
+				case LAST_IMPORT_LOCATION -> setConfig(key, DEFAULT_IMPORT_LOCATION);
+				case CHECK_FOR_UPDATES -> setConfig(key, "true");
 			}
-
-			try (FileWriter writer = new FileWriter(configFile)) {
-				writer.write(jsonObject.toString(4));
-			}
-
+			saveConfig();
 			System.out.println("Default value set for " + key);
-
-			// refresh in-memory map (simplified)
-			configList.put(key.toString(), jsonObject.optString(key.toString(), null));
-
-			if (needsRestart) Main.restart(firstpass);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			setDefaultConfig();
+			// Removed conditional restart
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -178,7 +144,6 @@ public class Config {
 			setDefault(ConfigKey.CHECK_FOR_UPDATES);
 	}
 
-	// get values from the config.json. Initially separate methods, now combined
 	public static String getConfig(ConfigKey key) {
 		return configList.getOrDefault(key.toString(), null);
 	}
@@ -191,7 +156,6 @@ public class Config {
 		return portableVersion;
 	}
 
-	// same as with getConfig
 	public static void setConfig(ConfigKey key, String value) {
 		configList.put(key.toString(), value);
 	}
