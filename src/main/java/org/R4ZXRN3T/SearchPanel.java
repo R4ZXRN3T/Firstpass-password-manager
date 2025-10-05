@@ -13,22 +13,22 @@ class SearchPanel extends JPanel {
 	// selected search option with enum from the Accounts class
 	// I can't decide whether it's good practice or not
 	private static SearchableField selectedSearchOption = SearchableField.ALL;
-	private final Main main;
+	private final Firstpass firstpass;
 
-	public SearchPanel(Main main) {
+	public SearchPanel(Firstpass firstpass) {
 		super();
-		this.main = main;
+		this.firstpass = firstpass;
 		// set stuff and add correct icon
 		this.setLayout(new BorderLayout(6, 0));
 		this.setFocusable(false);
-		this.add(main.isDarkMode() ? new JLabel(Icons.SEARCH_ICON_WHITE_SCALED) : new JLabel(Icons.SEARCH_ICON_SCALED), BorderLayout.WEST);
+		this.add(Config.getDarkMode() ? new JLabel(Icons.SEARCH_ICON_WHITE_SCALED) : new JLabel(Icons.SEARCH_ICON_SCALED), BorderLayout.WEST);
 
 		// add a combo box to select the field to search in
 		JComboBox<String> searchOptions = new JComboBox<>(new String[]{"All", "Name", "Username", "Password", "URL", "Comment"});
 		searchOptions.setSelectedIndex(0);
 		searchOptions.setFocusable(false);
-		searchOptions.setBackground(main.isDarkMode() ? BottomToolBar.DARK_MODE_COLOR : new Color(230, 230, 230));
-		searchOptions.addActionListener(e -> selectedSearchOption = SearchableField.fromValue(searchOptions.getSelectedIndex()));
+		searchOptions.setBackground(Config.getDarkMode() ? BottomToolBar.DARK_MODE_COLOR : new Color(230, 230, 230));
+		searchOptions.addActionListener(_ -> selectedSearchOption = SearchableField.fromValue(searchOptions.getSelectedIndex()));
 
 		// add stuff again
 		this.add(searchOptions, BorderLayout.EAST);
@@ -48,7 +48,7 @@ class SearchPanel extends JPanel {
 			// set stuff
 			this.setFocusable(true);
 
-			this.setBackground(main.isDarkMode() ? BottomToolBar.DARK_MODE_COLOR : new Color(230, 230, 230));
+			this.setBackground(Config.getDarkMode() ? BottomToolBar.DARK_MODE_COLOR : new Color(230, 230, 230));
 
 
 			// used to get user input every time the user types something in
@@ -71,7 +71,7 @@ class SearchPanel extends JPanel {
 				// pass the user's search to Main class
 				private void performSearch() {
 					requestFocus();
-					main.search(getText());
+					firstpass.search(getText());
 					requestFocus();
 				}
 			});

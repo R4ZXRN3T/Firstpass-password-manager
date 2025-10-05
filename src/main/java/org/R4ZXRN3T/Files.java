@@ -1,7 +1,6 @@
 package org.R4ZXRN3T;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.swing.*;
@@ -13,7 +12,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -120,7 +118,7 @@ class Files {
 		frame.add(progressBar);
 		frame.setLocationRelativeTo(null);
 
-		SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
+		SwingWorker<Void, Integer> worker = new SwingWorker<>() {
 			@Override
 			protected Void doInBackground() throws Exception {
 				try (FileWriter writer = new FileWriter("accounts.txt")) {
@@ -144,7 +142,7 @@ class Files {
 
 			@Override
 			protected void process(List<Integer> chunks) {
-				progressBar.setValue(chunks.get(chunks.size() - 1));
+				progressBar.setValue(chunks.getLast());
 			}
 
 			@Override
@@ -165,53 +163,7 @@ class Files {
 		}
 	}
 
-	// get values from the config.json. Initially separate methods, now combined
-	public static String getConfig(ConfigKey key) {
-		String value;
-		try {
-			File configFile = new File("config.json");
-			if (!configFile.exists() || configFile.length() == 0) {
-				Tools.setDefaultConfig();
-			}
-
-			String content = new String(java.nio.file.Files.readAllBytes(Paths.get("config.json")));
-			JSONObject jsonObject = new JSONObject(content);
-			value = jsonObject.get(key.toString()).toString();
-
-		} catch (JSONException e) {
-			Tools.setDefault(key);
-			return getConfig(key);
-		} catch (IOException e) {
-			System.err.println("Failed to read config file: " + e.getMessage());
-			JOptionPane.showMessageDialog(null, "Error reading config.json", "Error", JOptionPane.ERROR_MESSAGE);
-			// Return appropriate default based on key
-			return Tools.getDefaultConfigValue(key);
-		}
-		return value;
-	}
-
-	// same as with getConfig
-	public static void setConfig(ConfigKey key, String value) {
-		try {
-			File passwordFile = new File("config.json");
-			if (!passwordFile.exists() || passwordFile.length() == 0) {
-				Tools.setDefaultConfig();
-			}
-
-			String content = new String(java.nio.file.Files.readAllBytes(Paths.get("config.json")));
-			JSONObject jsonObject = new JSONObject(content);
-			jsonObject.put(key.toString(), value);
-
-			java.io.FileWriter writer = new java.io.FileWriter(passwordFile);
-			writer.write(jsonObject.toString(4));
-			writer.close();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void exportData(Main main) {
+	public static void exportData(Firstpass firstpass) {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
 		fileChooser.setDialogTitle("Specify a file to save");
@@ -220,7 +172,7 @@ class Files {
 		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setCurrentDirectory(new File(Files.getConfig(ConfigKey.LAST_EXPORT_LOCATION)));
+		fileChooser.setCurrentDirectory(new File(Config.getConfig(Config.ConfigKey.LAST_EXPORT_LOCATION)));
 		Action details = fileChooser.getActionMap().get("viewTypeDetails");
 		details.actionPerformed(null);
 
@@ -260,7 +212,7 @@ class Files {
 			exportFile.createNewFile();
 			PrintWriter writer = new PrintWriter(exportFile);
 			if (fileName.endsWith(".txt")) {
-				for (Account account : main.getAccountList()) {
+				for (Account account : firstpass.getAccountList()) {
 					writer.println(account.getProvider());
 					writer.println(account.getUsername());
 					writer.println(account.getPassword());
@@ -268,19 +220,19 @@ class Files {
 					writer.println(account.getComment());
 				}
 			} else if (fileName.endsWith(".csv")) {
-				for (Account account : main.getAccountList()) {
+				for (Account account : firstpass.getAccountList()) {
 					writer.println(account.getProvider() + ", " + account.getUsername() + ", " + account.getPassword() + ", " + account.getUrl() + ", " + account.getComment());
 				}
 			} else if (fileName.endsWith(".json")) {
 				JSONObject jsonObject = new JSONObject();
-				for (Account account : main.getAccountList()) {
+				for (Account account : firstpass.getAccountList()) {
 					jsonObject.put(account.getProvider(), new String[]{account.getUsername(), account.getPassword(), account.getUrl(), account.getComment()});
 				}
 				writer.println(jsonObject.toString(4));
 			} else if (fileName.endsWith(".xml")) {
 				writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 				writer.println("<accounts>");
-				for (Account account : main.getAccountList()) {
+				for (Account account : firstpass.getAccountList()) {
 					writer.println("\t<account>");
 					writer.println("\t\t<provider>" + validateForXML(account.getProvider()) + "</provider>");
 					writer.println("\t\t<username>" + validateForXML(account.getUsername()) + "</username>");
@@ -292,7 +244,7 @@ class Files {
 				writer.println("</accounts>");
 			}
 			writer.close();
-			Files.setConfig(ConfigKey.LAST_EXPORT_LOCATION, exportFile.getParent());
+			Config.setConfig(Config.ConfigKey.LAST_EXPORT_LOCATION, exportFile.getParent());
 			JOptionPane.showMessageDialog(null, "Data successfully exported under:\n" + exportFile.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -300,7 +252,7 @@ class Files {
 		}
 	}
 
-	public static void importData(Main main) {
+	public static void importData(Firstpass firstpass) {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
 		fileChooser.setDialogTitle("Specify a file to import");
@@ -309,7 +261,7 @@ class Files {
 		fileChooser.setAcceptAllFileFilterUsed(true);
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setCurrentDirectory(new File(Files.getConfig(ConfigKey.LAST_IMPORT_LOCATION)));
+		fileChooser.setCurrentDirectory(new File(Config.getConfig(Config.ConfigKey.LAST_IMPORT_LOCATION)));
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Supported file types (*.txt, *.csv, *.json, *.xml)", "txt", "csv", "json", "xml");
 		fileChooser.addChoosableFileFilter(filter);
@@ -412,41 +364,20 @@ class Files {
 			}
 
 			if (option == 0) {
-				main.getAccountList().addAll(importedAccounts);
+				firstpass.getAccountList().addAll(importedAccounts);
 			} else {
-				main.getAccountList().clear();
-				main.getAccountList().addAll(importedAccounts);
+				firstpass.getAccountList().clear();
+				firstpass.getAccountList().addAll(importedAccounts);
 			}
 
-			Files.setConfig(ConfigKey.LAST_IMPORT_LOCATION, importFile.getParent());
+			Config.setConfig(Config.ConfigKey.LAST_IMPORT_LOCATION, importFile.getParent());
 
 			JOptionPane.showMessageDialog(null, "Data successfully imported", "Success", JOptionPane.INFORMATION_MESSAGE);
-			main.refreshTable();
-			main.setChangeMade(true);
+			firstpass.refreshTable();
+			firstpass.setChangeMade(true);
 		} catch (IOException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "An error occurred while importing the data", "Error", JOptionPane.ERROR_MESSAGE);
-		}
-	}
-
-	public enum ConfigKey {
-		ALL("all"),
-		PASSWORD("password"),
-		SALT("salt"),
-		LOOK_AND_FEEL("lookAndFeel"),
-		LAST_EXPORT_LOCATION("export"),
-		LAST_IMPORT_LOCATION("import"),
-		CHECK_FOR_UPDATES("checkForUpdates");
-
-		private final String value;
-
-		ConfigKey(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return value;
 		}
 	}
 }
