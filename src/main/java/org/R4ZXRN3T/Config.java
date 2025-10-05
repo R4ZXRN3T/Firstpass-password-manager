@@ -82,9 +82,7 @@ public class Config {
 			String defaultPassword = encodePassword("", defaultSalt);
 
 			File configFile = new File("config.json");
-			if (configFile.exists()) {
-				configFile.delete();
-			}
+			if (configFile.exists()) configFile.delete();
 			JSONObject configJSON = getDefaultConfigJSON(defaultPassword, defaultSalt);
 
 			FileWriter writer = new FileWriter(configFile);
@@ -111,9 +109,7 @@ public class Config {
 	private static void setDefault(ConfigKey key) {
 		try {
 			File configFile = new File("config.json");
-			if (!configFile.exists() || configFile.length() == 0) {
-				setDefaultConfig();
-			}
+			if (!configFile.exists() || configFile.length() == 0) setDefaultConfig();
 			String content = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("config.json")));
 			JSONObject jsonObject = new JSONObject(content);
 
@@ -147,9 +143,7 @@ public class Config {
 			// refresh in-memory map (simplified)
 			configList.put(key.toString(), jsonObject.optString(key.toString(), null));
 
-			if (needsRestart) {
-				Main.restart(firstpass);
-			}
+			if (needsRestart) Main.restart(firstpass);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
@@ -167,8 +161,7 @@ public class Config {
 
 		try {
 			int tempLaF = Integer.parseInt(Objects.requireNonNull(getConfig(ConfigKey.LOOK_AND_FEEL)));
-			if (tempLaF < 0 || tempLaF > 7)
-				setDefault(ConfigKey.LOOK_AND_FEEL);
+			if (tempLaF < 0 || tempLaF > 7) setDefault(ConfigKey.LOOK_AND_FEEL);
 		} catch (NumberFormatException e) {
 			setDefault(ConfigKey.LOOK_AND_FEEL);
 		}

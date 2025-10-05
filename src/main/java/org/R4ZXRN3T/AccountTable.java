@@ -67,9 +67,7 @@ public class AccountTable extends JTable {
 
 		String[][] finalArray = new String[inputArrayList.size()][5];
 
-		for (int i = 0; i < inputArrayList.size(); i++) {
-			finalArray[i] = inputArrayList.get(i).toArray();
-		}
+		for (int i = 0; i < inputArrayList.size(); i++) finalArray[i] = inputArrayList.get(i).toArray();
 		return finalArray;
 	}
 
@@ -116,22 +114,17 @@ public class AccountTable extends JTable {
 		setRowSorter(sorter);
 
 		sorter.addRowSorterListener(e -> {
-			if (e.getType() == RowSorterEvent.Type.SORTED) {
-				// boolean reversed = sorter.getSortKeys().get(0).getSortOrder() == SortOrder.DESCENDING;
-				setMainData();
-			}
+			if (e.getType() == RowSorterEvent.Type.SORTED) setMainData();
 		});
 	}
 
 	private void setMainData() {
-		if (firstpass == null) {
-			return;
-		}
+		if (firstpass == null) return;
 		firstpass.getAccountList().clear();
 		firstpass.getAccountList().ensureCapacity(this.getRowCount());
 
 		// Iterate through rows and directly use view indices
-		for (int i = 0; i < this.getRowCount(); i++) {
+		for (int i = 0; i < this.getRowCount(); i++)
 			firstpass.getAccountList().add(new Account(
 					getValueAt(i, 0).toString(),
 					getValueAt(i, 1).toString(),
@@ -139,7 +132,6 @@ public class AccountTable extends JTable {
 					getValueAt(i, 3).toString(),
 					getValueAt(i, 4).toString()
 			));
-		}
 		firstpass.refreshIndices();
 		firstpass.setChangeMade(true);
 	}

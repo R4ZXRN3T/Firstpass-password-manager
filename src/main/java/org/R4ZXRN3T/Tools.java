@@ -22,9 +22,7 @@ class Tools {
 		StringBuilder hexString = new StringBuilder();
 		for (byte b : hashedPasswordAsByteArray) {
 			String hex = Integer.toHexString(0xff & b);
-			if (hex.length() == 1) {
-				hexString.append('0');
-			}
+			if (hex.length() == 1) hexString.append('0');
 			hexString.append(hex);
 		}
 		return hexString.toString();
@@ -37,9 +35,8 @@ class Tools {
 	// generates a random String with a specified length. What else can I say?
 	public static String generateRandomString(int length, String characterSet) {
 		StringBuilder randomString = new StringBuilder();
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < length; i++)
 			randomString.append(characterSet.charAt((int) (Math.random() * characterSet.length())));
-		}
 		return randomString.toString();
 	}
 

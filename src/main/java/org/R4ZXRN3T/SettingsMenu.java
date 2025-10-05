@@ -94,11 +94,9 @@ class SettingsMenu {
 		updatePanel.add(new CustomButton("Check for Updates", _ -> {
 			firstpass.setUpdateAvailable(Updater.checkVersion(true).compareToIgnoreCase(Firstpass.CURRENT_VERSION) > 0);
 			firstpass.getTopToolBar().getUpdateButton().setVisible(firstpass.isUpdateAvailable());
-			if (firstpass.isUpdateAvailable()) {
-				Updater.update();
-			} else {
+			if (firstpass.isUpdateAvailable()) Updater.update();
+			else
 				JOptionPane.showMessageDialog(settingsFrame, "You are already using the latest version.", "No Updates Available", JOptionPane.INFORMATION_MESSAGE);
-			}
 		}, new Dimension(140, 30)));
 
 		JCheckBox updateCheckBox = new JCheckBox("Check for updates on startup");
@@ -153,9 +151,8 @@ class SettingsMenu {
 			if (oldPassword.getText().equals(firstpass.getCorrectPassword())) {
 				currentSettings.replace(0, newPassword.getText());
 				JOptionPane.showMessageDialog(settingsFrame, "Password successfully changed", "Success", JOptionPane.INFORMATION_MESSAGE);
-			} else {
+			} else
 				JOptionPane.showMessageDialog(settingsFrame, "The old password is incorrect", "Error", JOptionPane.ERROR_MESSAGE);
-			}
 		}
 	}
 
@@ -183,16 +180,12 @@ class SettingsMenu {
 		JLabel warningLabel2 = new JLabel("Warning: This action will delete all saved accounts and then close the program. This action cannot be undone.");
 		warningLabel2.setForeground(Color.RED);
 		int option = JOptionPane.showConfirmDialog(null, new Object[]{warningLabel, warningLabel2}, "Delete all data", JOptionPane.YES_NO_OPTION);
-		if (option == JOptionPane.YES_OPTION) {
-			firstpass.fullDelete();
-		}
+		if (option == JOptionPane.YES_OPTION) firstpass.fullDelete();
 	}
 
 	private void removePasswordDialog() {
 		int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to remove the password?", "Remove Password", JOptionPane.YES_NO_OPTION);
-		if (option == JOptionPane.NO_OPTION) {
-			return;
-		}
+		if (option == JOptionPane.NO_OPTION) return;
 		currentSettings.replace(0, "");
 		firstpass.setPasswordSet(false);
 		JOptionPane.showMessageDialog(null, "Password removed", "Success", JOptionPane.INFORMATION_MESSAGE);

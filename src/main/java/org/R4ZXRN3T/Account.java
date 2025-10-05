@@ -155,21 +155,11 @@ public class Account {
 		StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
 		textEncryptor.setPasswordCharArray(encryptionPassword.toCharArray());
 
-		if (provider != null && !provider.isEmpty()) {
-			provider = textEncryptor.encrypt(provider);
-		}
-		if (username != null && !username.isEmpty()) {
-			username = textEncryptor.encrypt(username);
-		}
-		if (password != null && !password.isEmpty()) {
-			password = textEncryptor.encrypt(password);
-		}
-		if (url != null && !url.isEmpty()) {
-			url = textEncryptor.encrypt(url);
-		}
-		if (comment != null && !comment.isEmpty()) {
-			comment = textEncryptor.encrypt(comment);
-		}
+		if (provider != null && !provider.isEmpty()) provider = textEncryptor.encrypt(provider);
+		if (username != null && !username.isEmpty()) username = textEncryptor.encrypt(username);
+		if (password != null && !password.isEmpty()) password = textEncryptor.encrypt(password);
+		if (url != null && !url.isEmpty()) url = textEncryptor.encrypt(url);
+		if (comment != null && !comment.isEmpty()) comment = textEncryptor.encrypt(comment);
 	}
 
 	public void decrypt(String decryptionPassword) {
@@ -178,21 +168,11 @@ public class Account {
 		StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
 		textEncryptor.setPasswordCharArray(decryptionPassword.toCharArray());
 
-		if (provider != null && !provider.isEmpty()) {
-			provider = textEncryptor.decrypt(provider);
-		}
-		if (username != null && !username.isEmpty()) {
-			username = textEncryptor.decrypt(username);
-		}
-		if (password != null && !password.isEmpty()) {
-			password = textEncryptor.decrypt(password);
-		}
-		if (url != null && !url.isEmpty()) {
-			url = textEncryptor.decrypt(url);
-		}
-		if (comment != null && !comment.isEmpty()) {
-			comment = textEncryptor.decrypt(comment);
-		}
+		if (provider != null && !provider.isEmpty()) provider = textEncryptor.decrypt(provider);
+		if (username != null && !username.isEmpty()) username = textEncryptor.decrypt(username);
+		if (password != null && !password.isEmpty()) password = textEncryptor.decrypt(password);
+		if (url != null && !url.isEmpty()) url = textEncryptor.decrypt(url);
+		if (comment != null && !comment.isEmpty()) comment = textEncryptor.decrypt(comment);
 	}
 
 	public boolean isEmpty() {
@@ -216,11 +196,7 @@ public class Account {
 		}
 
 		public static SearchableField fromValue(int value) {
-			for (SearchableField field : SearchableField.values()) {
-				if (field.value == value) {
-					return field;
-				}
-			}
+			for (SearchableField field : SearchableField.values()) if (field.value == value) return field;
 			throw new IllegalArgumentException("Invalid value: " + value);
 		}
 	}

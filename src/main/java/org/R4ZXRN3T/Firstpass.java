@@ -37,12 +37,10 @@ public class Firstpass {
 
 		// check whether an update is available
 		// in a separate thread, as on slow internet connection this might take a while
-		if (Boolean.parseBoolean(Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES))) {
-			new Thread(() -> {
-				updateAvailable = Updater.checkVersion(false).compareToIgnoreCase(CURRENT_VERSION) > 0;
-				// Will be set after topToolBar is created
-			}).start();
-		}
+		if (Boolean.parseBoolean(Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES))) new Thread(() -> {
+			updateAvailable = Updater.checkVersion(false).compareToIgnoreCase(CURRENT_VERSION) > 0;
+			// Will be set after topToolBar is created
+		}).start();
 
 		new Thread(() -> {
 			// delete installer files if existing
@@ -276,9 +274,7 @@ public class Firstpass {
 				String[] options = {"Save", "Don't save", "Cancel"};
 
 				// exit if no changes were made
-				if (!changeMade) {
-					System.exit(0);
-				}
+				if (!changeMade) System.exit(0);
 
 				// check if user wants to save changes
 				int option = JOptionPane.showOptionDialog(null, message, "Save changes?", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, Config.getDarkMode() ? EXIT_ICON_WHITE_SCALED : EXIT_ICON_SCALED, options, options[0]);
@@ -314,9 +310,9 @@ public class Firstpass {
 		String currentSalt = Config.getConfig(Config.ConfigKey.SALT);
 		String encodedPassword = Config.getConfig(Config.ConfigKey.PASSWORD);
 
-		if (Config.getConfig(Config.ConfigKey.PASSWORD) == null || Objects.equals(Config.getConfig(Config.ConfigKey.PASSWORD), Tools.encodePassword(Config.getConfig(Config.ConfigKey.SALT), "")) || Objects.equals(Config.getConfig(Config.ConfigKey.PASSWORD), "")) {
+		if (Config.getConfig(Config.ConfigKey.PASSWORD) == null || Objects.equals(Config.getConfig(Config.ConfigKey.PASSWORD), Tools.encodePassword(Config.getConfig(Config.ConfigKey.SALT), "")) || Objects.equals(Config.getConfig(Config.ConfigKey.PASSWORD), ""))
 			return "";
-		}
+
 		// initialize variables for inputDialog, in order to make the code more readable
 		String enteredPassword = "[placeholder]";
 		JLabel label = new JLabel();
@@ -344,9 +340,7 @@ public class Firstpass {
 			enteredPassword = (String) JOptionPane.showInputDialog(tempFrame, label, title, JOptionPane.PLAIN_MESSAGE, null, null, null);
 
 			// exit if user presses cancel
-			if (enteredPassword == null) {
-				System.exit(0);
-			}
+			if (enteredPassword == null) System.exit(0);
 		} while (!Tools.encodePassword(enteredPassword, currentSalt).equals(encodedPassword));
 
 		tempFrame.dispose();
