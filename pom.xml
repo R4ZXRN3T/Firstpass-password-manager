@@ -52,7 +52,10 @@
 				<version>3.4.2</version>
 				<configuration>
 					<archive>
-						<manifestFile>${project.basedir}/META-INF/MANIFEST.MF</manifestFile>
+						<manifest>
+							<mainClass>org.R4ZXRN3T.Main</mainClass>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+						</manifest>
 					</archive>
 				</configuration>
 			</plugin>
