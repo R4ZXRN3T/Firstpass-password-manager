@@ -17,15 +17,15 @@ public class AccountTable extends JTable {
 
 	private final String[] columns = {"Provider", "Username", "Password", "URL", "Comment"};
 	private String[][] data;
-	private Main main;
+	private Firstpass firstpass;
 
 	public AccountTable(ArrayList<Account> accounts) {
 		this(accounts, null);
 	}
 
-	public AccountTable(ArrayList<Account> accounts, Main main) {
+	public AccountTable(ArrayList<Account> accounts, Firstpass firstpass) {
 		super();
-		this.main = main;
+		this.firstpass = firstpass;
 		data = AccountArrayListToArray(accounts);
 
 		// make table uneditable, unfortunately this is the only way to do it
@@ -44,28 +44,25 @@ public class AccountTable extends JTable {
 		setRowSelectionAllowed(true);
 		setColumnSelectionAllowed(false);
 		setFillsViewportHeight(true);
-		getTableHeader().setBackground((main != null && main.isDarkMode()) ? new Color(48, 48, 48) : new Color(200, 200, 200));
+		getTableHeader().setBackground(Config.getDarkMode() ? new Color(48, 48, 48) : new Color(200, 200, 200));
 		TableRowSorter<TableModel> sorter = new TableRowSorter<>(this.getModel());
 		setRowSorter(sorter);
 
 		sorter.addRowSorterListener(e -> {
-			if (e.getType() == RowSorterEvent.Type.SORTED) {
-				setMainData();
-			}
+			if (e.getType() == RowSorterEvent.Type.SORTED) setMainData();
 		});
 
 		addMouseListener(new MouseInputAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (e.getClickCount() == 2 && getSelectedRow() >= 0 && main != null) {
-					main.editAccount(getSelectedRow());
-				}
+				if (e.getClickCount() == 2 && getSelectedRow() >= 0 && firstpass != null)
+					firstpass.editAccount(getSelectedRow());
 			}
 		});
 	}
 
-	public void setMain(Main main) {
-		this.main = main;
+	public void setMain(Firstpass firstpass) {
+		this.firstpass = firstpass;
 	}
 
 	// converts an ArrayList of Account objects to a 2D String array, only used in this class for conversion
@@ -131,15 +128,15 @@ public class AccountTable extends JTable {
 	}
 
 	private void setMainData() {
-		if (main == null) {
+		if (firstpass == null) {
 			return;
 		}
-		main.getAccountList().clear();
-		main.getAccountList().ensureCapacity(this.getRowCount());
+		firstpass.getAccountList().clear();
+		firstpass.getAccountList().ensureCapacity(this.getRowCount());
 
 		// Iterate through rows and directly use view indices
 		for (int i = 0; i < this.getRowCount(); i++) {
-			main.getAccountList().add(new Account(
+			firstpass.getAccountList().add(new Account(
 					getValueAt(i, 0).toString(),
 					getValueAt(i, 1).toString(),
 					getValueAt(i, 2).toString(),
@@ -147,12 +144,7 @@ public class AccountTable extends JTable {
 					getValueAt(i, 4).toString()
 			));
 		}
-		main.refreshIndices();
-		main.setChangeMade(true);
-	}
-
-	// returns the content of a given row as an Account object
-	public Account getAccount(int rowIndex) {
-		return new Account(data[rowIndex][0], data[rowIndex][1], data[rowIndex][2], data[rowIndex][3], data[rowIndex][4]);
+		firstpass.refreshIndices();
+		firstpass.setChangeMade(true);
 	}
 }

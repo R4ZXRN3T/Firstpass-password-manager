@@ -32,7 +32,7 @@ public class PasswordGenerator {
 		lengthSlider.setBackground(Color.LIGHT_GRAY);
 		JLabel lengthLabel = new JLabel("Length:");
 		JLabel lengthValue = new JLabel("16");
-		lengthSlider.addChangeListener(e -> lengthValue.setText(String.valueOf(lengthSlider.getValue())));
+		lengthSlider.addChangeListener(_ -> lengthValue.setText(String.valueOf(lengthSlider.getValue())));
 
 		uppercase.setSelected(true);
 		lowercase.setSelected(true);
@@ -66,7 +66,7 @@ public class PasswordGenerator {
 		outputPanel.add(copyButton, BorderLayout.EAST);
 
 		CustomButton generateButton = new CustomButton("Generate!",
-				e -> passwordField.setText(generatePassword(lengthSlider.getValue(), uppercase.isSelected(), lowercase.isSelected(), numbers.isSelected(), specialCharacters.isSelected())),
+				_ -> passwordField.setText(generatePassword(lengthSlider.getValue(), uppercase.isSelected(), lowercase.isSelected(), numbers.isSelected(), specialCharacters.isSelected())),
 				new Dimension(100, 35));
 		generateButton.setToolTipText("Generate a new password");
 		generateButton.setBackground(UIManager.getColor("Button.background").brighter());
@@ -85,7 +85,7 @@ public class PasswordGenerator {
 		JButton copyButton = new JButton();
 		copyButton.setIcon(darkMode ? Icons.COPY_ICON_WHITE_SCALED : Icons.COPY_ICON_SCALED);
 		copyButton.setToolTipText("Copy password to clipboard");
-		copyButton.addActionListener(e -> {
+		copyButton.addActionListener(_ -> {
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(passwordField.getText()), null);
 			JOptionPane.showMessageDialog(frame, "Password copied to clipboard", "Success", JOptionPane.INFORMATION_MESSAGE);
 		});
@@ -98,7 +98,7 @@ public class PasswordGenerator {
 		if (uppercase) characterSet += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		if (lowercase) characterSet += "abcdefghijklmnopqrstuvwxyz";
 		if (numbers) characterSet += "0123456789";
-		if (specialCharacters) characterSet += "!@#$%^&*()-_=+[{]};:'<A,<.>/?";
+		if (specialCharacters) characterSet += "!@#$%^&*()-_=+[{]};:',<.>/?";
 		return Tools.generateRandomString(length, characterSet);
 	}
 }

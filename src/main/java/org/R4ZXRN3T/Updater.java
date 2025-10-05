@@ -17,11 +17,11 @@ class Updater {
 	private static final String REPO_URL = "https://api.github.com/repos/R4ZXRN3T/Firstpass-password-manager/releases/latest";
 	private static final String DOWNLOAD_URL = "https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/download/";
 	private static boolean portableVersion = false;
-	private static Main mainInstance = null;
+	private static Firstpass firstpassInstance = null;
 
-	public static void initialize(Main main) {
-		mainInstance = main;
-		portableVersion = main.isPortableVersion();
+	public static void initialize(Firstpass firstpass) {
+		firstpassInstance = firstpass;
+		portableVersion = Config.isPortableVersion();
 	}
 
 	private static String getFileName() {
@@ -102,7 +102,7 @@ class Updater {
 
 					Map<String, List<String>> header = http.getHeaderFields();
 					while (isRedirected(header)) {
-						link = header.get("Location").get(0);
+						link = header.get("Location").getFirst();
 						url = new URL(link);
 						http = (HttpURLConnection) url.openConnection();
 						header = http.getHeaderFields();
@@ -125,8 +125,8 @@ class Updater {
 
 					output.close();
 					input.close();
-					if (mainInstance != null) {
-						mainInstance.save();
+					if (firstpassInstance != null) {
+						firstpassInstance.save();
 					}
 					updateFrame.dispose();
 					installUpdate();

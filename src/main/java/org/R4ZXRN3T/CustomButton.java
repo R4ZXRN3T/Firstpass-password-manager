@@ -19,11 +19,6 @@ class CustomButton extends JButton {
 	}
 
 	// only relevant for the remove and edit button
-	public CustomButton(String text, ImageIcon icon, ActionListener actionListener, boolean listenForTableSelection, Dimension size) {
-		this(text, icon, actionListener, listenForTableSelection, false, size, null, null, null, null);
-	}
-
-	// only relevant for the remove and edit button
 	public CustomButton(String text, ImageIcon icon, ActionListener actionListener, AccountTable table, Dimension size) {
 		this(text, icon, actionListener, false, false, size, null, null, null, table);
 	}
@@ -67,10 +62,9 @@ class CustomButton extends JButton {
 		}
 
 		if (listenForTableSelection || table != null) {
-			AccountTable tableToUse = table;
-			this.setEnabled(tableToUse != null && tableToUse.isRowSelected() && tableToUse.isFocused());
-			if (tableToUse != null) {
-				tableToUse.addRowSelectionListener(e -> this.setEnabled(tableToUse.isRowSelected() && tableToUse.isFocused()));
+			this.setEnabled(table != null && table.isRowSelected() && table.isFocused());
+			if (table != null) {
+				table.addRowSelectionListener(_ -> this.setEnabled(table.isRowSelected() && table.isFocused()));
 			}
 		}
 
