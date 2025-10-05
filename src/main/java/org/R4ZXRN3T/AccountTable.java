@@ -57,10 +57,6 @@ public class AccountTable extends JTable {
 		});
 	}
 
-	public void setMain(Firstpass firstpass) {
-		this.firstpass = firstpass;
-	}
-
 	// converts an ArrayList of Account objects to a 2D String array, only used in this class for conversion
 	// maybe I'll move this to the Tools class if I need it elsewhere
 	private static String[][] AccountArrayListToArray(ArrayList<Account> inputArrayList) {
@@ -69,6 +65,10 @@ public class AccountTable extends JTable {
 
 		for (int i = 0; i < inputArrayList.size(); i++) finalArray[i] = inputArrayList.get(i).toArray();
 		return finalArray;
+	}
+
+	public void setMain(Firstpass firstpass) {
+		this.firstpass = firstpass;
 	}
 
 	// puts the table into a JScrollPane

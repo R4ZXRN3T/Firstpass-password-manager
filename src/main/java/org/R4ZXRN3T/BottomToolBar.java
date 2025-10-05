@@ -9,10 +9,9 @@ class BottomToolBar {
 
 	public final static Color DARK_MODE_COLOR = new Color(50, 50, 50);
 	private final static Dimension DEFAULT_BUTTON_SIZE = new Dimension(105, 35);
-
+	private final Firstpass firstpass;
 	// only here to be able to refresh the button
 	private CustomButton undoButton;
-	private final Firstpass firstpass;
 
 	public BottomToolBar(Firstpass firstpass) {
 		this.firstpass = firstpass;

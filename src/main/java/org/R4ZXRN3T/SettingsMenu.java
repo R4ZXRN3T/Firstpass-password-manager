@@ -7,11 +7,11 @@ import java.util.HashMap;
 class SettingsMenu {
 
 	private final HashMap<Integer, String> currentSettings = new HashMap<>();
+	private final Firstpass firstpass;
 	private JDialog settingsFrame;
 	private boolean needsRestart = false;
 	private CustomButton changePasswordButton;
 	private CustomButton removePasswordButton;
-	private final Firstpass firstpass;
 
 	public SettingsMenu(Firstpass firstpass) {
 		this.firstpass = firstpass;
