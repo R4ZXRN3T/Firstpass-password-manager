@@ -162,16 +162,17 @@ class SettingsMenu {
 		Config.setConfig(Config.ConfigKey.LOOK_AND_FEEL, currentSettings.get(1));
 		Config.setConfig(Config.ConfigKey.CHECK_FOR_UPDATES, currentSettings.get(2));
 
-		if (needsRestart) {
-			String message = "The program needs to be restarted in order to apply the new settings. Do you want to restart now?";
-			int option = JOptionPane.showConfirmDialog(null, message, "Restart to apply settings", JOptionPane.YES_NO_OPTION);
-			if (option == JOptionPane.YES_OPTION) {
-				firstpass.save();
-				Main.restart(firstpass);
-			}
+		boolean restart = needsRestart && JOptionPane.showConfirmDialog(settingsFrame, "The program needs to restart to apply the new settings. Restart now?", "Restart", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+
+		// Dispose before restarting to clear modality influence
+		settingsFrame.dispose();
+
+		if (restart) {
+			firstpass.save();
+			Main.restart(firstpass);
+			return;
 		}
 
-		settingsFrame.dispose();
 		firstpass.setChangeMade(true);
 	}
 
