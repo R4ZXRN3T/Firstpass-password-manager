@@ -17,17 +17,16 @@ import static org.R4ZXRN3T.Tools.generateRandomString;
 
 public class Config {
 
+	public static final int SALT_LENGTH = 64;
 	private static final String DEFAULT_LAF = "0";
 	private static final int PASSWORD_LENGTH = 64;
-	public static final int SALT_LENGTH = 64;
 	private static final String DEFAULT_EXPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
 	private static final String DEFAULT_IMPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
-	public static final String CONFIG_PATH = String.valueOf(getConfigFilePath());
 	private static HashMap<String, String> configList;
 	private static Firstpass firstpass;
-
 	private static boolean darkMode;
 	private static Boolean portableVersion;
+	public static final String CONFIG_PATH = String.valueOf(getConfigFilePath());
 
 	public static void init(Firstpass firstpassInstance) {
 		firstpass = firstpassInstance;
@@ -44,18 +43,13 @@ public class Config {
 
 	private static void readConfig(String path) {
 		try {
-			IO.println("Reading config from " + path);
-			Path configPath = Paths.get(path).getParent();
-			if (configPath != null && !configPath.toFile().exists() && !configPath.toFile().mkdirs()) {
-				System.err.println("Failed to create config directory");
-				return;
-			}
-			File configFile = new File(path);
+			File configFile = new File(new File(path).getAbsolutePath());
+			IO.println("Reading config from " + configFile.getAbsolutePath());
 			if (!configFile.exists() || configFile.length() == 0) {
 				setDefaultConfig(); // No restart here
 				return;
 			}
-			String fileContent = new String(java.nio.file.Files.readAllBytes(Paths.get(path)));
+			String fileContent = new String(java.nio.file.Files.readAllBytes(Path.of(configFile.getAbsolutePath())));
 			JSONObject jsonObject = new JSONObject(fileContent);
 			for (String currentKey : jsonObject.keySet()) {
 				String content = jsonObject.getString(currentKey);
@@ -73,13 +67,14 @@ public class Config {
 	}
 
 	private static void writeConfig(String path) {
-		File configFile = new File(path);
+		File configFile = new File(new File(path).getAbsolutePath());
 		try (FileWriter writer = new FileWriter(configFile)) {
 			if (!configFile.getParentFile().exists() && !configFile.getParentFile().mkdirs()) {
 				System.err.println("Failed to create config directory");
 				return;
 			}
 			JSONObject jsonToSave = new JSONObject(configList);
+			for (String key : configList.keySet()) IO.println("Saving config: " + key + " = " + configList.get(key));
 			writer.write(jsonToSave.toString(4));
 			writer.flush();
 		} catch (IOException e) {

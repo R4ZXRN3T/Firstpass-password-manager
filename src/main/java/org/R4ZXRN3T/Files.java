@@ -56,8 +56,10 @@ class Files {
 
 		try {
 			System.out.println("\nFinding file...");
-			File accountsFile = new File(ACCOUNTS_PATH);
-			accountsFile.createNewFile();
+			File accountsFile = new File(new File(ACCOUNTS_PATH).getAbsolutePath());
+			Path parentDir = accountsFile.toPath().getParent();
+			if (parentDir != null && !parentDir.toFile().exists()) parentDir.toFile().mkdirs();
+			if (!accountsFile.exists()) accountsFile.createNewFile();
 			Scanner readAcc = new Scanner(accountsFile);
 			System.out.println("File found.");
 
@@ -125,7 +127,11 @@ class Files {
 		SwingWorker<Void, Integer> worker = new SwingWorker<>() {
 			@Override
 			protected Void doInBackground() throws Exception {
-				try (FileWriter writer = new FileWriter(ACCOUNTS_PATH)) {
+				File accountsFile = new File(new File(ACCOUNTS_PATH).getAbsolutePath());
+				Path parentDir = accountsFile.toPath().getParent();
+				if (parentDir != null && !parentDir.toFile().exists()) parentDir.toFile().mkdirs();
+				if (!accountsFile.exists()) accountsFile.createNewFile();
+				try (FileWriter writer = new FileWriter(accountsFile, false)) {
 					progressBar.setMaximum(accountsArr.size());
 
 					int currentAccount = 0;
