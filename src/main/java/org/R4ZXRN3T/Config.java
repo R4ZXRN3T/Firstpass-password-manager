@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Objects;
@@ -21,28 +22,34 @@ public class Config {
 	public static final int SALT_LENGTH = 64;
 	private static final String DEFAULT_EXPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
 	private static final String DEFAULT_IMPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
+	public static final String CONFIG_PATH = String.valueOf(getConfigFilePath());
 	private static HashMap<String, String> configList;
 	private static Firstpass firstpass;
 
 	private static boolean darkMode;
-	private static boolean portableVersion;
+	private static Boolean portableVersion;
 
 	public static void init(Firstpass firstpassInstance) {
 		firstpass = firstpassInstance;
+		portableVersion = Firstpass.class.getResource("/assets/firstpass_icon.png") != null;
 		configList = new HashMap<>();
-		readConfig("config.json");
+		readConfig(CONFIG_PATH);
 		checkConfig();
 		darkMode = new ThemeManager().setLookAndFeel(getConfig(ConfigKey.LOOK_AND_FEEL));
-		portableVersion = Firstpass.class.getResource("/assets/firstpass_icon.png") != null;
 	}
 
 	public static void saveConfig() {
-		writeConfig("config.json");
+		writeConfig(CONFIG_PATH);
 	}
 
 	private static void readConfig(String path) {
 		try {
 			IO.println("Reading config from " + path);
+			Path configPath = Paths.get(path).getParent();
+			if (configPath != null && !configPath.toFile().exists() && !configPath.toFile().mkdirs()) {
+				System.err.println("Failed to create config directory");
+				return;
+			}
 			File configFile = new File(path);
 			if (!configFile.exists() || configFile.length() == 0) {
 				setDefaultConfig(); // No restart here
@@ -68,6 +75,10 @@ public class Config {
 	private static void writeConfig(String path) {
 		File configFile = new File(path);
 		try (FileWriter writer = new FileWriter(configFile)) {
+			if (!configFile.getParentFile().exists() && !configFile.getParentFile().mkdirs()) {
+				System.err.println("Failed to create config directory");
+				return;
+			}
 			JSONObject jsonToSave = new JSONObject(configList);
 			writer.write(jsonToSave.toString(4));
 			writer.flush();
@@ -153,7 +164,26 @@ public class Config {
 	}
 
 	public static boolean isPortableVersion() {
+		if (portableVersion != null) return portableVersion;
+		portableVersion = Firstpass.class.getResource("/assets/firstpass_icon.png") != null;
 		return portableVersion;
+	}
+
+	public static Path getConfigFilePath() {
+		String os = System.getProperty("os.name").toLowerCase();
+		String fileName = "Firstpass/config.json";
+		if (isPortableVersion()) {
+			return Paths.get("config.json");
+		} else if (os.contains("win")) {
+			String appData = System.getenv("APPDATA");
+			return Paths.get(appData, fileName);
+		} else if (os.contains("mac")) {
+			String userHome = System.getProperty("user.home");
+			return Paths.get(userHome, "Library", "Application Support", fileName);
+		} else { // Linux and others
+			String userHome = System.getProperty("user.home");
+			return Paths.get(userHome, ".config", fileName);
+		}
 	}
 
 	public static void setConfig(ConfigKey key, String value) {

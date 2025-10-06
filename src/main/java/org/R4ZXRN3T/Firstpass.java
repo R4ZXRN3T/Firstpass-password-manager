@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
@@ -226,8 +227,9 @@ public class Firstpass {
 
 	public void fullDelete() {
 		accountList.clear();
-		new File("accounts.txt").delete();
-		new File("config.json").delete();
+		new File(Files.ACCOUNTS_PATH).delete();
+		new File(Config.CONFIG_PATH).delete();
+		if (!Config.isPortableVersion()) new File(Paths.get(System.getenv("APPDATA")) + "\\Firstpass").delete();
 		System.exit(0);
 	}
 

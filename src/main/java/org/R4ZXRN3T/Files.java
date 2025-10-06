@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -21,6 +23,8 @@ import static org.R4ZXRN3T.Tools.validateForXML;
 
 // all file shit in here
 class Files {
+
+	public static final String ACCOUNTS_PATH = String.valueOf(getAccountFilePath());
 
 	// retrieve Accounts ArrayList from accounts.txt. Only called on program launch
 	public static ArrayList<Account> getAccounts(String decryptionKey) {
@@ -52,7 +56,7 @@ class Files {
 
 		try {
 			System.out.println("\nFinding file...");
-			File accountsFile = new File("accounts.txt");
+			File accountsFile = new File(ACCOUNTS_PATH);
 			accountsFile.createNewFile();
 			Scanner readAcc = new Scanner(accountsFile);
 			System.out.println("File found.");
@@ -121,7 +125,7 @@ class Files {
 		SwingWorker<Void, Integer> worker = new SwingWorker<>() {
 			@Override
 			protected Void doInBackground() throws Exception {
-				try (FileWriter writer = new FileWriter("accounts.txt")) {
+				try (FileWriter writer = new FileWriter(ACCOUNTS_PATH)) {
 					progressBar.setMaximum(accountsArr.size());
 
 					int currentAccount = 0;
@@ -359,6 +363,23 @@ class Files {
 		} catch (IOException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "An error occurred while importing the data", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	public static Path getAccountFilePath() {
+		String os = System.getProperty("os.name").toLowerCase();
+		String fileName = "Firstpass/accounts.txt";
+		if (Config.isPortableVersion()) {
+			return Paths.get("accounts.txt");
+		} else if (os.contains("win")) {
+			String appData = System.getenv("APPDATA");
+			return Paths.get(appData, fileName);
+		} else if (os.contains("mac")) {
+			String userHome = System.getProperty("user.home");
+			return Paths.get(userHome, "Library", "Application Support", fileName);
+		} else { // Linux and others
+			String userHome = System.getProperty("user.home");
+			return Paths.get(userHome, ".config", fileName);
 		}
 	}
 }
