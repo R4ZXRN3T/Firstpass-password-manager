@@ -16,14 +16,6 @@ import static org.R4ZXRN3T.Icons.*;
 public class Firstpass {
 
 	public static final String CURRENT_VERSION = resolveVersion();
-
-	private static String resolveVersion() {
-		Package pkg = Firstpass.class.getPackage();
-		String v = (pkg != null) ? pkg.getImplementationVersion() : null;
-		return (v != null) ? v : "DEV BUILD; NOT FOR PUBLIC USE";
-	}
-
-	// Instance variables - no longer static
 	private final ArrayList<Account> accountList = new ArrayList<>();
 	private final Stack<Account> undoStack = new Stack<>();
 	private JFrame frame;
@@ -34,6 +26,12 @@ public class Firstpass {
 	private boolean updateAvailable = false;
 	private BottomToolBar bottomToolBar;
 	private TopToolBar topToolBar;
+
+	private static String resolveVersion() {
+		Package pkg = Firstpass.class.getPackage();
+		String v = (pkg != null) ? pkg.getImplementationVersion() : null;
+		return (v != null) ? v : "DEV BUILD; NOT FOR PUBLIC USE";
+	}
 
 	public void run() {
 
