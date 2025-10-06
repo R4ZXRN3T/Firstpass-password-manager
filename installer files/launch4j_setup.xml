@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch4jConfig>
-  <dontWrapJar>false</dontWrapJar>
-  <headerType>gui</headerType>
-  <jar>D:\Projekte\Java Programme\Firstpass\Firstpass.jar</jar>
-  <outfile>D:\Projekte\Java Programme\Firstpass\Firstpass.exe</outfile>
-  <errTitle></errTitle>
-  <cmdLine></cmdLine>
-  <chdir>.</chdir>
-  <priority>normal</priority>
-  <downloadUrl></downloadUrl>
-  <supportUrl></supportUrl>
-  <stayAlive>false</stayAlive>
-  <restartOnCrash>false</restartOnCrash>
-  <manifest></manifest>
-  <icon>D:\Projekte\Java Programme\Firstpass\installer files\Firstpass.ico</icon>
-  <jre>
-    <path>%JAVA_HOME%;%PATH%</path>
-    <requiresJdk>false</requiresJdk>
-    <requires64Bit>false</requires64Bit>
-    <minVersion>25</minVersion>
-    <maxVersion></maxVersion>
-  </jre>
+	<dontWrapJar>false</dontWrapJar>
+	<headerType>gui</headerType>
+	<jar>D:\Projekte\Java Programme\Firstpass\Firstpass.jar</jar>
+	<outfile>D:\Projekte\Java Programme\Firstpass\Firstpass.exe</outfile>
+	<errTitle></errTitle>
+	<cmdLine></cmdLine>
+	<chdir>.</chdir>
+	<priority>normal</priority>
+	<downloadUrl></downloadUrl>
+	<supportUrl></supportUrl>
+	<stayAlive>false</stayAlive>
+	<restartOnCrash>false</restartOnCrash>
+	<manifest></manifest>
+	<icon>D:\Projekte\Java Programme\Firstpass\installer files\Firstpass.ico</icon>
+	<jre>
+		<path>%JAVA_HOME%;%PATH%</path>
+		<requiresJdk>false</requiresJdk>
+		<requires64Bit>false</requires64Bit>
+		<minVersion>25</minVersion>
+		<maxVersion></maxVersion>
+	</jre>
 </launch4jConfig>
