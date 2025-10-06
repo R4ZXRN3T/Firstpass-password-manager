@@ -6,5 +6,6 @@ Firstpass.jar
 Firstpass_portable.jar
 config.json
 accounts.txt
-installer files/Firstpass Password Manager-cache
-installer files/Firstpass_setup.msi
+installer files/Firstpass_setup.exe
+Firstpass.exe
+launch4j.log
