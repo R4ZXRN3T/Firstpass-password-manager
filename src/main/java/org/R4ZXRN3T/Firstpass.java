@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -47,20 +48,7 @@ public class Firstpass {
 			// Will be set after topToolBar is created
 		}).start();
 
-		new Thread(() -> {
-			// delete installer files if existing
-			// in new thread as I need a delay. If deletion happens too quickly the files are still open, thus can't be deleted
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-			new File("Firstpass_setup.msi").delete();
-			new File("Firstpass_setup.msi.tmp").delete();
-			new File("Firstpass_portable.jar.tmp").delete();
-			new File("rename.bat").delete();
-			new File("rename.sh").delete();
-		}).start();
+		deleteFiles();
 
 		// load and decrypt accounts
 		correctPassword = checkPassword();
@@ -355,6 +343,27 @@ public class Firstpass {
 
 		tempFrame.dispose();
 		return enteredPassword;
+	}
+
+	private void deleteFiles() {
+		new Thread(() -> {
+			// delete installer files if existing
+			// in new thread as I need a delay. If deletion happens too quickly the files are still open, thus can't be deleted
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			Path parentPath = Config.getConfigFilePath().toAbsolutePath().getParent();
+			if (!parentPath.toFile().exists()) return;
+			new File(parentPath + "/Firstpass_setup.msi").delete();
+			new File(parentPath + "/Firstpass_setup.msi.tmp").delete();
+			new File(parentPath + "/Firstpass_setup.exe").delete();
+			new File(parentPath + "/Firstpass_setup.exe.tmp").delete();
+			new File(parentPath + "/Firstpass_portable.jar.tmp").delete();
+			new File(parentPath + "/rename.bat").delete();
+			new File(parentPath + "/rename.sh").delete();
+		}).start();
 	}
 
 	// Getters for encapsulation

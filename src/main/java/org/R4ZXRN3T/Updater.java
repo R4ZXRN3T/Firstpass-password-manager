@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -136,18 +137,21 @@ class Updater {
 
 	private static void installUpdate() {
 		if (!portableVersion) {
-			File tmp = new File("Firstpass_setup.msi.tmp");
-			File current = new File("Firstpass_setup.msi");
+			Path filePath = Config.getConfigFilePath().toAbsolutePath().getParent();
+			if (filePath.toFile().exists()) filePath.toFile().mkdirs();
+			File tmp = new File(filePath + "/Firstpass_setup.exe.tmp");
+			File current = new File(filePath + "/Firstpass_setup.exe");
 			if (current.exists()) current.delete();
 			tmp.renameTo(current);
 			try {
-				new ProcessBuilder("cmd", "/c", "start", "Firstpass_setup.msi").start();
+				new ProcessBuilder("cmd", "/c", "start", filePath + "/Firstpass_setup.exe").start();
 				System.exit(0);
 			} catch (IOException e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(null, "Failed to install update.\nPlease contact the developer if this issue persists", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+
 		String tempFileName = "Firstpass_portable.jar.tmp";
 		String currentFileName = "Firstpass_portable.jar";
 		try {
