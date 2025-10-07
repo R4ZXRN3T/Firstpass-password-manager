@@ -5,7 +5,7 @@ encrypted list you control.
 
 Latest Release / Downloads:
 
-- Windows (.msi) and Portable JAR: https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest
+- Windows (.exe) and Portable JAR: https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest
 
 Quick Links:
 
