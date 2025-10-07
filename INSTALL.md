@@ -4,14 +4,12 @@
 
 Grab the latest release here:
 
-- Windows Installer (
-  MSI): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_setup.msi
-- Portable JAR (all
-  platforms): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_portable.jar
+- Windows Installer (EXE): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_setup.exe
+- Portable JAR (all platforms): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_portable.jar
 
 ## Windows (Installer)
 
-1. Download the `.msi` file.
+1. Download the `.exe` file.
 2. Run it and follow the wizard.
 3. Launch "Firstpass" from the Start Menu or desktop shortcut.
 
@@ -58,4 +56,3 @@ Use the in‑app update button when shown, or re-download latest release and rep
 - `accounts.txt` – stored accounts (encrypted if a password is set).
 - `config.json` – settings + password hash/salt.
   Delete both to fully reset the application.
-
