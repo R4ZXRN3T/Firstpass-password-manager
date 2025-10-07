@@ -14,11 +14,10 @@ public class Logger {
 
 	private final File logFile;
 	private final String formatString;
-	private volatile boolean running = true;
-
-	private PrintWriter writer;
 	private final LinkedBlockingQueue<Object> queue = new LinkedBlockingQueue<>();
 	private final Thread worker;
+	private volatile boolean running = true;
+	private PrintWriter writer;
 	private volatile boolean initialized = false;
 
 	public Logger(String logFilePath) {
