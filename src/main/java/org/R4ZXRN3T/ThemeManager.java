@@ -6,11 +6,15 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import org.slf4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class ThemeManager {
+
+	Logger logger = org.slf4j.LoggerFactory.getLogger(ThemeManager.class);
+
 	// sets the look and feel of the program. Also returns whether the look and feel is a dark mode theme
 	public boolean setLookAndFeel(String LaFIndex) {
 		boolean isDarkTheme = false;
@@ -42,8 +46,8 @@ public class ThemeManager {
 			return isDarkTheme;
 		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException |
 				 IllegalAccessException e) {
-			e.printStackTrace();
-			System.out.println("Error setting Look and Feel. Exiting program...");
+			logger.error("Error setting Look and Feel: ", e);
+			IO.println("Error setting Look and Feel: " + e.getMessage() + "Exiting program...");
 			System.exit(1);
 		}
 		return false;

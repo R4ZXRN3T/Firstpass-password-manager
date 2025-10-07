@@ -2,6 +2,8 @@ package org.R4ZXRN3T;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.io.File;
@@ -22,6 +24,7 @@ public class Config {
 	private static final int PASSWORD_LENGTH = 64;
 	private static final String DEFAULT_EXPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
 	private static final String DEFAULT_IMPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
+	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 	private static HashMap<String, String> configList;
 	private static Firstpass firstpass;
 	private static boolean darkMode;
@@ -32,18 +35,18 @@ public class Config {
 		firstpass = firstpassInstance;
 		portableVersion = Firstpass.class.getResource("/assets/firstpass_icon.png") != null;
 		configList = new HashMap<>();
-		readConfig(CONFIG_PATH);
+		readConfig();
 		checkConfig();
 		darkMode = new ThemeManager().setLookAndFeel(getConfig(ConfigKey.LOOK_AND_FEEL));
 	}
 
 	public static void saveConfig() {
-		writeConfig(CONFIG_PATH);
+		writeConfig();
 	}
 
-	private static void readConfig(String path) {
+	private static void readConfig() {
 		try {
-			File configFile = new File(new File(path).getAbsolutePath());
+			File configFile = new File(new File(Config.CONFIG_PATH).getAbsolutePath());
 			IO.println("Reading config from " + configFile.getAbsolutePath());
 			if (!configFile.exists() || configFile.length() == 0) {
 				setDefaultConfig(); // No restart here
@@ -66,8 +69,8 @@ public class Config {
 		}
 	}
 
-	private static void writeConfig(String path) {
-		File configFile = new File(new File(path).getAbsolutePath());
+	private static void writeConfig() {
+		File configFile = new File(new File(Config.CONFIG_PATH).getAbsolutePath());
 		try (FileWriter writer = new FileWriter(configFile)) {
 			if (!configFile.getParentFile().exists() && !configFile.getParentFile().mkdirs()) {
 				System.err.println("Failed to create config directory");
@@ -98,7 +101,8 @@ public class Config {
 			System.out.println("Default config set");
 			// Removed Main.restart(firstpass);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error setting default config: ", e);
+			IO.println("Error setting default config: " + e.getMessage());
 		}
 	}
 
@@ -120,7 +124,8 @@ public class Config {
 			System.out.println("Default value set for " + key);
 			// Removed conditional restart
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error setting default config for {}: ", key, e);
+			IO.println("Error setting default config for " + key + ": " + e.getMessage());
 		}
 	}
 
@@ -183,6 +188,11 @@ public class Config {
 
 	public static void setConfig(ConfigKey key, String value) {
 		configList.put(key.toString(), value);
+	}
+
+	// For testing purposes only
+	public static void resetForTesting() {
+		configList = new HashMap<>();
 	}
 
 	public enum ConfigKey {

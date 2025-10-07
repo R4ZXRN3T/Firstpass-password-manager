@@ -2,6 +2,8 @@ package org.R4ZXRN3T;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -25,6 +27,7 @@ import static org.R4ZXRN3T.Tools.validateForXML;
 class Files {
 
 	public static final String ACCOUNTS_PATH = String.valueOf(getAccountFilePath());
+	private static final Logger logger = LoggerFactory.getLogger(Files.class);
 
 	// retrieve Accounts ArrayList from accounts.txt. Only called on program launch
 	public static ArrayList<Account> getAccounts(String decryptionKey) {
@@ -97,8 +100,8 @@ class Files {
 			System.out.println("Accounts successfully fetched and decrypted.");
 			readAcc.close();
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Error reading accounts.");
+			logger.error("Error reading accounts: {}", e.getMessage());
+			IO.println("Error reading accounts: " + e.getMessage());
 			accountsArr = null;
 		} finally {
 			frame.dispose();
@@ -169,7 +172,8 @@ class Files {
 		try {
 			worker.get(); // Waits for the background task to complete
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error saving accounts: {}", e.getMessage());
+			IO.println("Error saving accounts: " + e.getMessage());
 		}
 	}
 
@@ -247,7 +251,8 @@ class Files {
 			Config.setConfig(Config.ConfigKey.LAST_EXPORT_LOCATION, exportFile.getParent());
 			JOptionPane.showMessageDialog(null, "Data successfully exported under:\n" + exportFile.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error exporting data: {}", e.getMessage());
+			IO.println("Error exporting data: " + e.getMessage());
 			JOptionPane.showMessageDialog(null, "An error occurred while exporting the data", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
@@ -337,17 +342,16 @@ class Files {
 						Account newAccount = new Account();
 						while (!line.contains("</account>")) {
 							line = fileReader.nextLine();
-							if (line.contains("<provider>")) {
+							if (line.contains("<provider>"))
 								newAccount.setProvider(returnOriginalValue(line.substring(12, line.length() - 11)));
-							} else if (line.contains("<username>")) {
+							else if (line.contains("<username>"))
 								newAccount.setUsername(returnOriginalValue(line.substring(12, line.length() - 11)));
-							} else if (line.contains("<password>")) {
+							else if (line.contains("<password>"))
 								newAccount.setPassword(returnOriginalValue(line.substring(12, line.length() - 11)));
-							} else if (line.contains("<url>")) {
+							else if (line.contains("<url>"))
 								newAccount.setUrl(returnOriginalValue(line.substring(7, line.length() - 6)));
-							} else if (line.contains("<comment>")) {
+							else if (line.contains("<comment>"))
 								newAccount.setComment(returnOriginalValue(line.substring(11, line.length() - 10)));
-							}
 						}
 						importedAccounts.add(newAccount);
 					}
@@ -367,7 +371,8 @@ class Files {
 			firstpass.refreshTable();
 			firstpass.setChangeMade(true);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Error importing data: {}", e.getMessage());
+			IO.println("Error importing data: " + e.getMessage());
 			JOptionPane.showMessageDialog(null, "An error occurred while importing the data", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
