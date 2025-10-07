@@ -3,6 +3,7 @@ package org.R4ZXRN3T;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 public class Tools {
 
@@ -50,8 +51,9 @@ public class Tools {
 
 	public static String generateRandomString(int length, String characterSet) {
 		StringBuilder randomString = new StringBuilder();
+		SecureRandom rng = new SecureRandom();
 		for (int i = 0; i < length; i++)
-			randomString.append(characterSet.charAt((int) (Math.random() * characterSet.length())));
+			randomString.append(characterSet.charAt(rng.nextInt(characterSet.length())));
 		return randomString.toString();
 	}
 

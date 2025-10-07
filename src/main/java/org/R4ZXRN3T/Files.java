@@ -2,8 +2,6 @@ package org.R4ZXRN3T;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -27,7 +25,7 @@ import static org.R4ZXRN3T.Tools.validateForXML;
 class Files {
 
 	public static final String ACCOUNTS_PATH = String.valueOf(getAccountFilePath());
-	private static final Logger logger = LoggerFactory.getLogger(Files.class);
+	private static final Logger logger = new org.R4ZXRN3T.Logger(Config.LOG_PATH);
 
 	// retrieve Accounts ArrayList from accounts.txt. Only called on program launch
 	public static ArrayList<Account> getAccounts(String decryptionKey) {
@@ -100,7 +98,7 @@ class Files {
 			System.out.println("Accounts successfully fetched and decrypted.");
 			readAcc.close();
 		} catch (IOException e) {
-			logger.error("Error reading accounts: {}", e.getMessage());
+			logger.error("Error reading accounts: " + e.getMessage());
 			IO.println("Error reading accounts: " + e.getMessage());
 			accountsArr = null;
 		} finally {
@@ -172,7 +170,7 @@ class Files {
 		try {
 			worker.get(); // Waits for the background task to complete
 		} catch (Exception e) {
-			logger.error("Error saving accounts: {}", e.getMessage());
+			logger.error("Error saving accounts: " + e.getMessage());
 			IO.println("Error saving accounts: " + e.getMessage());
 		}
 	}
@@ -251,7 +249,7 @@ class Files {
 			Config.setConfig(Config.ConfigKey.LAST_EXPORT_LOCATION, exportFile.getParent());
 			JOptionPane.showMessageDialog(null, "Data successfully exported under:\n" + exportFile.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
 		} catch (Exception e) {
-			logger.error("Error exporting data: {}", e.getMessage());
+			logger.error("Error exporting data: " + e.getMessage());
 			IO.println("Error exporting data: " + e.getMessage());
 			JOptionPane.showMessageDialog(null, "An error occurred while exporting the data", "Error", JOptionPane.ERROR_MESSAGE);
 		}
@@ -371,7 +369,7 @@ class Files {
 			firstpass.refreshTable();
 			firstpass.setChangeMade(true);
 		} catch (IOException e) {
-			logger.error("Error importing data: {}", e.getMessage());
+			logger.error("Error importing data: " + e.getMessage());
 			IO.println("Error importing data: " + e.getMessage());
 			JOptionPane.showMessageDialog(null, "An error occurred while importing the data", "Error", JOptionPane.ERROR_MESSAGE);
 		}

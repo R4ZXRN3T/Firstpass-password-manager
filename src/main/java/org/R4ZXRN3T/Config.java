@@ -2,8 +2,6 @@ package org.R4ZXRN3T;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.io.File;
@@ -24,12 +22,13 @@ public class Config {
 	private static final int PASSWORD_LENGTH = 64;
 	private static final String DEFAULT_EXPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
 	private static final String DEFAULT_IMPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
-	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 	private static HashMap<String, String> configList;
 	private static Firstpass firstpass;
 	private static boolean darkMode;
 	private static Boolean portableVersion;
 	public static final String CONFIG_PATH = String.valueOf(getConfigFilePath());
+	public static final String LOG_PATH = CONFIG_PATH.replace("config.json", "logs/log.txt");
+	private static final Logger logger = new Logger(LOG_PATH);
 
 	public static void init(Firstpass firstpassInstance) {
 		firstpass = firstpassInstance;
@@ -101,7 +100,7 @@ public class Config {
 			System.out.println("Default config set");
 			// Removed Main.restart(firstpass);
 		} catch (Exception e) {
-			logger.error("Error setting default config: ", e);
+			logger.error("Error setting default config: " + e.getMessage());
 			IO.println("Error setting default config: " + e.getMessage());
 		}
 	}
@@ -124,7 +123,7 @@ public class Config {
 			System.out.println("Default value set for " + key);
 			// Removed conditional restart
 		} catch (Exception e) {
-			logger.error("Error setting default config for {}: ", key, e);
+			logger.error("Error setting default config for " + key + ": " + e.getMessage());
 			IO.println("Error setting default config for " + key + ": " + e.getMessage());
 		}
 	}

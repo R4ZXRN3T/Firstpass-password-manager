@@ -1,8 +1,6 @@
 package org.R4ZXRN3T;
 
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +19,7 @@ import java.util.Map;
 class Updater {
 	private static final String REPO_URL = "https://api.github.com/repos/R4ZXRN3T/Firstpass-password-manager/releases/latest";
 	private static final String DOWNLOAD_URL = "https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/download/";
-	private static final Logger logger = LoggerFactory.getLogger(Updater.class);
+	private static final Logger logger = new org.R4ZXRN3T.Logger(Config.LOG_PATH);
 	private static boolean portableVersion = false;
 	private static Firstpass firstpassInstance = null;
 
@@ -47,7 +45,7 @@ class Updater {
 
 			if (conn.getResponseCode() != 200) {
 				JOptionPane.showMessageDialog(null, "Github Version Not Found", "Error", JOptionPane.ERROR_MESSAGE);
-				logger.error("Failed to check for updates: HTTP error code : {}", conn.getResponseCode());
+				logger.error("Failed to check for updates: HTTP error code: " + conn.getResponseCode());
 				throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
 			}
 
@@ -62,7 +60,7 @@ class Updater {
 			JSONObject jsonResponse = new JSONObject(sb.toString());
 			latestVersion = jsonResponse.getString("tag_name");
 		} catch (Exception e) {
-			logger.error("Error checking for updates: {}", e.getMessage());
+			logger.error("Error checking for updates: " + e.getMessage());
 			IO.println("Error checking for updates: " + e.getMessage());
 			if (showError)
 				JOptionPane.showMessageDialog(null, "<html>Update check failed.<br>Please check your internet connection</html>", "Error", JOptionPane.ERROR_MESSAGE);
@@ -154,7 +152,7 @@ class Updater {
 				new ProcessBuilder("cmd", "/c", "start", filePath + "/Firstpass_setup.exe").start();
 				System.exit(0);
 			} catch (IOException e) {
-				logger.error("Failed to start installer: {}", e.getMessage());
+				logger.error("Failed to start installer: " + e.getMessage());
 				IO.println("Failed to start installer: " + e.getMessage());
 				JOptionPane.showMessageDialog(null, "Failed to install update.\nPlease contact the developer if this issue persists", "Error", JOptionPane.ERROR_MESSAGE);
 			}
@@ -190,7 +188,7 @@ class Updater {
 			}
 			System.exit(0);
 		} catch (IOException e) {
-			logger.error("Failed to schedule update: {}", e.getMessage());
+			logger.error("Failed to schedule update: " + e.getMessage());
 			IO.println("Failed to schedule update: " + e.getMessage());
 			JOptionPane.showMessageDialog(null, "Failed to schedule update.\nPlease contact the developer if this issue persists", "Error", JOptionPane.ERROR_MESSAGE);
 		}
