@@ -29,7 +29,7 @@ class Updater {
 	}
 
 	private static String getFileName() {
-		return portableVersion ? "Firstpass_portable.jar" : "Firstpass_setup.msi";
+		return portableVersion ? "Firstpass_portable.jar" : "Firstpass_setup.exe";
 	}
 
 
@@ -71,7 +71,7 @@ class Updater {
 
 	public static void update() {
 		JLabel versionAvailableLabel = new JLabel("<html> <font color=\"#00b3ff\">Version " + checkVersion(true) + " is available.<br></font> Are you sure you want to update Firstpass?</html>");
-		int option = JOptionPane.showConfirmDialog(null, versionAvailableLabel, "Update", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		int option = JOptionPane.showConfirmDialog(firstpassInstance.getFrame(), versionAvailableLabel, "Update", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		if (option != JOptionPane.YES_OPTION) return;
 
 		SwingUtilities.invokeLater(() -> {
@@ -99,8 +99,11 @@ class Updater {
 				try {
 					String newestVersion = checkVersion(true);
 
+					Path filePath = Config.getConfigFilePath().toAbsolutePath().getParent();
+					if (!filePath.toFile().exists()) filePath.toFile().mkdirs();
+
 					String link = DOWNLOAD_URL + newestVersion + "/" + getFileName();
-					String fileName = portableVersion ? "Firstpass_portable.jar.tmp" : "Firstpass_setup.msi.tmp";
+					String fileName = portableVersion ? filePath + "/Firstpass_portable.jar.tmp" : filePath + "/Firstpass_setup.exe.tmp";
 
 					URL url = new URI(link).toURL();
 					HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -143,13 +146,13 @@ class Updater {
 	private static void installUpdate() {
 		if (!portableVersion) {
 			Path filePath = Config.getConfigFilePath().toAbsolutePath().getParent();
-			if (filePath.toFile().exists()) filePath.toFile().mkdirs();
-			File tmp = new File(filePath + "/Firstpass_setup.exe.tmp");
-			File current = new File(filePath + "/Firstpass_setup.exe");
+			if (!filePath.toFile().exists()) filePath.toFile().mkdirs();
+			File tmp = new File(filePath + "\\Firstpass_setup.exe.tmp");
+			File current = new File(filePath + "\\Firstpass_setup.exe");
 			if (current.exists()) current.delete();
 			tmp.renameTo(current);
 			try {
-				new ProcessBuilder("cmd", "/c", "start", filePath + "/Firstpass_setup.exe").start();
+				new ProcessBuilder("cmd", "/c", "start", filePath + "\\Firstpass_setup.exe").start();
 				System.exit(0);
 			} catch (IOException e) {
 				logger.error("Failed to start installer: " + e.getMessage());
