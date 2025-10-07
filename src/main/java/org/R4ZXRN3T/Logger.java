@@ -8,6 +8,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Logger class for asynchronous logging to a file.
+ * Supports different log levels and customizable log format.
+ * Thread-safe and uses a background thread for writing logs.
+ */
 public class Logger {
 	private static final DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private static final Object POISON = new Object();
@@ -20,10 +25,19 @@ public class Logger {
 	private PrintWriter writer;
 	private volatile boolean initialized = false;
 
+	/**
+	 * Constructs a Logger with the specified log file path and default format.
+	 * @param logFilePath the path to the log file
+	 */
 	public Logger(String logFilePath) {
 		this(logFilePath, "[%t] [%l]\t%m");
 	}
 
+	/**
+	 * Constructs a Logger with the specified log file path and format string.
+	 * @param logFilePath the path to the log file
+	 * @param formatString the format string for log entries
+	 */
 	public Logger(String logFilePath, String formatString) {
 		this.logFile = new File(new File(logFilePath).getAbsolutePath());
 		this.formatString = formatString;
@@ -32,22 +46,42 @@ public class Logger {
 		this.worker.start();
 	}
 
+	/**
+	 * Logs an error message.
+	 * @param message the message to log
+	 */
 	public void error(String message) {
 		enqueue("ERROR", message);
 	}
 
+	/**
+	 * Logs a warning message.
+	 * @param message the message to log
+	 */
 	public void warn(String message) {
 		enqueue("WARN", message);
 	}
 
+	/**
+	 * Logs an informational message.
+	 * @param message the message to log
+	 */
 	public void info(String message) {
 		enqueue("INFO", message);
 	}
 
+	/**
+	 * Logs a debug message.
+	 * @param message the message to log
+	 */
 	public void debug(String message) {
 		enqueue("DEBUG", message);
 	}
 
+	/**
+	 * Closes the logger and releases resources.
+	 * Waits for the background thread to finish writing.
+	 */
 	public void close() {
 		if (!running) return;
 		running = false;
@@ -60,6 +94,11 @@ public class Logger {
 		if (writer != null) writer.close();
 	}
 
+	/**
+	 * Enqueues a formatted log entry for writing.
+	 * @param level the log level
+	 * @param msg the log message
+	 */
 	private void enqueue(String level, String msg) {
 		if (!running) return;
 		String line = formatString
@@ -69,6 +108,10 @@ public class Logger {
 		queue.offer(line);
 	}
 
+	/**
+	 * Initializes the PrintWriter if it has not been initialized.
+	 * Creates the log file and its parent directories if necessary.
+	 */
 	private void initWriterIfNeeded() {
 		if (initialized) return;
 		synchronized (this) {
@@ -85,6 +128,9 @@ public class Logger {
 		}
 	}
 
+	/**
+	 * Background thread loop for draining the log queue and writing to the file.
+	 */
 	private void drainLoop() {
 		try {
 			while (true) {
