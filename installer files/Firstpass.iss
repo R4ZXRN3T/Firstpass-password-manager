@@ -93,14 +93,17 @@ procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   Answer: Integer;
   UserDataPath: String;
+  LogPath: String;
 begin
   if CurUninstallStep = usPostUninstall then begin
     UserDataPath := ExpandConstant('{userappdata}\Firstpass');
+    LogPath := ExpandConstant('{userappdata}\Firstpass\logs');
     if DirExists(UserDataPath) then begin
       Answer := MsgBox('Do you want to delete all data from Firstpass? WARNING: This is not recoverable.', mbConfirmation, MB_YESNO);
       if Answer = IDYES then begin
         DelTree(UserDataPath, True, True, True);
       end;
+      DelTree(LogPath, True, True, True);
     end;
   end;
 end;
