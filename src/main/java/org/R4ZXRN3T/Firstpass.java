@@ -45,7 +45,7 @@ public class Firstpass {
 		// in a separate thread, as on slow internet connection this might take a while
 		if (Boolean.parseBoolean(Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES))) new Thread(() -> {
 			updateAvailable = Updater.checkVersion(false).compareToIgnoreCase(CURRENT_VERSION) > 0;
-			// Will be set after topToolBar is created
+			getTopToolBar().getUpdateButton().setVisible(isUpdateAvailable());
 		}).start();
 
 		deleteFiles();
