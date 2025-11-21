@@ -33,11 +33,12 @@ public class Account {
 
 	/**
 	 * Constructs an Account with specified values.
+	 *
 	 * @param provider the account provider
 	 * @param username the account username
 	 * @param password the account password
-	 * @param url the account URL
-	 * @param comment additional comments
+	 * @param url      the account URL
+	 * @param comment  additional comments
 	 */
 	public Account(String provider, String username, String password, String url, String comment) {
 		this.provider = provider;
@@ -50,12 +51,13 @@ public class Account {
 
 	/**
 	 * Constructs an Account with specified values and index.
+	 *
 	 * @param provider the account provider
 	 * @param username the account username
 	 * @param password the account password
-	 * @param url the account URL
-	 * @param comment additional comments
-	 * @param index the index of the account in a list
+	 * @param url      the account URL
+	 * @param comment  additional comments
+	 * @param index    the index of the account in a list
 	 */
 	public Account(String provider, String username, String password, String url, String comment, int index) {
 		this.provider = provider;
@@ -68,6 +70,7 @@ public class Account {
 
 	/**
 	 * Checks if string1 contains string2, ignoring case.
+	 *
 	 * @param string1 the string to search in
 	 * @param string2 the string to search for
 	 * @return if string1 contains string2 (case-insensitive), false otherwise
@@ -78,6 +81,7 @@ public class Account {
 
 	/**
 	 * Gets the provider.
+	 *
 	 * @return the provider
 	 */
 	public String getProvider() {
@@ -86,6 +90,7 @@ public class Account {
 
 	/**
 	 * Sets the provider.
+	 *
 	 * @param provider the provider to set
 	 */
 	public void setProvider(String provider) {
@@ -94,6 +99,7 @@ public class Account {
 
 	/**
 	 * Gets the username.
+	 *
 	 * @return the username
 	 */
 	public String getUsername() {
@@ -102,6 +108,7 @@ public class Account {
 
 	/**
 	 * Sets the username.
+	 *
 	 * @param username the username to set
 	 */
 	public void setUsername(String username) {
@@ -110,6 +117,7 @@ public class Account {
 
 	/**
 	 * Gets the password.
+	 *
 	 * @return the password
 	 */
 	public String getPassword() {
@@ -118,6 +126,7 @@ public class Account {
 
 	/**
 	 * Sets the password.
+	 *
 	 * @param password the password to set
 	 */
 	public void setPassword(String password) {
@@ -126,6 +135,7 @@ public class Account {
 
 	/**
 	 * Gets the URL.
+	 *
 	 * @return the URL
 	 */
 	public String getUrl() {
@@ -134,6 +144,7 @@ public class Account {
 
 	/**
 	 * Sets the URL.
+	 *
 	 * @param url the URL to set
 	 */
 	public void setUrl(String url) {
@@ -142,6 +153,7 @@ public class Account {
 
 	/**
 	 * Gets the comment.
+	 *
 	 * @return the comment
 	 */
 	public String getComment() {
@@ -150,6 +162,7 @@ public class Account {
 
 	/**
 	 * Sets the comment.
+	 *
 	 * @param comment the comment to set
 	 */
 	public void setComment(String comment) {
@@ -158,6 +171,7 @@ public class Account {
 
 	/**
 	 * Gets the index.
+	 *
 	 * @return the index
 	 */
 	public int getIndex() {
@@ -166,6 +180,7 @@ public class Account {
 
 	/**
 	 * Sets the index.
+	 *
 	 * @param index the index to set
 	 */
 	public void setIndex(int index) {
@@ -174,6 +189,7 @@ public class Account {
 
 	/**
 	 * Checks equality with another object.
+	 *
 	 * @param o the object to compare
 	 * @return true if equal, false otherwise
 	 */
@@ -191,8 +207,9 @@ public class Account {
 
 	/**
 	 * Checks equality with another Account, using a specific field.
+	 *
 	 * @param accountToCompareWith the account to compare
-	 * @param searchableField the field to compare
+	 * @param searchableField      the field to compare
 	 * @return true if equal on the specified field, false otherwise
 	 */
 	public boolean equals(Account accountToCompareWith, SearchableField searchableField) {
@@ -208,7 +225,8 @@ public class Account {
 
 	/**
 	 * Checks if the specified string is contained in the account fields, ignoring case.
-	 * @param s the string to search for
+	 *
+	 * @param s               the string to search for
 	 * @param searchableField the field to search in
 	 * @return true if contained, false otherwise
 	 */
@@ -229,6 +247,7 @@ public class Account {
 
 	/**
 	 * Converts the account fields to an array.
+	 *
 	 * @return an array of account fields
 	 */
 	public String[] toArray() {
@@ -242,9 +261,10 @@ public class Account {
 
 		return returnArray;
 	}
-
+	
 	/**
 	 * Computes the hash code for the account.
+	 *
 	 * @return the hash code
 	 */
 	@Override
@@ -254,6 +274,7 @@ public class Account {
 
 	/**
 	 * Encrypts all account fields using the specified password.
+	 *
 	 * @param encryptionPassword the password for encryption
 	 */
 	public void encrypt(String encryptionPassword) {
@@ -271,6 +292,7 @@ public class Account {
 
 	/**
 	 * Decrypts all account fields using the specified password.
+	 *
 	 * @param decryptionPassword the password for decryption
 	 */
 	public void decrypt(String decryptionPassword) {
@@ -288,6 +310,7 @@ public class Account {
 
 	/**
 	 * Checks if all account fields are empty or null.
+	 *
 	 * @return true if empty, false otherwise
 	 */
 	public boolean isEmpty() {
@@ -311,6 +334,7 @@ public class Account {
 
 		/**
 		 * Constructs a SearchableField with the specified value.
+		 *
 		 * @param value the integer value of the field
 		 */
 		SearchableField(int value) {
@@ -319,6 +343,7 @@ public class Account {
 
 		/**
 		 * Gets the SearchableField corresponding to the specified value.
+		 *
 		 * @param value the integer value
 		 * @return the corresponding SearchableField
 		 * @throws IllegalArgumentException if the value is invalid
