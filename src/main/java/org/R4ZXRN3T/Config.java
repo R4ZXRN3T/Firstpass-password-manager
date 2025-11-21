@@ -1,9 +1,11 @@
 package org.R4ZXRN3T;
 
+import static org.R4ZXRN3T.Tools.encodePassword;
+import static org.R4ZXRN3T.Tools.generateRandomString;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,12 +14,11 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static org.R4ZXRN3T.Tools.encodePassword;
-import static org.R4ZXRN3T.Tools.generateRandomString;
+import javax.swing.*;
 
 public class Config {
 
-	public static final int SALT_LENGTH = 64;
+	public static final int SALT_LENGTH = 16;
 	private static final String DEFAULT_LAF = "0";
 	private static final int PASSWORD_LENGTH = 64;
 	private static final String DEFAULT_EXPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
@@ -62,6 +63,7 @@ public class Config {
 			System.err.println("Config file is corrupted or invalid JSON: " + e.getMessage());
 			setDefaultConfig(); // No restart
 		} catch (IOException e) {
+			logger.error("Failed to read config file: " + e.getMessage());
 			System.err.println("Failed to read config file: " + e.getMessage());
 			JOptionPane.showMessageDialog(firstpass.getFrame(), "Error reading config.json. Program will exit. Please try again later", "Error", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
@@ -80,6 +82,7 @@ public class Config {
 			writer.write(jsonToSave.toString(4));
 			writer.flush();
 		} catch (IOException e) {
+			logger.error("Error writing config: " + e.getMessage());
 			System.err.println("Error writing config: " + e.getMessage());
 		}
 	}
