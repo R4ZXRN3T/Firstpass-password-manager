@@ -261,7 +261,7 @@ public class Account {
 
 		return returnArray;
 	}
-	
+
 	/**
 	 * Computes the hash code for the account.
 	 *
@@ -270,42 +270,6 @@ public class Account {
 	@Override
 	public int hashCode() {
 		return Objects.hash(provider, username, password, url, comment);
-	}
-
-	/**
-	 * Encrypts all account fields using the specified password.
-	 *
-	 * @param encryptionPassword the password for encryption
-	 */
-	public void encrypt(String encryptionPassword) {
-		if (isEmpty() || encryptionPassword == null || encryptionPassword.isEmpty()) return;
-
-		StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
-		textEncryptor.setPasswordCharArray(encryptionPassword.toCharArray());
-
-		if (provider != null && !provider.isEmpty()) provider = textEncryptor.encrypt(provider);
-		if (username != null && !username.isEmpty()) username = textEncryptor.encrypt(username);
-		if (password != null && !password.isEmpty()) password = textEncryptor.encrypt(password);
-		if (url != null && !url.isEmpty()) url = textEncryptor.encrypt(url);
-		if (comment != null && !comment.isEmpty()) comment = textEncryptor.encrypt(comment);
-	}
-
-	/**
-	 * Decrypts all account fields using the specified password.
-	 *
-	 * @param decryptionPassword the password for decryption
-	 */
-	public void decrypt(String decryptionPassword) {
-		if (isEmpty() || decryptionPassword == null || decryptionPassword.isEmpty()) return;
-
-		StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
-		textEncryptor.setPasswordCharArray(decryptionPassword.toCharArray());
-
-		if (provider != null && !provider.isEmpty()) provider = textEncryptor.decrypt(provider);
-		if (username != null && !username.isEmpty()) username = textEncryptor.decrypt(username);
-		if (password != null && !password.isEmpty()) password = textEncryptor.decrypt(password);
-		if (url != null && !url.isEmpty()) url = textEncryptor.decrypt(url);
-		if (comment != null && !comment.isEmpty()) comment = textEncryptor.decrypt(comment);
 	}
 
 	/**
