@@ -87,18 +87,19 @@ public class PasswordGenerator {
 		copyButton.setToolTipText("Copy password to clipboard");
 		copyButton.addActionListener(_ -> {
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(passwordField.getText()), null);
-			JOptionPane.showMessageDialog(frame, "Password copied to clipboard", "Success", JOptionPane.INFORMATION_MESSAGE);
+			Tools.showToast(frame, "Password copied to clipboard", 1500, darkMode, -50);
 		});
 		copyButton.setPreferredSize(new Dimension(40, 40));
 		return copyButton;
 	}
+
 
 	private static String generatePassword(int length, boolean uppercase, boolean lowercase, boolean numbers, boolean specialCharacters) {
 		String characterSet = "";
 		if (uppercase) characterSet += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		if (lowercase) characterSet += "abcdefghijklmnopqrstuvwxyz";
 		if (numbers) characterSet += "0123456789";
-		if (specialCharacters) characterSet += "!@#$%^&*()-_=+[{]};:',<.>/?";
+		if (specialCharacters) characterSet += "!#$%&'()*+,-./:;<=>?@[]^_`{|}~";
 		return Tools.generateRandomString(length, characterSet);
 	}
 }
