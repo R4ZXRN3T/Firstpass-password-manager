@@ -1,7 +1,5 @@
 package org.R4ZXRN3T;
 
-import org.jasypt.util.text.StrongTextEncryptor;
-
 import java.util.Objects;
 
 /**
