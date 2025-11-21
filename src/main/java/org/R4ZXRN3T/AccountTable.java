@@ -160,7 +160,6 @@ public class AccountTable extends JTable {
 		firstpass.setChangeMade(true);
 	}
 
-	// file: 'src/main/java/org/R4ZXRN3T/AccountTable.java'
 	private class HoverCopyRenderer extends DefaultTableCellRenderer {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -169,6 +168,11 @@ public class AccountTable extends JTable {
 			JPanel panel = new JPanel(new BorderLayout());
 			panel.setOpaque(true);
 			panel.setBackground(label.getBackground());
+
+			// Use the table grid color so it looks like the real grid
+			panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, table.getGridColor()));
+
+			label.setOpaque(false); // panel paints background
 			panel.add(label, BorderLayout.CENTER);
 
 			if (row == hoverRow && column == hoverCol) {
