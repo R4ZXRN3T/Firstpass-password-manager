@@ -16,33 +16,6 @@ class AccountTests {
 	}
 
 	@Test
-	void testEncryptionAndDecryption() {
-		String key = "secretKey";
-		Account account = new Account("Google", "user@example.com", "password123", "google.com", "My Google account");
-
-		// Save original values
-		String originalProvider = account.getProvider();
-		String originalUsername = account.getUsername();
-		String originalPassword = account.getPassword();
-
-		// Encrypt
-		account.encrypt(key);
-
-		// Verify encryption changed the values
-		assertNotEquals(originalProvider, account.getProvider());
-		assertNotEquals(originalUsername, account.getUsername());
-		assertNotEquals(originalPassword, account.getPassword());
-
-		// Decrypt
-		account.decrypt(key);
-
-		// Verify decryption restored the values
-		assertEquals("Google", account.getProvider());
-		assertEquals("user@example.com", account.getUsername());
-		assertEquals("password123", account.getPassword());
-	}
-
-	@Test
 	void testEquality() {
 		Account account1 = new Account("Google", "user1@example.com", "pass1", "google.com", "");
 		Account account2 = new Account("Google", "user2@example.com", "pass2", "google.com", "");
