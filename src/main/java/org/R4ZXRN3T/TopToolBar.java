@@ -23,12 +23,12 @@ public class TopToolBar {
 		saveItem.setIcon(Config.getDarkMode() ? Icons.SAVE_ICON_WHITE_SCALED : Icons.SAVE_ICON_SCALED);
 
 		JMenuItem exportAsItem = new JMenuItem("Export");
-		exportAsItem.addActionListener(_ -> Files.exportData(firstpass));
+		exportAsItem.addActionListener(_ -> ImportExportManager.exportData(firstpass));
 		exportAsItem.setIcon(Config.getDarkMode() ? Icons.EXPORT_ICON_WHITE_SCALED : Icons.EXPORT_ICON_SCALED);
 
 		JMenuItem importAsItem = new JMenuItem("Import");
 		importAsItem.setIcon(Config.getDarkMode() ? Icons.IMPORT_ICON_WHITE_SCALED : Icons.IMPORT_ICON_SCALED);
-		importAsItem.addActionListener(_ -> Files.importData(firstpass));
+		importAsItem.addActionListener(_ -> ImportExportManager.importData(firstpass));
 
 		JButton settingsButton = new JButton("Settings");
 		settingsButton.addActionListener(_ -> new SettingsMenu(firstpass).showSettings());
