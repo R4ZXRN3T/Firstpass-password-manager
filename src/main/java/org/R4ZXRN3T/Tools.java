@@ -16,7 +16,7 @@ public class Tools {
 		return encodePassword(initialPassword, salt, HASH_ITERATIONS);
 	}
 
-	// Multi-iteration SHA-256 hashing matching the Rust logic
+	// Multi-iteration SHA-256 hashing
 	public static String encodePassword(String initialPassword, String salt, int iterations) {
 		if (iterations <= 0) return initialPassword;
 		MessageDigest digest = getSHA256Digest();
