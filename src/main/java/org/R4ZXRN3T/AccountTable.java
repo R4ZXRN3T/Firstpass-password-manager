@@ -1,5 +1,12 @@
 package org.R4ZXRN3T;
 
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -10,10 +17,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import java.awt.*;
-import java.awt.datatransfer.StringSelection;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+
 
 public class AccountTable extends JTable {
 
@@ -22,6 +26,8 @@ public class AccountTable extends JTable {
 	private Firstpass firstpass;
 	private int hoverRow = -1;
 	private int hoverCol = -1;
+
+	private final Set<Integer> revealedPasswordRows = new HashSet<>();
 
 	public AccountTable(ArrayList<Account> accounts, Firstpass firstpass) {
 		super();
@@ -62,29 +68,33 @@ public class AccountTable extends JTable {
 
 		addMouseListener(new MouseInputAdapter() {
 			@Override
-			public void mouseExited(MouseEvent e) {
-				hoverRow = -1;
-				hoverCol = -1;
-				repaint();
-			}
-
-			@Override
 			public void mousePressed(MouseEvent e) {
 				Point p = e.getPoint();
 				int r = rowAtPoint(p);
 				int c = columnAtPoint(p);
+				if (r == -1 || c == -1) return;
 
-				// If clicked inside a valid cell, check if the click is within the "button" area (right edge)
-				if (r != -1 && c != -1) {
-					Rectangle cellRect = getCellRect(r, c, false);
-					int buttonWidth = 20; // pixels reserved for the fake button area
-					if (p.x >= cellRect.x + cellRect.width - buttonWidth) {
+				Rectangle cellRect = getCellRect(r, c, false);
+				int buttonWidth = 20;
+
+				if (c == 2) {
+					int copyStart = cellRect.x + cellRect.width - buttonWidth;
+					int eyeStart = copyStart - buttonWidth;
+					if (p.x >= copyStart) {
 						copyToClipboard(getValueAt(r, c));
 						return;
 					}
+					if (p.x >= eyeStart) {
+						int modelRow = convertRowIndexToModel(r);
+						if (!revealedPasswordRows.add(modelRow)) revealedPasswordRows.remove(modelRow);
+						repaint(cellRect);
+						return;
+					}
+				} else if (p.x >= cellRect.x + cellRect.width - buttonWidth) {
+					copyToClipboard(getValueAt(r, c));
+					return;
 				}
 
-				// existing double-click edit behavior
 				if (e.getClickCount() == 2 && getSelectedRow() >= 0 && firstpass != null) {
 					firstpass.editAccount(getSelectedRow());
 				}
@@ -142,6 +152,7 @@ public class AccountTable extends JTable {
 			if (e.getType() == RowSorterEvent.Type.SORTED) setMainData();
 		});
 		setDefaultRenderer(Object.class, new HoverCopyRenderer());
+		revealedPasswordRows.clear();
 	}
 
 	private void setMainData() {
@@ -162,29 +173,53 @@ public class AccountTable extends JTable {
 
 	private class HoverCopyRenderer extends DefaultTableCellRenderer {
 		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+		public Component getTableCellRendererComponent(JTable table, Object value,
+													   boolean isSelected, boolean hasFocus,
+													   int row, int column) {
 			JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
 			JPanel panel = new JPanel(new BorderLayout());
 			panel.setOpaque(true);
 			panel.setBackground(label.getBackground());
-
-			// Use the table grid color so it looks like the real grid
 			panel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, table.getGridColor()));
+			label.setOpaque(false);
 
-			label.setOpaque(false); // panel paints background
+			if (column == 2) {
+				int modelRow = convertRowIndexToModel(row);
+				String text = value == null ? "" : value.toString();
+				if (!revealedPasswordRows.contains(modelRow)) {
+					label.setText("•".repeat(Math.max(4, text.length())));
+				} else {
+					label.setText(text);
+				}
+			}
+
 			panel.add(label, BorderLayout.CENTER);
 
 			if (row == hoverRow && column == hoverCol) {
-				JButton btn = new JButton("⧉");
-				btn.setBorderPainted(false);
-				btn.setFocusPainted(true);
-				btn.setMargin(new Insets(0, 0, 0, 0));
-				btn.addActionListener(_ -> copyToClipboard(value));
-				panel.add(btn, BorderLayout.EAST);
+				JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 0));
+				buttonPanel.setOpaque(false);
+
+				if (column == 2) {
+					JButton eyeBtn = new JButton("\uD83D\uDC41");
+					styleButton(eyeBtn);
+					buttonPanel.add(eyeBtn);
+				}
+
+				JButton copyBtn = new JButton("⧉");
+				styleButton(copyBtn);
+				buttonPanel.add(copyBtn);
+
+				panel.add(buttonPanel, BorderLayout.EAST);
 			}
 			return panel;
 		}
+	}
+
+	private void styleButton(JButton btn) {
+		btn.setBorderPainted(false);
+		btn.setFocusPainted(false);
+		btn.setMargin(new Insets(0, 0, 0, 0));
+		btn.setEnabled(false); // renderer only paints; actual click handled in mousePressed
 	}
 
 	private void copyToClipboard(Object value) {
