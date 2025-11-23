@@ -1,6 +1,7 @@
 package org.R4ZXRN3T;
 
-import javax.swing.*;
+import static org.R4ZXRN3T.Icons.*;
+
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -12,7 +13,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Stack;
 
-import static org.R4ZXRN3T.Icons.*;
+import javax.swing.*;
 
 public class Firstpass {
 
@@ -45,7 +46,7 @@ public class Firstpass {
 		// in a separate thread, as on slow internet connection this might take a while
 		if (Boolean.parseBoolean(Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES))) new Thread(() -> {
 			updateAvailable = Updater.checkVersion(false).compareToIgnoreCase(CURRENT_VERSION) > 0;
-			getTopToolBar().getUpdateButton().setVisible(isUpdateAvailable());
+			if (getTopToolBar() != null) getTopToolBar().getUpdateButton().setVisible(isUpdateAvailable());
 		}).start();
 
 		deleteFiles();
