@@ -17,7 +17,7 @@ import javax.swing.*;
 
 public class Firstpass {
 
-	public static final String CURRENT_VERSION = "2.1.0";
+	public static final String CURRENT_VERSION = "2.1.1";
 	private final ArrayList<Account> accountList = new ArrayList<>();
 	private final Stack<Account> undoStack = new Stack<>();
 	private JFrame frame;

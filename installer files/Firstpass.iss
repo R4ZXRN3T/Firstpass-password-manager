@@ -5,7 +5,7 @@
 ; Application Constants
 ; -----------------------------
 #define MyAppName "Firstpass Password Manager"
-#define MyAppVersion "2.1.0"
+#define MyAppVersion "2.1.1"
 #define MyAppPublisher "R4ZXRN3T"
 #define MyAppURL "https://github.com/R4ZXRN3T/Firstpass-password-manager"
 #define MyAppExeName "Firstpass.exe"
@@ -35,7 +35,7 @@ OutputBaseFilename=Firstpass_setup
 SetupIconFile=.\Firstpass.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
-WizardStyle=modern
+WizardStyle=modern dark
 
 [Languages]
 ; -----------------------------
@@ -55,6 +55,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; -----------------------------
 Source: ".\..\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ".\..\jre\*"; DestDir: "{app}\jre"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
