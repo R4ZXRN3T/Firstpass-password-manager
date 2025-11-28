@@ -1,6 +1,0 @@
-Manifest-Version: 1.0.0
-Implementation-Title: Firstpass Password Manager
-Implementation-Version: 2.1.0
-Implementation-Vendor: R4ZXRN3T
-Implementation-Vendor-Id: com.R4ZXRN3T.Firstpass
-Main-Class: org.R4ZXRN3T.Main

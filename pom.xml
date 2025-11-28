@@ -183,8 +183,6 @@
 				</executions>
 			</plugin>
 
-			<!-- Portable jar with dependencies + assets: Firstpass_portable.jar -->
-			<!-- In pom.xml -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -200,7 +198,10 @@
 							<finalName>Firstpass_portable</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 							<archive>
-								<manifestFile>${project.basedir}/META-INF/MANIFEST.MF</manifestFile>
+								<manifest>
+									<mainClass>org.R4ZXRN3T.Main</mainClass>
+									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+								</manifest>
 							</archive>
 							<descriptors>
 								<descriptor>src/assembly/portable.xml</descriptor>
@@ -225,8 +226,6 @@
 									  tofile="${project.basedir}/Firstpass.jar" overwrite="true"/>
 								<copy file="${project.build.directory}/Firstpass_portable.jar"
 									  tofile="${project.basedir}/Firstpass_portable.jar" overwrite="true"/>
-								<copy file="${project.build.directory}/Firstpass-jlink.zip"
-									  tofile="${project.basedir}/Firstpass_jre.zip" overwrite="true"/>
 							</target>
 						</configuration>
 						<goals>
@@ -235,7 +234,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 
@@ -258,11 +256,21 @@
 							</execution>
 						</executions>
 						<configuration>
-							<!-- Add modularized jasypt directory FIRST in module path -->
+							<!-- Add modularized jasypt directory in module path -->
 							<modulePaths>
 								<modulePath>${project.build.directory}/modules</modulePath>
 							</modulePaths>
-							<launcher>firstpass=org.R4ZXRN3T.Firstpass/org.R4ZXRN3T.Main</launcher>
+
+							<addModules>
+								<addModule>java.base</addModule>
+								<addModule>java.desktop</addModule>
+								<addModule>java.logging</addModule>
+								<addModule>java.sql</addModule>
+								<addModule>jasypt</addModule>
+								<addModule>org.json</addModule>
+								<addModule>com.formdev.flatlaf</addModule>
+							</addModules>
+
 							<compress>2</compress>
 							<noHeaderFiles>true</noHeaderFiles>
 							<noManPages>true</noManPages>
@@ -282,7 +290,7 @@
 								<configuration>
 									<target>
 										<copy file="${project.build.directory}/Firstpass-jlink.zip"
-											  tofile="${project.basedir}/Firstpass_jre.zip" overwrite="true"/>
+											  tofile="${project.basedir}/jre.zip" overwrite="true"/>
 									</target>
 								</configuration>
 								<goals>
