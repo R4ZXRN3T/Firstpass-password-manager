@@ -92,7 +92,7 @@ public class ImportExportManager {
 			}
 			writer.close();
 			Config.setConfig(Config.ConfigKey.LAST_EXPORT_LOCATION, exportFile.getParent());
-			JOptionPane.showMessageDialog(null, "Data successfully exported under:\n" + exportFile.getAbsolutePath(), "Success", JOptionPane.INFORMATION_MESSAGE);
+			Tools.showToast(firstpass.getFrame(), "Data successfully exported under: " + exportFile.getAbsolutePath(), 3000, Config.getDarkMode());
 		} catch (Exception e) {
 			logger.error("Error exporting data: " + e.getMessage());
 			IO.println("Error exporting data: " + e.getMessage());
@@ -210,7 +210,7 @@ public class ImportExportManager {
 
 			Config.setConfig(Config.ConfigKey.LAST_IMPORT_LOCATION, importFile.getParent());
 
-			JOptionPane.showMessageDialog(null, "Data successfully imported", "Success", JOptionPane.INFORMATION_MESSAGE);
+			Tools.showToast(firstpass.getFrame(), "Data successfully imported", 1500, Config.getDarkMode());
 			firstpass.refreshTable();
 			firstpass.setChangeMade(true);
 		} catch (IOException e) {
