@@ -8,6 +8,5 @@ module org.R4ZXRN3T.Firstpass {
 	requires com.formdev.flatlaf;
 	requires jasypt;
 
-	// Export your main package (contains Main, Firstpass, etc.)
 	exports org.R4ZXRN3T;
 }

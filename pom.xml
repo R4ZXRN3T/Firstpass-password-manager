@@ -225,6 +225,8 @@
 									  tofile="${project.basedir}/Firstpass.jar" overwrite="true"/>
 								<copy file="${project.build.directory}/Firstpass_portable.jar"
 									  tofile="${project.basedir}/Firstpass_portable.jar" overwrite="true"/>
+								<copy file="${project.build.directory}/Firstpass-jlink.zip"
+									  tofile="${project.basedir}/Firstpass_jre.zip" overwrite="true"/>
 							</target>
 						</configuration>
 						<goals>
@@ -234,31 +236,63 @@
 				</executions>
 			</plugin>
 
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-jlink-plugin</artifactId>
-			<version>3.2.0</version>
-			<executions>
-				<execution>
-					<phase>verify</phase>
-					<goals>
-						<goal>jlink</goal>
-					</goals>
-				</execution>
-			</executions>
-			<configuration>
-				<!-- Add modularized jasypt directory FIRST in module path -->
-				<modulePaths>
-					<modulePath>${project.build.directory}/modules</modulePath>
-				</modulePaths>
-				<launcher>firstpass=org.R4ZXRN3T.Firstpass/org.R4ZXRN3T.Main</launcher>
-				<compress>2</compress>
-				<noHeaderFiles>true</noHeaderFiles>
-				<noManPages>true</noManPages>
-				<stripDebug>true</stripDebug>
-				<classifier>jlink</classifier>
-			</configuration>
-		</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<!-- Profile for building JLink custom runtime image -->
+		<profile>
+			<id>jlink</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jlink-plugin</artifactId>
+						<version>3.2.0</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jlink</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<!-- Add modularized jasypt directory FIRST in module path -->
+							<modulePaths>
+								<modulePath>${project.build.directory}/modules</modulePath>
+							</modulePaths>
+							<launcher>firstpass=org.R4ZXRN3T.Firstpass/org.R4ZXRN3T.Main</launcher>
+							<compress>2</compress>
+							<noHeaderFiles>true</noHeaderFiles>
+							<noManPages>true</noManPages>
+							<stripDebug>true</stripDebug>
+							<classifier>jlink</classifier>
+						</configuration>
+					</plugin>
+					<!-- Copy jlink zip to project root -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>3.2.0</version>
+						<executions>
+							<execution>
+								<id>copy-jlink-to-root</id>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<copy file="${project.build.directory}/Firstpass-jlink.zip"
+											  tofile="${project.basedir}/Firstpass_jre.zip" overwrite="true"/>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
