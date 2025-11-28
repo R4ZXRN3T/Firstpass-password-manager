@@ -18,7 +18,7 @@ Core Features:
 - Add / edit / remove accounts (with undo for deletions)
 - Optional master password (per‑field encryption at rest)
 - Fast search & field filtering
-- Export / import (TXT, CSV, JSON, XML) – merge or replace
+- Export / import (TXT, CSV, JSON, XML)
 - Built‑in password generator
 - Theme selection (light/dark & more)
 - In‑app update checker
