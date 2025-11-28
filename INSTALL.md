@@ -34,13 +34,26 @@ java -jar Firstpass_portable.jar
 Requirements: JDK 25, Maven.
 
 ```
-mvn clean package
+mvn clean install clean
 ```
 
 Artifacts copied to project root after build:
 
 - `Firstpass.jar` (requires external `assets/` folder)
 - `Firstpass_portable.jar` (self-contained)
+
+### Creating an installer (Windows Only)
+
+Requirements: Inno Setup, Launch4j
+
+1. Execute ```mvn package -P jlink``` in the root dir
+2. Unzip the archive, so that you have a "jre" folder
+3. Open Launch4j
+4. Load "installer files/launch4j_setup.xml"
+5. Click on the ⚙️ button to create an .exe
+6. Launch Inno Setup and load "installer files/Firstpass.iss"
+7. Click the compile button
+8. Done! Your .exe installer should be available under "installer files/Firstpass_setup.exe"
 
 ## Updating
 
