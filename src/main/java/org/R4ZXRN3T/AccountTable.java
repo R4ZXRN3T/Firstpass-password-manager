@@ -187,7 +187,7 @@ public class AccountTable extends JTable {
 				int modelRow = convertRowIndexToModel(row);
 				String text = value == null ? "" : value.toString();
 				if (!revealedPasswordRows.contains(modelRow)) {
-					label.setText("•".repeat(Math.max(4, text.length())));
+					label.setText("⬤".repeat(Math.max(4, text.length())));
 				} else {
 					label.setText(text);
 				}
