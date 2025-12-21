@@ -14,6 +14,8 @@ import java.util.Objects;
 import java.util.Stack;
 
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 public class Firstpass {
 
@@ -24,11 +26,13 @@ public class Firstpass {
 	private String correctPassword;
 	private AccountTable table;
 	private boolean changeMade = false;
-	private boolean passwordSet = true;
 	private boolean updateAvailable = false;
 	private BottomToolBar bottomToolBar;
 	private TopToolBar topToolBar;
 
+	/**
+	 * This funtion is the main function responsible for initializing and running the program.
+	 */
 	public void run() {
 
 		// general initialization
@@ -45,11 +49,8 @@ public class Firstpass {
 
 		deleteFiles();
 
-		// load and decrypt accounts
 		correctPassword = checkPassword();
-		if (correctPassword.isEmpty()) passwordSet = false;
 
-		// Initialize Updater with this instance
 		Updater.initialize(this);
 
 		table = new AccountTable(new ArrayList<>(), this);
@@ -66,6 +67,9 @@ public class Firstpass {
 		frame.setVisible(true);
 	}
 
+	/**
+	 * Kills the entire program and resets everything. Save to restart afterwards.
+	 */
 	public void kill() {
 		if (frame != null) frame.dispose();
 		frame = null;
@@ -78,7 +82,9 @@ public class Firstpass {
 		System.gc();
 	}
 
-	// add an account to the Account ArrayList
+	/**
+	 * Prompts the user to add a new account and adds it to the Account ArrayList.
+	 */
 	public void addAccount() {
 
 		// initialize text fields
@@ -111,7 +117,12 @@ public class Firstpass {
 		}
 	}
 
-	// removes an account from the Account ArrayList
+	/**
+	 * Removes an account from the Account ArrayList.
+	 *
+	 * @param rowIndex the index of the account to remove
+	 *
+	 */
 	public void removeAccount(int rowIndex) {
 
 		// check if row index is valid
@@ -140,7 +151,12 @@ public class Firstpass {
 		changeMade = true;
 	}
 
-	// edit an account in the Account ArrayList
+	/**
+	 * Prompts the user to edit an existing account and updates it in the Account ArrayList.
+	 *
+	 * @param rowIndex the index of the account to edit
+	 *
+	 */
 	public void editAccount(int rowIndex) {
 
 		// check if row index is valid
@@ -175,7 +191,9 @@ public class Firstpass {
 		changeMade = true;
 	}
 
-	// undo the last deletion from the undo stack
+	/**
+	 * Restores the last deleted account from the undo stack back into the Account ArrayList.
+	 */
 	public void undoDeletion() {
 		if (undoStack.isEmpty()) {
 			JOptionPane.showMessageDialog(null, "No deletions to undo.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -191,12 +209,17 @@ public class Firstpass {
 		bottomToolBar.refreshUndoButton();
 	}
 
-	// save accounts and config and exit the program
+	/**
+	 * save accounts and config and exit the program
+	 */
 	public void exit() {
 		save();
 		System.exit(0);
 	}
 
+	/**
+	 * Saves all accounts to file, generates a new salt, hashes it with the password and then saves the config file
+	 */
 	public void save() {
 		Files.saveAccounts(accountList, correctPassword);
 		// generate new salt and thus also new encoded password; *VERY* important for security :)
@@ -206,6 +229,9 @@ public class Firstpass {
 		Config.saveConfig();
 	}
 
+	/**
+	 * Completely removes the config and all account data from disk. Called from the settings menu
+	 */
 	public void fullDelete() {
 		accountList.clear();
 		new File(Files.ACCOUNTS_PATH).delete();
@@ -233,12 +259,16 @@ public class Firstpass {
 		}
 	}
 
-	// adds position in main ArrayList to each Account object
+	/**
+	 * Changes the value of each index field in the account objects to reflect their position in the ArrayList
+	 */
 	public void refreshIndices() {
 		for (int i = 0; i < accountList.size(); i++) accountList.get(i).setIndex(i);
 	}
 
-	// redraws the entire frame with the given Account ArrayList
+	/**
+	 * Initializes the main application frame and adds all items to it.
+	 */
 	public void initializeFrame() {
 		// create and initialize center panel
 		JPanel centerPanel = new JPanel();
@@ -267,8 +297,17 @@ public class Firstpass {
 				// exit if no changes were made
 				if (!changeMade) System.exit(0);
 
-				// check if user wants to save changes
-				int option = JOptionPane.showOptionDialog(null, message, "Save changes?", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, Config.getDarkMode() ? EXIT_ICON_WHITE_SCALED : EXIT_ICON_SCALED, options, options[0]);
+				// dialog to check if user wants to save changes
+				int option = JOptionPane.showOptionDialog(
+						frame,
+						message,
+						"Save changes?",
+						JOptionPane.YES_NO_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE,
+						Config.getDarkMode() ? EXIT_ICON_WHITE_SCALED : EXIT_ICON_SCALED,
+						options,
+						options[0]
+				);
 				switch (option) {
 					case JOptionPane.YES_OPTION -> exit();
 					case JOptionPane.NO_OPTION -> System.exit(0);
@@ -284,19 +323,32 @@ public class Firstpass {
 		frame.repaint();
 	}
 
-	// refreshes only the table with the current Account ArrayList
+	/**
+	 * refreshes the table, using the main Account ArrayList
+	 */
 	public void refreshTable() {
 		refreshTable(accountList);
 	}
 
-	// redraws only the table with the given Account ArrayList
+	/**
+	 * refreshes the table with a given Account ArrayList
+	 *
+	 * @param accountsArr the ArrayList of accounts to display in the table
+	 *
+	 */
 	public void refreshTable(ArrayList<Account> accountsArr) {
 		table.setContent(accountsArr);
-		table.revalidate();                        // self-explanatory
+		table.revalidate();
 		table.repaint();
 	}
 
-	// provides input dialog for password and checks if it's correct. AiO basically :)
+	/**
+	 * Prompts the user for entering a correct password. This will be checked and if correct,
+	 * the user is let in and the correct password is returned.
+	 *
+	 * @return the correct password as String
+	 *
+	 */
 	private String checkPassword() {
 		String currentSalt = Config.getConfig(Config.ConfigKey.SALT);
 		String encodedPassword = Config.getConfig(Config.ConfigKey.PASSWORD);
@@ -307,39 +359,44 @@ public class Firstpass {
 		}
 
 		// initialize variables for inputDialog, in order to make the code more readable
-		String enteredPassword = null;
 		JLabel label = new JLabel();
 		String promptMessage = "Please Enter your password: ";
 		String title = "Firstpass Password Manager";
+		JPasswordField passwordField = new JPasswordField();
+
+		Object[] message = {label, passwordField};
 
 		JFrame tempFrame = new JFrame("Firstpass Password Manager");
-
 		tempFrame.setUndecorated(true);
 		tempFrame.setVisible(true);
 		tempFrame.setLocationRelativeTo(null);
 		tempFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		tempFrame.setIconImage(FIRSTPASS_ICON.getImage());
 
-
-		// loop until correct password is entered or the user exits
+		boolean firstRun = true;
 		do {
-			// set message to incorrect password message if run the second time
-			if (enteredPassword != null) {
+			if (!firstRun) {
 				promptMessage = "Incorrect password. Please try again: ";
 				label.setForeground(Color.RED);
+				passwordField.setText("");
 			}
-			// finally show the input dialog
-			label.setText(promptMessage);
-			enteredPassword = (String) JOptionPane.showInputDialog(tempFrame, label, title, JOptionPane.PLAIN_MESSAGE, null, null, null);
 
-			// exit if user presses cancel
-			if (enteredPassword == null) System.exit(0);
-		} while (!Tools.encodePassword(enteredPassword, currentSalt).equals(encodedPassword));
+			label.setText(promptMessage);
+
+			passwordField.addAncestorListener(new RequestFocusListener());
+			int option = JOptionPane.showConfirmDialog(tempFrame, message, title, JOptionPane.OK_CANCEL_OPTION);
+			if (option != JOptionPane.OK_OPTION) System.exit(0);
+
+			firstRun = false;
+		} while (!Tools.encodePassword(String.valueOf(passwordField.getPassword()), currentSalt).equals(encodedPassword));
 
 		tempFrame.dispose();
-		return enteredPassword;
+		return String.valueOf(passwordField.getPassword());
 	}
 
+	/**
+	 * Helper method to remove any installer related files
+	 */
 	private void deleteFiles() {
 		new Thread(() -> {
 			// delete installer files if existing
@@ -361,53 +418,116 @@ public class Firstpass {
 		}).start();
 	}
 
-	// Getters for encapsulation
+	/**
+	 * Gets the accountList
+	 *
+	 * @return the ArrayList of accounts
+	 */
 	public ArrayList<Account> getAccountList() {
 		return accountList;
 	}
 
+	/**
+	 * Gets the undoStack
+	 *
+	 * @return the Stack of deleted accounts
+	 */
 	public Stack<Account> getUndoStack() {
 		return undoStack;
 	}
 
+	/**
+	 * Gets the main application frame
+	 *
+	 * @return the JFrame of the main application
+	 */
 	public JFrame getFrame() {
 		return frame;
 	}
 
+	/**
+	 * Gets the correct password
+	 *
+	 * @return the correct password as String
+	 */
 	public String getCorrectPassword() {
 		return correctPassword;
 	}
 
+	/**
+	 * Sets the correct password
+	 *
+	 * @param correctPassword the correct password as String
+	 */
 	public void setCorrectPassword(String correctPassword) {
 		this.correctPassword = correctPassword;
 	}
 
+	/**
+	 * Gets the account table
+	 *
+	 * @return the AccountTable object
+	 */
 	public AccountTable getTable() {
 		return table;
 	}
 
+	/**
+	 * Sets changeMade to the value
+	 *
+	 * @param changeMade the value to set it to
+	 */
 	public void setChangeMade(boolean changeMade) {
 		this.changeMade = changeMade;
 	}
 
-	public boolean isPasswordSet() {
-		return passwordSet;
-	}
-
-	public void setPasswordSet(boolean passwordSet) {
-		this.passwordSet = passwordSet;
-	}
-
+	/**
+	 * returns the value of the upodateAvailable variable
+	 *
+	 * @return true if an update is available, false otherwise
+	 */
 	public boolean isUpdateAvailable() {
 		return updateAvailable;
 	}
 
+	/**
+	 * sets the value of the updateAvailable variable
+	 *
+	 * @param updateAvailable true if an update is available, false otherwise
+	 */
 	public void setUpdateAvailable(boolean updateAvailable) {
 		this.updateAvailable = updateAvailable;
 	}
 
+	/**
+	 * gets the bottom tool bar
+	 *
+	 * @return the BottomToolBar object
+	 */
 	public TopToolBar getTopToolBar() {
 		return topToolBar;
 	}
-}
 
+	/**
+	 * <p>This class can be added to a component to immediately focus them on display.</p>
+	 * <p>Only used for JOptionPanes.</p>
+	 */
+	public static class RequestFocusListener implements AncestorListener {
+		public RequestFocusListener() {
+		}
+
+		@Override
+		public void ancestorAdded(AncestorEvent e) {
+			JComponent component = e.getComponent();
+			component.requestFocusInWindow();
+		}
+
+		@Override
+		public void ancestorMoved(AncestorEvent e) {
+		}
+
+		@Override
+		public void ancestorRemoved(AncestorEvent e) {
+		}
+	}
+}
