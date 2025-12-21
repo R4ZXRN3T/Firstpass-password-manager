@@ -8,11 +8,15 @@ public class Main {
 		start();
 	}
 
+	/** starts everything
+	 * */
 	static void start() {
 		Firstpass app = new Firstpass();
 		app.run();
 	}
 
+	/** restart the application
+	 * */
 	public static void restart(Firstpass old) {
 		SwingUtilities.invokeLater(() -> {
 			old.kill();

@@ -1,9 +1,10 @@
 package org.R4ZXRN3T;
 
-import javax.swing.*;
+import static org.R4ZXRN3T.Icons.*;
+
 import java.awt.*;
 
-import static org.R4ZXRN3T.Icons.*;
+import javax.swing.*;
 
 class BottomToolBar {
 
@@ -13,11 +14,18 @@ class BottomToolBar {
 	// only here to be able to refresh the button
 	private CustomButton undoButton;
 
+	/**
+	 * Constructor with Firstpass instance.
+	 */
 	public BottomToolBar(Firstpass firstpass) {
 		this.firstpass = firstpass;
 	}
 
-	// get and populate the toolbar
+	/**
+	 * Sets up the toolbar and returns it.
+	 *
+	 * @return The toolbar
+	 */
 	public JToolBar getToolBar() {
 		// init toolbar
 		JToolBar toolBar = new JToolBar();
@@ -38,7 +46,11 @@ class BottomToolBar {
 		return toolBar;
 	}
 
-	// returns the panel in which all the buttons live
+	/**
+	 * Returns the panel in which all the buttons live.
+	 *
+	 * @return The button panel
+	 */
 	private JPanel getButtonPanel() {
 		// init panel
 		JPanel buttonPanel = new JPanel();
@@ -61,7 +73,11 @@ class BottomToolBar {
 		return buttonPanel;
 	}
 
-	// returns the panel in which the exit button lives
+	/**
+	 * Returns the panel in which the exit button lives.
+	 *
+	 * @return The panel with the exit button
+	 */
 	private JPanel getExitPanel() {
 		JPanel exitPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		exitPanel.add(new CustomButton("Save & Exit", Config.getDarkMode() ? EXIT_ICON_WHITE_SCALED : EXIT_ICON_SCALED, _ -> firstpass.exit(), new Dimension(125, 35)), BorderLayout.EAST);
@@ -69,8 +85,9 @@ class BottomToolBar {
 		return exitPanel;
 	}
 
-	// refresh the undo button
-	// this damn button is annoying
+	/**
+	 * Refreshes the undo button based on whether there is something to undo.
+	 */
 	public void refreshUndoButton() {
 		undoButton.setEnabled(!firstpass.getUndoStack().isEmpty());
 	}

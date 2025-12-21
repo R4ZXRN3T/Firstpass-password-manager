@@ -29,6 +29,13 @@ public class AccountTable extends JTable {
 
 	private final Set<Integer> revealedPasswordRows = new HashSet<>();
 
+	/**
+	 * Initializes the account table with given accounts and a reference to the main Firstpass instance.
+	 *
+	 * @param accounts  the list of accounts to display in the table
+	 * @param firstpass the main Firstpass instance
+	 *
+	 */
 	public AccountTable(ArrayList<Account> accounts, Firstpass firstpass) {
 		super();
 		this.firstpass = firstpass;
@@ -102,6 +109,13 @@ public class AccountTable extends JTable {
 		});
 	}
 
+	/**
+	 * Creates a custom model from table data. Needed to make the cells non-editable
+	 *
+	 * @param tableData 2D array of table data
+	 * @return DefaultTableModel with non-editable cells
+	 *
+	 */
 	private DefaultTableModel createModel(String[][] tableData) {
 		return new DefaultTableModel(tableData, columns) {
 			@Override
@@ -111,16 +125,34 @@ public class AccountTable extends JTable {
 		};
 	}
 
+	/**
+	 * Converts an ArrayList of Account objects to a 2D String array for table display.
+	 *
+	 * @param inputArrayList the list of Account objects
+	 * @return 2D String array representing the account data
+	 *
+	 */
 	private static String[][] AccountArrayListToArray(ArrayList<Account> inputArrayList) {
 		String[][] finalArray = new String[inputArrayList.size()][5];
 		for (int i = 0; i < inputArrayList.size(); i++) finalArray[i] = inputArrayList.get(i).toArray();
 		return finalArray;
 	}
 
+	/**
+	 * Sets the Firstpass instance for the object
+	 *
+	 * @param firstpass The Firstpass instance
+	 */
 	public void setMain(Firstpass firstpass) {
 		this.firstpass = firstpass;
 	}
 
+	/**
+	 * Wraps the table in a JScrollPane with rounded borders.
+	 *
+	 * @return JScrollPane containing the table
+	 *
+	 */
 	public JScrollPane getScrollPane() {
 		JScrollPane scrollPane = new JScrollPane(this);
 		scrollPane.setFocusable(true);
@@ -130,18 +162,42 @@ public class AccountTable extends JTable {
 		return scrollPane;
 	}
 
+	/**
+	 * Checks if a row is selected in the table.
+	 *
+	 * @return true if a row is selected, false otherwise
+	 *
+	 */
 	public boolean isRowSelected() {
 		return getSelectedRow() != -1;
 	}
 
+	/**
+	 * Adds a ListSelectionListener to the table's selection model.
+	 *
+	 * @param listener the ListSelectionListener to add
+	 *
+	 */
 	public void addRowSelectionListener(ListSelectionListener listener) {
 		getSelectionModel().addListSelectionListener(listener);
 	}
 
+	/**
+	 * Checks if the table is focused.
+	 *
+	 * @return true if the table is focused, false otherwise
+	 *
+	 */
 	public boolean isFocused() {
 		return this.isFocusOwner();
 	}
 
+	/**
+	 * Sets the table content with a new list of accounts.
+	 *
+	 * @param accounts the list of accounts to display
+	 *
+	 */
 	public void setContent(ArrayList<Account> accounts) {
 		data = AccountArrayListToArray(accounts);
 		DefaultTableModel model = createModel(data);
@@ -155,6 +211,9 @@ public class AccountTable extends JTable {
 		revealedPasswordRows.clear();
 	}
 
+	/**
+	 * Updates the main Firstpass instance with the current table data.
+	 */
 	private void setMainData() {
 		if (firstpass == null) return;
 		firstpass.getAccountList().clear();
@@ -171,6 +230,9 @@ public class AccountTable extends JTable {
 		firstpass.setChangeMade(true);
 	}
 
+	/**
+	 * Custom cell renderer that shows copy and reveal buttons on hover.
+	 */
 	private class HoverCopyRenderer extends DefaultTableCellRenderer {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value,
@@ -192,6 +254,7 @@ public class AccountTable extends JTable {
 					label.setText(text);
 				}
 			}
+
 
 			panel.add(label, BorderLayout.CENTER);
 
@@ -215,6 +278,11 @@ public class AccountTable extends JTable {
 		}
 	}
 
+	/**
+	 * Styles a button to be used in the cell renderer.
+	 *
+	 * @param btn the JButton to style
+	 */
 	private void styleButton(JButton btn) {
 		btn.setBorderPainted(false);
 		btn.setFocusPainted(false);
@@ -222,6 +290,11 @@ public class AccountTable extends JTable {
 		btn.setEnabled(false); // renderer only paints; actual click handled in mousePressed
 	}
 
+	/**
+	 * Copies the given value to the system clipboard and shows a toast notification.
+	 *
+	 * @param value the value to copy
+	 */
 	private void copyToClipboard(Object value) {
 		String text = value == null ? "" : value.toString();
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
