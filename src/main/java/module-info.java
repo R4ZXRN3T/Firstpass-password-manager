@@ -7,6 +7,7 @@ module org.R4ZXRN3T.Firstpass {
 	requires org.json;
 	requires com.formdev.flatlaf;
 	requires jasypt;
+	requires java.compiler;
 
 	exports org.R4ZXRN3T;
 }
