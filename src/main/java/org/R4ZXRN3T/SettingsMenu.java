@@ -1,17 +1,24 @@
 package org.R4ZXRN3T;
 
-import javax.swing.*;
+import static org.R4ZXRN3T.Config.ConfigKey.*;
+
+import org.R4ZXRN3T.Config.ConfigKey;
+
 import java.awt.*;
 import java.util.HashMap;
 
+import javax.swing.*;
+
 class SettingsMenu {
 
-	private final HashMap<Integer, String> currentSettings = new HashMap<>();
+	private final HashMap<ConfigKey, String> currentSettings = new HashMap<>();
 	private final Firstpass firstpass;
 	private JDialog settingsFrame;
 	private boolean needsRestart = false;
 	private CustomButton changePasswordButton;
 	private CustomButton removePasswordButton;
+
+	private boolean passwordSet = true;
 
 	public SettingsMenu(Firstpass firstpass) {
 		this.firstpass = firstpass;
@@ -20,6 +27,7 @@ class SettingsMenu {
 	public void showSettings() {
 
 		setCurrentSettings();
+		setPasswordSet(!firstpass.getCorrectPassword().isEmpty());
 
 		// set up frame
 		settingsFrame = new JDialog(firstpass.getFrame(), "Firstpass Settings", true);
@@ -41,9 +49,9 @@ class SettingsMenu {
 
 	// write the current settings to the HashMap
 	private void setCurrentSettings() {
-		currentSettings.put(0, firstpass.getCorrectPassword());
-		currentSettings.put(1, Config.getConfig(Config.ConfigKey.LOOK_AND_FEEL));
-		currentSettings.put(2, Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES));
+		currentSettings.put(PASSWORD, firstpass.getCorrectPassword());
+		currentSettings.put(LOOK_AND_FEEL, Config.getConfig(LOOK_AND_FEEL));
+		currentSettings.put(CHECK_FOR_UPDATES, Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES));
 	}
 
 	// get the panel for theme settings
@@ -53,9 +61,9 @@ class SettingsMenu {
 		JLabel themeLabel = new JLabel("Theme:");
 		String[] themeOptions = {"Flat Light", "Flat Dark", "Flat Mac Light", "Flat Mac Dark", "Flat IntelliJ", "Flat Darcula", "Swing Metal", "System Default"};
 		JComboBox<String> themeSelector = new JComboBox<>(themeOptions);
-		themeSelector.setSelectedIndex(Integer.parseInt(currentSettings.get(1)));
+		themeSelector.setSelectedIndex(Integer.parseInt(currentSettings.get(LOOK_AND_FEEL)));
 		themeSelector.addActionListener(_ -> {
-			currentSettings.replace(1, String.valueOf(themeSelector.getSelectedIndex()));
+			currentSettings.replace(LOOK_AND_FEEL, String.valueOf(themeSelector.getSelectedIndex()));
 			needsRestart = true;
 		});
 		themePanel.add(themeLabel);
@@ -67,13 +75,13 @@ class SettingsMenu {
 	private JPanel getPasswordPanel() {
 		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		passwordPanel.setBorder(BorderFactory.createTitledBorder("Password"));
-		changePasswordButton = new CustomButton("Change Password", _ -> {
-			changePassword();
-			refreshButton();
-		}, new Dimension(140, 30));
+
+		changePasswordButton = new CustomButton("Change Password", _ -> changePassword(), new Dimension(140, 30));
 		passwordPanel.add(changePasswordButton);
+
 		removePasswordButton = new CustomButton("Remove Password", _ -> removePasswordDialog(), new Dimension(140, 30));
 		passwordPanel.add(removePasswordButton);
+
 		refreshButton();
 		return passwordPanel;
 	}
@@ -100,8 +108,8 @@ class SettingsMenu {
 		}, new Dimension(140, 30)));
 
 		JCheckBox updateCheckBox = new JCheckBox("Check for updates on startup");
-		updateCheckBox.setSelected(Boolean.parseBoolean(currentSettings.get(2)));
-		updateCheckBox.addActionListener(_ -> currentSettings.replace(2, String.valueOf(updateCheckBox.isSelected())));
+		updateCheckBox.setSelected(Boolean.parseBoolean(currentSettings.get(CHECK_FOR_UPDATES)));
+		updateCheckBox.addActionListener(_ -> currentSettings.replace(CHECK_FOR_UPDATES, String.valueOf(updateCheckBox.isSelected())));
 		updatePanel.add(updateCheckBox);
 
 		return updatePanel;
@@ -135,32 +143,36 @@ class SettingsMenu {
 
 	// change the password
 	private void changePassword() {
-		JTextField oldPassword = new JTextField();
-		JTextField newPassword = new JTextField();
+		JPasswordField oldPassword = new JPasswordField();
+		JPasswordField newPassword = new JPasswordField();
 
-		Object[] message = firstpass.isPasswordSet() ? new Object[]{"Old Password:", oldPassword, "New Password:", newPassword} : new Object[]{"New Password:", newPassword};
+		Object[] message = isPasswordSet() ? new Object[]{"Old Password:", oldPassword, "New Password:", newPassword} : new Object[]{"New Password:", newPassword};
 
-		int option = JOptionPane.showConfirmDialog(settingsFrame, message, "Change Password", JOptionPane.OK_CANCEL_OPTION);
-		if (option == JOptionPane.OK_OPTION) {
-			if (!firstpass.isPasswordSet()) {
-				currentSettings.replace(0, newPassword.getText());
-				firstpass.setPasswordSet(true);
-				JOptionPane.showMessageDialog(settingsFrame, "Password successfully set", "Success", JOptionPane.INFORMATION_MESSAGE);
-				return;
+		boolean firstRun = true;
+
+		do {
+			if (!firstRun) {
+				Tools.showToast(settingsFrame, "Old password is incorrect", 2000, Config.getDarkMode(), 70);
+				oldPassword.setText("");
+				newPassword.setText("");
 			}
-			if (oldPassword.getText().equals(firstpass.getCorrectPassword())) {
-				currentSettings.replace(0, newPassword.getText());
-				JOptionPane.showMessageDialog(settingsFrame, "Password successfully changed", "Success", JOptionPane.INFORMATION_MESSAGE);
-			} else
-				JOptionPane.showMessageDialog(settingsFrame, "The old password is incorrect", "Error", JOptionPane.ERROR_MESSAGE);
-		}
+			oldPassword.addAncestorListener(new Firstpass.RequestFocusListener());
+			int option = JOptionPane.showConfirmDialog(settingsFrame, message, "Change Password", JOptionPane.OK_CANCEL_OPTION);
+			firstRun = false;
+			if (option != JOptionPane.OK_OPTION) return;
+		} while (isPasswordSet() && !String.valueOf(oldPassword.getPassword()).equals(firstpass.getCorrectPassword()));
+
+		currentSettings.replace(PASSWORD, String.valueOf(newPassword.getPassword()));
+		setPasswordSet(true);
+		refreshButton();
+		Tools.showToast(settingsFrame, "Password successfully changed.", 1500, true, 70);
 	}
 
 	// apply the settings and restart the program if necessary
 	private void applySettings() {
-		firstpass.setCorrectPassword(currentSettings.get(0));
-		Config.setConfig(Config.ConfigKey.LOOK_AND_FEEL, currentSettings.get(1));
-		Config.setConfig(Config.ConfigKey.CHECK_FOR_UPDATES, currentSettings.get(2));
+		firstpass.setCorrectPassword(currentSettings.get(PASSWORD));
+		Config.setConfig(LOOK_AND_FEEL, currentSettings.get(LOOK_AND_FEEL));
+		Config.setConfig(CHECK_FOR_UPDATES, currentSettings.get(CHECK_FOR_UPDATES));
 
 		boolean restart = needsRestart && JOptionPane.showConfirmDialog(settingsFrame, "The program needs to restart to apply the new settings. Restart now?", "Restart", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
 
@@ -185,16 +197,39 @@ class SettingsMenu {
 	}
 
 	private void removePasswordDialog() {
-		int option = JOptionPane.showConfirmDialog(null, "Are you sure you want to remove the password?", "Remove Password", JOptionPane.YES_NO_OPTION);
-		if (option == JOptionPane.NO_OPTION) return;
-		currentSettings.replace(0, "");
-		firstpass.setPasswordSet(false);
-		JOptionPane.showMessageDialog(null, "Password removed", "Success", JOptionPane.INFORMATION_MESSAGE);
+		JLabel promptLabel = new JLabel("Enter current password to remove it:");
+		JPasswordField passwordField = new JPasswordField();
+		Object[] message = {promptLabel, passwordField};
+
+		boolean firstRun = true;
+		do {
+			if (!firstRun) {
+				promptLabel.setText("Wrong password. Please try again:");
+				promptLabel.setForeground(Color.RED);
+				passwordField.setText("");
+			}
+			passwordField.addAncestorListener(new Firstpass.RequestFocusListener());
+			int option = JOptionPane.showConfirmDialog(null, message, "Remove Password", JOptionPane.OK_CANCEL_OPTION);
+			if (option != JOptionPane.OK_OPTION) return;
+			firstRun = false;
+		} while (!String.valueOf(passwordField.getPassword()).equals(currentSettings.get(PASSWORD)));
+
+		currentSettings.replace(PASSWORD, "");
+		setPasswordSet(false);
+		Tools.showToast(settingsFrame, "Password successfully removed", 2000, Config.getDarkMode(), 70);
 		refreshButton();
 	}
 
+	private boolean isPasswordSet() {
+		return passwordSet;
+	}
+
+	private void setPasswordSet(boolean passwordSet) {
+		this.passwordSet = passwordSet;
+	}
+
 	private void refreshButton() {
-		changePasswordButton.setText(firstpass.isPasswordSet() ? "Change Password" : "Set Password");
-		removePasswordButton.setEnabled(firstpass.isPasswordSet());
+		changePasswordButton.setText(isPasswordSet() ? "Change Password" : "Set Password");
+		removePasswordButton.setEnabled(isPasswordSet());
 	}
 }
