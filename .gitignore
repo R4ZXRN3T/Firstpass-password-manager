@@ -12,4 +12,4 @@ launch4j.log
 firstpass.log
 jre.zip
 jre/
-full_build.ps1
+full_build_windows.ps1
