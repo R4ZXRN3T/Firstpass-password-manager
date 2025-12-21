@@ -124,7 +124,6 @@ public class Config {
 			}
 			saveConfig();
 			System.out.println("Default value set for " + key);
-			// Removed conditional restart
 		} catch (Exception e) {
 			logger.error("Error setting default config for " + key + ": " + e.getMessage());
 			IO.println("Error setting default config for " + key + ": " + e.getMessage());
