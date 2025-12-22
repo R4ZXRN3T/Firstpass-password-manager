@@ -129,7 +129,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>org.R4ZXRN3T.Main</mainClass>
+							<mainClass>org.R4ZXRN3T.firstpass.Main</mainClass>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 						</manifest>
 					</archive>
@@ -199,7 +199,7 @@
 							<appendAssemblyId>false</appendAssemblyId>
 							<archive>
 								<manifest>
-									<mainClass>org.R4ZXRN3T.Main</mainClass>
+									<mainClass>org.R4ZXRN3T.firstpass.Main</mainClass>
 									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 								</manifest>
 							</archive>

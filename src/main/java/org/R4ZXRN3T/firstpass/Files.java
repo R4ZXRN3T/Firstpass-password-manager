@@ -1,4 +1,4 @@
-package org.R4ZXRN3T;
+package org.R4ZXRN3T.firstpass;
 
 import org.jasypt.util.text.StrongTextEncryptor;
 
@@ -17,7 +17,7 @@ import javax.swing.*;
 class Files {
 
 	public static final String ACCOUNTS_PATH = String.valueOf(getAccountFilePath());
-	private static final Logger logger = new org.R4ZXRN3T.Logger(Config.LOG_PATH);
+	private static final Logger logger = new org.R4ZXRN3T.firstpass.Logger(Config.LOG_PATH);
 	private static final int ACCOUNT_FIELDS_COUNT = 5;
 
 	// retrieve Accounts ArrayList from accounts.txt. Only called on program launch

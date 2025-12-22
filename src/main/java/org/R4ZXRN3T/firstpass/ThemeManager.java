@@ -1,4 +1,4 @@
-package org.R4ZXRN3T;
+package org.R4ZXRN3T.firstpass;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
@@ -12,7 +12,7 @@ import java.awt.*;
 
 public class ThemeManager {
 
-	private static final Logger logger = new org.R4ZXRN3T.Logger(Config.LOG_PATH);
+	private static final Logger logger = new org.R4ZXRN3T.firstpass.Logger(Config.LOG_PATH);
 
 	// sets the look and feel of the program. Also returns whether the look and feel is a dark mode theme
 	public boolean setLookAndFeel(String LaFIndex) {

@@ -1,4 +1,4 @@
-module org.R4ZXRN3T.Firstpass {
+module org.R4ZXRN3T.firstpass {
 	// JDK modules
 	requires java.base;
 	requires java.desktop;  // Swing, AWT
@@ -9,5 +9,5 @@ module org.R4ZXRN3T.Firstpass {
 	requires jasypt;
 	requires java.compiler;
 
-	exports org.R4ZXRN3T;
+	exports org.R4ZXRN3T.firstpass;
 }

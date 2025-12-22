@@ -1,8 +1,8 @@
-package org.R4ZXRN3T;
+package org.R4ZXRN3T.firstpass;
 
-import static org.R4ZXRN3T.Config.ConfigKey.*;
+import static org.R4ZXRN3T.firstpass.Config.ConfigKey.*;
 
-import org.R4ZXRN3T.Config.ConfigKey;
+import org.R4ZXRN3T.firstpass.Config.ConfigKey;
 
 import java.awt.*;
 import java.util.HashMap;
