@@ -1,4 +1,4 @@
-import org.R4ZXRN3T.Config;
+import org.R4ZXRN3T.firstpass.Config;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

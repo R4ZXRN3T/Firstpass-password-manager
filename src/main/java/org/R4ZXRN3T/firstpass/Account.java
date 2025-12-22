@@ -1,4 +1,4 @@
-package org.R4ZXRN3T;
+package org.R4ZXRN3T.firstpass;
 
 import java.util.Objects;
 

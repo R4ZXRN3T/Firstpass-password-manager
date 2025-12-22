@@ -1,7 +1,7 @@
-package org.R4ZXRN3T;
+package org.R4ZXRN3T.firstpass;
 
-import static org.R4ZXRN3T.Tools.encodePassword;
-import static org.R4ZXRN3T.Tools.generateRandomString;
+import static org.R4ZXRN3T.firstpass.Tools.encodePassword;
+import static org.R4ZXRN3T.firstpass.Tools.generateRandomString;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,4 +1,4 @@
-package org.R4ZXRN3T;
+package org.R4ZXRN3T.firstpass;
 
 import org.json.JSONObject;
 
@@ -19,7 +19,7 @@ import java.util.Map;
 class Updater {
 	private static final String REPO_URL = "https://api.github.com/repos/R4ZXRN3T/Firstpass-password-manager/releases/latest";
 	private static final String DOWNLOAD_URL = "https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/download/";
-	private static final Logger logger = new org.R4ZXRN3T.Logger(Config.LOG_PATH);
+	private static final Logger logger = new org.R4ZXRN3T.firstpass.Logger(Config.LOG_PATH);
 	private static boolean portableVersion = false;
 	private static Firstpass firstpassInstance = null;
 

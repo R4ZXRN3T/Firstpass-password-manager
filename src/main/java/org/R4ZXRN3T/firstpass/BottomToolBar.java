@@ -1,6 +1,6 @@
-package org.R4ZXRN3T;
+package org.R4ZXRN3T.firstpass;
 
-import static org.R4ZXRN3T.Icons.*;
+import static org.R4ZXRN3T.firstpass.Icons.*;
 
 import java.awt.*;
 
