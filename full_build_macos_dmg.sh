@@ -1,6 +1,9 @@
 mvn clean install -P jlink clean
 rm -rf ./jre
-unzip ./jre.zip
+mkdir ./jre
+cd ./jre
+unzip ../jre.zip
+cd ..
 
 jpackage \
 	--type dmg \
