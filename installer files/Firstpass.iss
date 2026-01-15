@@ -29,7 +29,7 @@ DefaultDirName={autopf}\Firstpass
 DisableProgramGroupPage=yes
 LicenseFile=.\License Agreement.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
-;PrivilegesRequired=lowest
+;PrivilegesRequired=none
 OutputDir=.\
 OutputBaseFilename=Firstpass_setup
 SetupIconFile=.\Firstpass.ico
@@ -70,25 +70,6 @@ Name: "{autodesktop}\{#DesktopShortcutName}"; Filename: "{app}\{#MyAppExeName}";
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall skipifsilent
 
 [Code]
-
-function IsJavaInstalled(): Boolean;
-var
-  ResultCode: Integer;
-begin
-  // Try to run 'java -version' and check the output
-  Result := (Exec('java', '-version', '', 0, ewWaitUntilTerminated, ResultCode));
-end;
-
-function InitializeSetup(): Boolean;
-begin
-  if not IsJavaInstalled() then
-  begin
-    MsgBox('Java is not installed! Please install Java before running Firstpass Password Manager setup.', mbCriticalError, MB_OK);
-    Result := False; // abort setup
-  end
-  else
-    Result := True;
-end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
