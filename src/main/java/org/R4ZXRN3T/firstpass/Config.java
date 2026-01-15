@@ -47,7 +47,7 @@ public class Config {
 	private static void readConfig() {
 		try {
 			File configFile = new File(new File(Config.CONFIG_PATH).getAbsolutePath());
-			IO.println("Reading config from " + configFile.getAbsolutePath());
+			System.out.println("Reading config from " + configFile.getAbsolutePath());
 			if (!configFile.exists() || configFile.length() == 0) {
 				setDefaultConfig(); // No restart here
 				return;
@@ -57,7 +57,7 @@ public class Config {
 			for (String currentKey : jsonObject.keySet()) {
 				String content = jsonObject.getString(currentKey);
 				configList.put(currentKey, content);
-				IO.println("Loaded config: " + currentKey + " = " + content);
+				System.out.println("Loaded config: " + currentKey + " = " + content);
 			}
 		} catch (JSONException e) {
 			System.err.println("Config file is corrupted or invalid JSON: " + e.getMessage());
@@ -78,7 +78,7 @@ public class Config {
 				return;
 			}
 			JSONObject jsonToSave = new JSONObject(configList);
-			for (String key : configList.keySet()) IO.println("Saving config: " + key + " = " + configList.get(key));
+			for (String key : configList.keySet()) System.out.println("Saving config: " + key + " = " + configList.get(key));
 			writer.write(jsonToSave.toString(4));
 			writer.flush();
 		} catch (IOException e) {
@@ -104,7 +104,7 @@ public class Config {
 			// Removed Main.restart(firstpass);
 		} catch (Exception e) {
 			logger.error("Error setting default config: " + e.getMessage());
-			IO.println("Error setting default config: " + e.getMessage());
+			System.out.println("Error setting default config: " + e.getMessage());
 		}
 	}
 
@@ -126,7 +126,7 @@ public class Config {
 			System.out.println("Default value set for " + key);
 		} catch (Exception e) {
 			logger.error("Error setting default config for " + key + ": " + e.getMessage());
-			IO.println("Error setting default config for " + key + ": " + e.getMessage());
+			System.out.println("Error setting default config for " + key + ": " + e.getMessage());
 		}
 	}
 

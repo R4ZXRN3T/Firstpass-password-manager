@@ -16,28 +16,28 @@ public class TopToolBar {
 		JMenuBar toolBar = new JMenuBar();
 
 		JMenuItem saveItem = new JMenuItem("Save");
-		saveItem.addActionListener(_ -> {
+		saveItem.addActionListener(e -> {
 			firstpass.save();
 			firstpass.setChangeMade(false);
 		});
 		saveItem.setIcon(Config.getDarkMode() ? Icons.SAVE_ICON_WHITE_SCALED : Icons.SAVE_ICON_SCALED);
 
 		JMenuItem exportAsItem = new JMenuItem("Export");
-		exportAsItem.addActionListener(_ -> ImportExportManager.exportData(firstpass));
+		exportAsItem.addActionListener(e -> ImportExportManager.exportData(firstpass));
 		exportAsItem.setIcon(Config.getDarkMode() ? Icons.EXPORT_ICON_WHITE_SCALED : Icons.EXPORT_ICON_SCALED);
 
 		JMenuItem importAsItem = new JMenuItem("Import");
 		importAsItem.setIcon(Config.getDarkMode() ? Icons.IMPORT_ICON_WHITE_SCALED : Icons.IMPORT_ICON_SCALED);
-		importAsItem.addActionListener(_ -> ImportExportManager.importData(firstpass));
+		importAsItem.addActionListener(e -> ImportExportManager.importData(firstpass));
 
 		JButton settingsButton = new JButton("Settings");
-		settingsButton.addActionListener(_ -> new SettingsMenu(firstpass).showSettings());
+		settingsButton.addActionListener(e -> new SettingsMenu(firstpass).showSettings());
 		settingsButton.setBackground(firstpass.getFrame().getBackground());
 		settingsButton.setBorderPainted(false);
 		settingsButton.setFocusable(false);
 
 		JMenuItem exitItem = new JMenuItem("Save & Exit");
-		exitItem.addActionListener(_ -> firstpass.exit());
+		exitItem.addActionListener(e -> firstpass.exit());
 		exitItem.setIcon(Config.getDarkMode() ? Icons.EXIT_ICON_WHITE_SCALED : Icons.EXIT_ICON_SCALED);
 
 		JMenu fileItem = new JMenu("File");
@@ -48,7 +48,7 @@ public class TopToolBar {
 
 		updateButton.setForeground(new Color(0, 180, 255));
 		updateButton.setBorderPainted(true);
-		updateButton.addActionListener(_ -> Updater.update());
+		updateButton.addActionListener(e -> Updater.update());
 		updateButton.setVisible(firstpass.isUpdateAvailable());
 
 		toolBar.add(fileItem);

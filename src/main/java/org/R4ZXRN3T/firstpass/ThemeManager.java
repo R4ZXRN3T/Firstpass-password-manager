@@ -46,7 +46,7 @@ public class ThemeManager {
 		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException |
 				 IllegalAccessException e) {
 			logger.error("Error setting Look and Feel: " + e.getMessage());
-			IO.println("Error setting Look and Feel: " + e.getMessage() + "Exiting program...");
+			System.out.println("Error setting Look and Feel: " + e.getMessage() + "Exiting program...");
 			System.exit(1);
 		}
 		return false;

@@ -1,7 +1,8 @@
 package org.R4ZXRN3T.firstpass;
 
-import static org.R4ZXRN3T.firstpass.Icons.*;
-
+import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -13,9 +14,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Stack;
 
-import javax.swing.*;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
+import static org.R4ZXRN3T.firstpass.Icons.*;
 
 public class Firstpass {
 
@@ -43,7 +42,9 @@ public class Firstpass {
 		// check whether an update is available
 		// in a separate thread, as on slow internet connection this might take a while
 		if (Boolean.parseBoolean(Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES))) new Thread(() -> {
-			updateAvailable = Updater.checkVersion(false).compareToIgnoreCase(CURRENT_VERSION) > 0;
+			String newVersion = Updater.checkVersion(false);
+			if (newVersion == null || newVersion.isBlank()) return;
+			setUpdateAvailable(Tools.compareVersion(newVersion, CURRENT_VERSION) > 0);
 			if (getTopToolBar() != null) getTopToolBar().getUpdateButton().setVisible(isUpdateAvailable());
 		}).start();
 

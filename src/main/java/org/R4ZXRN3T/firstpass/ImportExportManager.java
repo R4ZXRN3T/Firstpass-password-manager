@@ -95,7 +95,7 @@ public class ImportExportManager {
 			Tools.showToast(firstpass.getFrame(), "Data successfully exported under: " + exportFile.getAbsolutePath(), 3000, Config.getDarkMode());
 		} catch (Exception e) {
 			logger.error("Error exporting data: " + e.getMessage());
-			IO.println("Error exporting data: " + e.getMessage());
+			System.out.println("Error exporting data: " + e.getMessage());
 			JOptionPane.showMessageDialog(null, "An error occurred while exporting the data", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
@@ -215,7 +215,7 @@ public class ImportExportManager {
 			firstpass.setChangeMade(true);
 		} catch (IOException e) {
 			logger.error("Error importing data: " + e.getMessage());
-			IO.println("Error importing data: " + e.getMessage());
+			System.out.println("Error importing data: " + e.getMessage());
 			JOptionPane.showMessageDialog(null, "An error occurred while importing the data", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}

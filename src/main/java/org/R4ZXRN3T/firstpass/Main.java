@@ -4,19 +4,23 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Main {
-	static void main() {
+	public static void main(String[] args) {
 		start();
 	}
 
-	/** starts everything
-	 * */
+	/**
+	 * starts everything
+	 *
+	 */
 	static void start() {
 		Firstpass app = new Firstpass();
 		app.run();
 	}
 
-	/** restart the application
-	 * */
+	/**
+	 * restart the application
+	 *
+	 */
 	public static void restart(Firstpass old) {
 		SwingUtilities.invokeLater(() -> {
 			old.kill();
