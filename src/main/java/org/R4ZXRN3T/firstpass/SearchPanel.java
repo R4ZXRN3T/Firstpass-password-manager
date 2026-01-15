@@ -28,7 +28,7 @@ class SearchPanel extends JPanel {
 		searchOptions.setSelectedIndex(0);
 		searchOptions.setFocusable(false);
 		searchOptions.setBackground(Config.getDarkMode() ? BottomToolBar.DARK_MODE_COLOR : new Color(230, 230, 230));
-		searchOptions.addActionListener(_ -> selectedSearchOption = SearchableField.fromValue(searchOptions.getSelectedIndex()));
+		searchOptions.addActionListener(e -> selectedSearchOption = SearchableField.fromValue(searchOptions.getSelectedIndex()));
 
 		// add stuff again
 		this.add(searchOptions, BorderLayout.EAST);

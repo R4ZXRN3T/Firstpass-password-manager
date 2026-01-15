@@ -11,12 +11,25 @@ public class Tools {
 
 	private static final int HASH_ITERATIONS = 250_000;
 
-	// Backwards compatible: single iteration
+	/**
+	 * Encode a password using SHA-256 with 250,000 iterations and a salt
+	 *
+	 * @param initialPassword The password to hash
+	 * @param salt            Thesalt to use
+	 * @return The hashed password
+	 */
 	public static String encodePassword(String initialPassword, String salt) {
 		return encodePassword(initialPassword, salt, HASH_ITERATIONS);
 	}
 
-	// Multi-iteration SHA-256 hashing
+	/**
+	 * Encode a password using SHA-256 with a specified number of iterations and a salt
+	 *
+	 * @param initialPassword The password to hash
+	 * @param salt            The salt to use
+	 * @param iterations      The number of iterations
+	 * @return The hashed password
+	 */
 	public static String encodePassword(String initialPassword, String salt, int iterations) {
 		if (iterations <= 0) return initialPassword;
 		MessageDigest digest = getSHA256Digest();
@@ -29,6 +42,12 @@ public class Tools {
 		return current;
 	}
 
+	/**
+	 * Convert a byte array to a hexadecimal string
+	 *
+	 * @param bytes The byte array
+	 * @return The hexadecimal string
+	 */
 	private static String toHex(byte[] bytes) {
 		StringBuilder sb = new StringBuilder(bytes.length * 2);
 		for (byte b : bytes) {
@@ -39,6 +58,11 @@ public class Tools {
 		return sb.toString();
 	}
 
+	/**
+	 * Get a SHA-256 MessageDigest instance
+	 *
+	 * @return The MessageDigest instance
+	 */
 	private static MessageDigest getSHA256Digest() {
 		try {
 			return MessageDigest.getInstance("SHA-256");
@@ -47,10 +71,23 @@ public class Tools {
 		}
 	}
 
+	/**
+	 * Generate a random string of specified length using alphanumeric characters
+	 *
+	 * @param length The length of the string
+	 * @return The generated random string
+	 */
 	public static String generateRandomString(int length) {
 		return generateRandomString(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 	}
 
+	/**
+	 * Generate a random string of specified length using the provided character set
+	 *
+	 * @param length       The length of the string
+	 * @param characterSet The set of characters to use
+	 * @return The generated random string
+	 */
 	public static String generateRandomString(int length, String characterSet) {
 		StringBuilder randomString = new StringBuilder();
 		SecureRandom rng = new SecureRandom();
@@ -59,6 +96,12 @@ public class Tools {
 		return randomString.toString();
 	}
 
+	/**
+	 * Validate and escape special characters for XML
+	 *
+	 * @param input The input string
+	 * @return The escaped string
+	 */
 	public static String validateForXML(String input) {
 		return input.replace("&", "&amp;")
 				.replace("<", "&lt;")
@@ -67,6 +110,12 @@ public class Tools {
 				.replace("'", "&apos;");
 	}
 
+	/**
+	 * Return the original string by unescaping XML special characters
+	 *
+	 * @param input The escaped string
+	 * @return The original string
+	 */
 	public static String returnOriginalValue(String input) {
 		return input.replace("&amp;", "&")
 				.replace("&lt;", "<")
@@ -75,11 +124,50 @@ public class Tools {
 				.replace("&apos;", "'");
 	}
 
+	/**
+	 * Compare two version strings
+	 *
+	 * @param v1 The first version string
+	 * @param v2 The second version string
+	 * @return if v1 > v2 returns 1 <br>
+	 * if v1 < v2 returns -1 <br>
+	 * if v1 == v2 returns 0
+	 */
+	public static int compareVersion(String v1, String v2) {
+		String[] parts1 = v1.split("\\.");
+		String[] parts2 = v2.split("\\.");
+		int length = Math.max(parts1.length, parts2.length);
+		for (int i = 0; i < length; i++) {
+			int p1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
+			int p2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
+			if (p1 != p2) {
+				return p1 > p2 ? 1 : -1;
+			}
+		}
+		return 0; // versions are equal
+	}
+
+	/**
+	 * Show a toast message on the given parent window
+	 *
+	 * @param parent     The parent window
+	 * @param message    The message to show
+	 * @param durationMs The duration to show the message in milliseconds
+	 * @param darkMode   Whether to use dark mode colors
+	 */
 	public static void showToast(Window parent, String message, int durationMs, boolean darkMode) {
 		showToast(parent, message, durationMs, darkMode, 200);
 	}
 
-	// Java
+	/**
+	 * Show a toast message on the given parent window with a vertical offset
+	 *
+	 * @param parent     The parent window
+	 * @param message    The message to show
+	 * @param durationMs The duration to show the message in milliseconds
+	 * @param darkMode   Whether to use dark mode colors
+	 * @param yOffset    The vertical offset from the bottom of the parent window
+	 */
 	public static void showToast(Window parent, String message, int durationMs, boolean darkMode, int yOffset) {
 		if (parent == null) return;
 
@@ -111,7 +199,7 @@ public class Tools {
 			((Timer) e.getSource()).stop();
 			Timer fade = new Timer(fadeDelay, null);
 			final int[] step = {0};
-			fade.addActionListener(_ -> {
+			fade.addActionListener(ev -> {
 				step[0]++;
 				if (step[0] >= fadeSteps) {
 					fade.stop();
@@ -126,6 +214,14 @@ public class Tools {
 		}).start();
 	}
 
+	/**
+	 * Create a JPanel with rounded corners and anti-aliased text
+	 *
+	 * @param message  The message to display
+	 * @param darkMode Whether to use dark mode colors
+	 * @param arc      The corner arc size
+	 * @return The created JPanel
+	 */
 	private static JPanel getJPanel(String message, boolean darkMode, int arc) {
 		Color bgColor = darkMode ? new Color(50, 50, 50) : new Color(240, 240, 240);
 		Color fgColor = darkMode ? Color.WHITE : Color.BLACK;
@@ -161,5 +257,4 @@ public class Tools {
 		content.add(label);
 		return content;
 	}
-
 }

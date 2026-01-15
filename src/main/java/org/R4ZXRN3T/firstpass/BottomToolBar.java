@@ -57,11 +57,11 @@ class BottomToolBar {
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
 		// create buttons
-		CustomButton addButton = new CustomButton("Add", Config.getDarkMode() ? ADD_ICON_WHITE_SCALED : ADD_ICON_SCALED, _ -> firstpass.addAccount(), DEFAULT_BUTTON_SIZE);
-		CustomButton removeButton = new CustomButton("Remove", Config.getDarkMode() ? REMOVE_ICON_WHITE_SCALED : REMOVE_ICON_SCALED, _ -> firstpass.removeAccount(firstpass.getTable().getSelectedRow()), firstpass.getTable(), DEFAULT_BUTTON_SIZE);
-		CustomButton editButton = new CustomButton("Edit", Config.getDarkMode() ? EDIT_ICON_WHITE_SCALED : EDIT_ICON_SCALED, _ -> firstpass.editAccount(firstpass.getTable().getSelectedRow()), firstpass.getTable(), DEFAULT_BUTTON_SIZE);
-		undoButton = new CustomButton("Undo", Config.getDarkMode() ? UNDO_ICON_WHITE_SCALED : UNDO_ICON_SCALED, _ -> firstpass.undoDeletion(), DEFAULT_BUTTON_SIZE);
-		CustomButton settingsButton = new CustomButton("Generator", Config.getDarkMode() ? GENERATE_ICON_WHITE_SCALED : GENERATE_ICON_SCALED, _ -> PasswordGenerator.showPasswordGeneratorDialog(firstpass.getFrame(), Config.getDarkMode()), DEFAULT_BUTTON_SIZE);
+		CustomButton addButton = new CustomButton("Add", Config.getDarkMode() ? ADD_ICON_WHITE_SCALED : ADD_ICON_SCALED, e -> firstpass.addAccount(), DEFAULT_BUTTON_SIZE);
+		CustomButton removeButton = new CustomButton("Remove", Config.getDarkMode() ? REMOVE_ICON_WHITE_SCALED : REMOVE_ICON_SCALED, e -> firstpass.removeAccount(firstpass.getTable().getSelectedRow()), firstpass.getTable(), DEFAULT_BUTTON_SIZE);
+		CustomButton editButton = new CustomButton("Edit", Config.getDarkMode() ? EDIT_ICON_WHITE_SCALED : EDIT_ICON_SCALED, e -> firstpass.editAccount(firstpass.getTable().getSelectedRow()), firstpass.getTable(), DEFAULT_BUTTON_SIZE);
+		undoButton = new CustomButton("Undo", Config.getDarkMode() ? UNDO_ICON_WHITE_SCALED : UNDO_ICON_SCALED, e -> firstpass.undoDeletion(), DEFAULT_BUTTON_SIZE);
+		CustomButton settingsButton = new CustomButton("Generator", Config.getDarkMode() ? GENERATE_ICON_WHITE_SCALED : GENERATE_ICON_SCALED, e -> PasswordGenerator.showPasswordGeneratorDialog(firstpass.getFrame(), Config.getDarkMode()), DEFAULT_BUTTON_SIZE);
 
 		// add buttons to panel
 		buttonPanel.add(addButton);
@@ -80,7 +80,7 @@ class BottomToolBar {
 	 */
 	private JPanel getExitPanel() {
 		JPanel exitPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		exitPanel.add(new CustomButton("Save & Exit", Config.getDarkMode() ? EXIT_ICON_WHITE_SCALED : EXIT_ICON_SCALED, _ -> firstpass.exit(), new Dimension(125, 35)), BorderLayout.EAST);
+		exitPanel.add(new CustomButton("Save & Exit", Config.getDarkMode() ? EXIT_ICON_WHITE_SCALED : EXIT_ICON_SCALED, e -> firstpass.exit(), new Dimension(125, 35)), BorderLayout.EAST);
 
 		return exitPanel;
 	}

@@ -61,7 +61,7 @@ class Updater {
 			latestVersion = jsonResponse.getString("tag_name");
 		} catch (Exception e) {
 			logger.error("Error checking for updates: " + e.getMessage());
-			IO.println("Error checking for updates: " + e.getMessage());
+			System.out.println("Error checking for updates: " + e.getMessage());
 			if (showError)
 				JOptionPane.showMessageDialog(null, "<html>Update check failed.<br>Please check your internet connection</html>", "Error", JOptionPane.ERROR_MESSAGE);
 		}
@@ -156,7 +156,7 @@ class Updater {
 				System.exit(0);
 			} catch (IOException e) {
 				logger.error("Failed to start installer: " + e.getMessage());
-				IO.println("Failed to start installer: " + e.getMessage());
+				System.out.println("Failed to start installer: " + e.getMessage());
 				JOptionPane.showMessageDialog(null, "Failed to install update.\nPlease contact the developer if this issue persists", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
@@ -192,7 +192,7 @@ class Updater {
 			System.exit(0);
 		} catch (IOException e) {
 			logger.error("Failed to schedule update: " + e.getMessage());
-			IO.println("Failed to schedule update: " + e.getMessage());
+			System.out.println("Failed to schedule update: " + e.getMessage());
 			JOptionPane.showMessageDialog(null, "Failed to schedule update.\nPlease contact the developer if this issue persists", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}

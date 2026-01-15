@@ -74,7 +74,7 @@ class Files {
 					accountsArr.addAll(result);
 				} catch (Exception e) {
 					logger.error("Error reading accounts: " + e.getMessage());
-					IO.println("Error reading accounts: " + e.getMessage());
+					System.out.println("Error reading accounts: " + e.getMessage());
 				}
 				frame.dispose();
 			}
@@ -139,7 +139,7 @@ class Files {
 			worker.get();
 		} catch (Exception e) {
 			logger.error("Error saving accounts: " + e.getMessage());
-			IO.println("Error saving accounts: " + e.getMessage());
+			System.out.println("Error saving accounts: " + e.getMessage());
 		}
 	}
 
@@ -173,7 +173,7 @@ class Files {
 			}
 		} catch (IOException e) {
 			logger.error("Error saving accounts: " + e.getMessage());
-			IO.println("Error saving accounts: " + e.getMessage());
+			System.out.println("Error saving accounts: " + e.getMessage());
 		}
 	}
 
