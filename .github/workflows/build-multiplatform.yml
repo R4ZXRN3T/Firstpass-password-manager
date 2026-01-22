@@ -1,35 +1,35 @@
 name: Build Multi-Platform Installers
 
-on:  
-  push:  
+on:
+  push:
     branches: [ main ]
-    tags:  
-      - 'v*'
+    tags:
+      - v*
   pull_request:
     branches: [ main ]
   workflow_dispatch:
 
-jobs:  
+jobs:
   extract-version:
     runs-on: ubuntu-latest
-    outputs:  
-      version: ${{ steps. get-version.outputs.version }}
-    
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
     steps:
-    - name:  Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Extract version from pom.xml
-      id: get-version
-      run:  |
-        VERSION=$(grep -m1 '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/')
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "Extracted version: $VERSION"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from pom.xml
+        id: get-version
+        shell: bash
+        run: |
+          VERSION=$(grep -m1 '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Extracted version: $VERSION"
 
   build-windows:
     runs-on: ${{ matrix.runner }}
     needs: extract-version
-    strategy:  
+    strategy:
       matrix:
         include:
           - runner: windows-latest
@@ -38,166 +38,166 @@ jobs:
           - runner: windows-latest-arm64
             arch: arm64
             arch-name: arm64
-    
-    steps: 
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name:  Set up JDK 25
-      uses: actions/setup-java@v4
-      with:  
-        java-version: '25'
-        distribution: 'temurin'
-        architecture: ${{ matrix.arch }}
-    
-    - name: Cache Maven dependencies
-      uses: actions/cache@v4
-      with:
-        path:  ~/.m2/repository
-        key: ${{ runner.os }}-${{ matrix.arch }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.arch }}-maven-
-    
-    - name: Install Launch4j
-      run: choco install launch4j -y
-    
-    - name:  Install Inno Setup
-      run: choco install innosetup -y
-    
-    - name: Add Inno Setup to PATH
-      run: echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-    
-    - name: Build with Maven and jlink
-      run: mvn clean install -P jlink clean
-    
-    - name: Extract JRE
-      run: |
-        if (Test-Path ".\jre") {
-          Remove-Item ".\jre" -Recurse -Force
-        }
-        New-Item -ItemType Directory -Force -Path ".\jre"
-        Expand-Archive -Path ".\jre.zip" -DestinationPath ".\jre"
-        Remove-Item ".\jre.zip" -Force
-    
-    - name: Create EXE with Launch4j
-      run: |
-        & "C:\ProgramData\chocolatey\bin\launch4jc.exe" ".\installer files\launch4j_setup.xml"
-    
-    - name: Build installer with Inno Setup
-      run: |
-        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ".\installer files\Firstpass.iss"
-    
-    - name:  Rename installer with version and architecture
-      run: |
-        $version = "${{ needs.extract-version.outputs.version }}"
-        $arch = "${{ matrix.arch-name }}"
-        Move-Item ".\installer files\Firstpass_setup.exe" ".\installer files\Firstpass-${version}-Windows-${arch}.exe"
-    
-    - name: Upload Windows Installer
-      uses: actions/upload-artifact@v4
-      with:
-        name:  Firstpass-Windows-${{ matrix.arch-name }}
-        path: installer files/Firstpass_setup_v*.exe
-        retention-days: 30
-    
-    - name: Upload to Release (on tag push)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with: 
-        files: installer files/Firstpass_setup_v*.exe
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+          architecture: ${{ matrix.arch }}
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-${{ matrix.arch }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch }}-maven-
+
+      - name: Install Launch4j
+        run: choco install launch4j -y
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+
+      - name: Add Inno Setup to PATH
+        run: echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Build with Maven and jlink
+        run: mvn -B -U clean install -P jlink
+
+      - name: Extract JRE
+        shell: pwsh
+        run: |
+          if (Test-Path ".\jre") { Remove-Item ".\jre" -Recurse -Force }
+          New-Item -ItemType Directory -Force -Path ".\jre" | Out-Null
+          Expand-Archive -Path ".\jre.zip" -DestinationPath ".\jre" -Force
+          Remove-Item ".\jre.zip" -Force
+
+      - name: Create EXE with Launch4j
+        run: |
+          & "C:\ProgramData\chocolatey\bin\launch4jc.exe" ".\installer files\launch4j_setup.xml"
+
+      - name: Build installer with Inno Setup
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ".\installer files\Firstpass.iss"
+
+      - name: Rename installer with version and architecture
+        shell: pwsh
+        run: |
+          $version = "${{ needs.extract-version.outputs.version }}"
+          $arch = "${{ matrix.arch-name }}"
+          $src = ".\installer files\Firstpass_setup.exe"
+          $dst = ".\installer files\Firstpass-$version-Windows-$arch.exe"
+          Move-Item $src $dst -Force
+
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Firstpass-Windows-${{ matrix.arch-name }}
+          path: installer files/Firstpass-${{ needs.extract-version.outputs.version }}-Windows-${{ matrix.arch-name }}.exe
+          retention-days: 30
+
+      - name: Upload to Release (on tag push)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: installer files/Firstpass-${{ needs.extract-version.outputs.version }}-Windows-${{ matrix.arch-name }}.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
     runs-on: ${{ matrix.runner }}
     needs: extract-version
-    strategy: 
+    strategy:
       matrix:
-        include:  
-          - runner: macos-15-intel     # Intel x86_64
-            arch:  x64
-            arch-name:  x86_64
-          - runner: macos-latest       # Apple Silicon ARM64
+        include:
+          - runner: macos-15-intel
+            arch: x64
+            arch-name: x86_64
+          - runner: macos-latest
             arch: aarch64
-            arch-name:  arm64
-    
-    steps:  
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Set up JDK 25
-      uses: actions/setup-java@v4
-      with: 
-        java-version: '25'
-        distribution: 'temurin'
-    
-    - name: Cache Maven dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-${{ matrix.arch }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.arch }}-maven-
-    
-    - name:  Build with Maven and jlink
-      run: mvn clean install -P jlink clean
-    
-    - name: Extract JRE
-      run: |
-        rm -rf ./jre
-        mkdir ./jre
-        cd ./jre
-        unzip ../jre.zip
-        cd ..
-    
-    - name: Build DMG with jpackage
-      run: |
-        jpackage \
-          --type dmg \
-          --name Firstpass \
-          --app-version ${{ needs.extract-version.outputs.version }} \
-          --vendor "R4ZXRN3T" \
-          --description "A simple, secure password manager." \
-          --input "." \
-          --main-jar "Firstpass.jar" \
-          --main-class "org.R4ZXRN3T.firstpass.Main" \
-          --runtime-image "./jre" \
-          --resource-dir "." \
-          --dest "./dist"
-    
-    - name:  Rename DMG with version and architecture
-      run: |
-        version="${{ needs.extract-version.outputs.version }}"
-        arch="${{ matrix.arch-name }}"
-        # Find the generated DMG and rename it
-        for dmg in dist/*.dmg; do
-          if [ -f "$dmg" ]; then
-            mv "$dmg" "dist/Firstpass-${version}-MacOS-${arch}.dmg"
-          fi
-        done
-    
-    - name: Upload macOS DMG
-      uses: actions/upload-artifact@v4
-      with:
-        name: Firstpass-macOS-${{ matrix. arch-name }}
-        path:  dist/*. dmg
-        retention-days:  30
-    
-    - name: Upload to Release (on tag push)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: dist/*.dmg
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            arch-name: arm64
 
-  build-linux:  
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+          architecture: ${{ matrix.arch }}
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-${{ matrix.arch }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch }}-maven-
+
+      - name: Build with Maven and jlink
+        run: mvn -B -U clean install -P jlink
+
+      - name: Extract JRE
+        shell: bash
+        run: |
+          rm -rf ./jre
+          mkdir -p ./jre
+          unzip -q ./jre.zip -d ./jre
+          rm -f ./jre.zip
+
+      - name: Build DMG with jpackage
+        shell: bash
+        run: |
+          jpackage \
+            --type dmg \
+            --name Firstpass \
+            --app-version "${{ needs.extract-version.outputs.version }}" \
+            --vendor "R4ZXRN3T" \
+            --description "A simple, secure password manager." \
+            --input "." \
+            --main-jar "Firstpass.jar" \
+            --main-class "org.R4ZXRN3T.firstpass.Main" \
+            --runtime-image "./jre" \
+            --resource-dir "." \
+            --dest "./dist"
+
+      - name: Rename DMG with version and architecture
+        shell: bash
+        run: |
+          version="${{ needs.extract-version.outputs.version }}"
+          arch="${{ matrix.arch-name }}"
+          dmg="$(ls -1 dist/*.dmg | head -n 1)"
+          mv "$dmg" "dist/Firstpass-${version}-MacOS-${arch}.dmg"
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Firstpass-macOS-${{ matrix.arch-name }}
+          path: dist/Firstpass-${{ needs.extract-version.outputs.version }}-MacOS-${{ matrix.arch-name }}.dmg
+          retention-days: 30
+
+      - name: Upload to Release (on tag push)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/Firstpass-${{ needs.extract-version.outputs.version }}-MacOS-${{ matrix.arch-name }}.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
     runs-on: ${{ matrix.runner }}
     needs: extract-version
-    strategy:  
+    strategy:
       matrix:
-        include: 
-          # x86_64 builds
+        include:
           - runner: ubuntu-latest
             arch: x64
             arch-name: x86_64
@@ -206,123 +206,139 @@ jobs:
             arch: x64
             arch-name: x86_64
             package-type: rpm
-          # ARM64 builds
           - runner: ubuntu-latest-arm64
             arch: aarch64
-            arch-name:  arm64
-            package-type:  deb
+            arch-name: arm64
+            package-type: deb
           - runner: ubuntu-latest-arm64
             arch: aarch64
             arch-name: arm64
             package-type: rpm
-    
-    steps: 
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Set up JDK 25
-      uses: actions/setup-java@v4
-      with: 
-        java-version: '25'
-        distribution: 'temurin'
-    
-    - name: Cache Maven dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/. m2/repository
-        key:  ${{ runner.os }}-${{ matrix.arch }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.arch }}-maven-
-    
-    - name: Install RPM tools (for RPM builds)
-      if: matrix.package-type == 'rpm'
-      run: sudo apt-get update && sudo apt-get install -y rpm
-    
-    - name: Build with Maven and jlink
-      run: mvn clean install -P jlink clean
-    
-    - name: Extract JRE
-      run: |
-        rm -rf ./jre
-        mkdir ./jre
-        cd ./jre
-        unzip ../jre.zip
-        cd ..
-    
-    - name: Build ${{ matrix.package-type }} with jpackage
-      run: |
-        jpackage \
-          --type ${{ matrix.package-type }} \
-          --name firstpass \
-          --app-version ${{ needs.extract-version.outputs.version }} \
-          --vendor "R4ZXRN3T" \
-          --description "A simple, secure password manager." \
-          --input "." \
-          --main-jar "Firstpass.jar" \
-          --main-class "org.R4ZXRN3T.firstpass.Main" \
-          --runtime-image "./jre" \
-          --resource-dir "." \
-          --dest "./dist" \
-          --linux-shortcut \
-          --linux-menu-group "Utilities"
-    
-    - name: Upload Linux ${{ matrix.package-type }}
-      uses: actions/upload-artifact@v4
-      with:  
-        name: "Firstpass-${{ matrix.arch-name }}-Linux-${{ matrix.package-type }}"
-        path: dist/*.${{ matrix.package-type }}
-        retention-days: 30
-    
-    - name: Upload to Release (on tag push)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: dist/*.${{ matrix.package-type }}
-      env:
-        GITHUB_TOKEN: ${{ secrets. GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+          architecture: ${{ matrix.arch }}
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-${{ matrix.arch }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch }}-maven-
+
+      - name: Install RPM tools (for RPM builds)
+        if: matrix.package-type == 'rpm'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
+      - name: Build with Maven and jlink
+        run: mvn -B -U clean install -P jlink
+
+      - name: Extract JRE
+        shell: bash
+        run: |
+          rm -rf ./jre
+          mkdir -p ./jre
+          unzip -q ./jre.zip -d ./jre
+          rm -f ./jre.zip
+
+      - name: Build ${{ matrix.package-type }} with jpackage
+        shell: bash
+        run: |
+          jpackage \
+            --type "${{ matrix.package-type }}" \
+            --name firstpass \
+            --app-version "${{ needs.extract-version.outputs.version }}" \
+            --vendor "R4ZXRN3T" \
+            --description "A simple, secure password manager." \
+            --input "." \
+            --main-jar "Firstpass.jar" \
+            --main-class "org.R4ZXRN3T.firstpass.Main" \
+            --runtime-image "./jre" \
+            --resource-dir "." \
+            --dest "./dist" \
+            --linux-shortcut \
+            --linux-menu-group "Utilities"
+
+      - name: Rename Linux package with version and architecture
+        shell: bash
+        run: |
+          version="${{ needs.extract-version.outputs.version }}"
+          arch="${{ matrix.arch-name }}"
+          type="${{ matrix.package-type }}"
+          pkg="$(ls -1 dist/*.${type} | head -n 1)"
+          mv "$pkg" "dist/Firstpass-${version}-Linux-${arch}.${type}"
+
+      - name: Upload Linux ${{ matrix.package-type }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Firstpass-${{ matrix.arch-name }}-Linux-${{ matrix.package-type }}
+          path: dist/Firstpass-${{ needs.extract-version.outputs.version }}-Linux-${{ matrix.arch-name }}.${{ matrix.package-type }}
+          retention-days: 30
+
+      - name: Upload to Release (on tag push)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/Firstpass-${{ needs.extract-version.outputs.version }}-Linux-${{ matrix.arch-name }}.${{ matrix.package-type }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-portable:
     runs-on: ubuntu-latest
     needs: extract-version
-    
+
     steps:
-    - name:  Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Set up JDK 25
-      uses: actions/setup-java@v4
-      with:
-        java-version: '25'
-        distribution:  'temurin'
-    
-    - name: Cache Maven dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-    
-    - name: Build portable JAR
-      run: mvn clean install clean
-    
-    - name:  Rename JAR with version
-      run: |
-        cp Firstpass_portable.jar "Firstpass-portable.jar"
-    
-    - name: Upload Portable JAR
-      uses: actions/upload-artifact@v4
-      with:
-        name:  Firstpass-Portable-JAR
-        path: Firstpass_portable_v*. jar
-        retention-days: 30
-    
-    - name:  Upload to Release (on tag push)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          Firstpass_portable.jar
-          Firstpass_portable_v*.jar
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build portable JAR
+        run: mvn -B -U clean install
+
+      - name: Rename JAR with version (OS and arch)
+        shell: bash
+        run: |
+          version="${{ needs.extract-version.outputs.version }}"
+          os="Portable"
+          arch="any"
+          if [ -f "Firstpass_portable.jar" ]; then
+            cp "Firstpass_portable.jar" "Firstpass-${version}-${os}-${arch}.jar"
+          else
+            cp target/*portable*.jar "Firstpass-${version}-${os}-${arch}.jar"
+          fi
+
+      - name: Upload Portable JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: Firstpass-Portable-JAR
+          path: Firstpass-${{ needs.extract-version.outputs.version }}-Portable-any.jar
+          retention-days: 30
+
+      - name: Upload to Release (on tag push)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: Firstpass-${{ needs.extract-version.outputs.version }}-Portable-any.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
