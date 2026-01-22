@@ -35,9 +35,6 @@ jobs:
           - runner: windows-latest
             arch: x64
             arch-name: x86_64
-          - runner: windows-latest-arm64
-            arch: arm64
-            arch-name: arm64
 
     steps:
       - name: Checkout repository
@@ -49,6 +46,19 @@ jobs:
           java-version: '25'
           distribution: temurin
           architecture: ${{ matrix.arch }}
+
+      - name: Ensure Java environment for Launch4j
+        shell: pwsh
+        run: |
+          if (-not $env:JAVA_HOME -or -not (Test-Path $env:JAVA_HOME)) {
+            $javaExe = (Get-Command java.exe -ErrorAction Stop).Source
+            $javaHome = Split-Path -Parent (Split-Path -Parent $javaExe)
+            "JAVA_HOME=$javaHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            "PATH=$javaHome\bin;$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          }
+          
+          Write-Host "JAVA_HOME=$env:JAVA_HOME"
+          java -version
 
       - name: Cache Maven dependencies
         uses: actions/cache@v4
@@ -207,14 +217,6 @@ jobs:
           - runner: ubuntu-latest
             arch: x64
             arch-name: x86_64
-            package-type: rpm
-          - runner: ubuntu-latest-arm64
-            arch: aarch64
-            arch-name: arm64
-            package-type: deb
-          - runner: ubuntu-latest-arm64
-            arch: aarch64
-            arch-name: arm64
             package-type: rpm
 
     steps:
