@@ -90,9 +90,49 @@ jobs:
           Expand-Archive -Path ".\jre.zip" -DestinationPath ".\jre" -Force
           Remove-Item ".\jre.zip" -Force
 
-      - name: Create EXE with Launch4j
+      - name: Pre-Launch4j diagnostics
+        shell: pwsh
         run: |
-          & "C:\Program Files (x86)\Launch4j\launch4jc.exe" ".\installer files\launch4j_setup.xml"
+          Write-Host "PWD: $(Get-Location)"
+          Write-Host "JAVA_HOME=$env:JAVA_HOME"
+          Write-Host "PATH=$env:PATH"
+          java -version
+          if (Get-Command javac.exe -ErrorAction SilentlyContinue) { javac -version }
+
+          Write-Host "\n== Root files =="
+          Get-ChildItem -Force | Select-Object Name, Length | Format-Table -AutoSize
+
+          Write-Host "\n== installer files/ =="
+          Get-ChildItem -Path "installer files" -Force | Select-Object Name, Length | Format-Table -AutoSize
+
+          if (-not (Test-Path "Firstpass.jar")) { throw "Missing Firstpass.jar in repo root (Launch4j config expects ..\\Firstpass.jar)" }
+          if (-not (Test-Path "installer files\\launch4j_setup.xml")) { throw "Missing installer files\\launch4j_setup.xml" }
+          if (-not (Test-Path "installer files\\Firstpass.ico")) { throw "Missing installer files\\Firstpass.ico" }
+          if (-not (Test-Path "jre\\bin")) { throw "Missing extracted runtime at .\\jre\\bin (check jre.zip contents)" }
+
+          Write-Host "\n== launch4j_setup.xml =="
+          Get-Content -Path "installer files\\launch4j_setup.xml" -Raw
+
+      - name: Create EXE with Launch4j
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $log = Join-Path $env:RUNNER_TEMP 'launch4j.log'
+
+          Push-Location "installer files"
+          try {
+            & "C:\Program Files (x86)\Launch4j\launch4jc.exe" ".\launch4j_setup.xml" 2>&1 | Tee-Object -FilePath $log
+          } finally {
+            Pop-Location
+          }
+
+      - name: Upload Launch4j log (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: launch4j-log-${{ matrix.arch-name }}
+          path: ${{ runner.temp }}\\launch4j.log
+          retention-days: 7
 
       - name: Build installer with Inno Setup
         run: |
