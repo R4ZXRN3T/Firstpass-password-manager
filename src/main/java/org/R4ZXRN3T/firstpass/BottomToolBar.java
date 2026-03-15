@@ -1,10 +1,9 @@
 package org.R4ZXRN3T.firstpass;
 
-import static org.R4ZXRN3T.firstpass.Icons.*;
-
+import javax.swing.*;
 import java.awt.*;
 
-import javax.swing.*;
+import static org.R4ZXRN3T.firstpass.Icons.*;
 
 class BottomToolBar {
 

@@ -27,6 +27,7 @@ public class Logger {
 
 	/**
 	 * Constructs a Logger with the specified log file path and default format.
+	 *
 	 * @param logFilePath the path to the log file
 	 */
 	public Logger(String logFilePath) {
@@ -35,7 +36,8 @@ public class Logger {
 
 	/**
 	 * Constructs a Logger with the specified log file path and format string.
-	 * @param logFilePath the path to the log file
+	 *
+	 * @param logFilePath  the path to the log file
 	 * @param formatString the format string for log entries
 	 */
 	public Logger(String logFilePath, String formatString) {
@@ -48,6 +50,7 @@ public class Logger {
 
 	/**
 	 * Logs an error message.
+	 *
 	 * @param message the message to log
 	 */
 	public void error(String message) {
@@ -56,6 +59,7 @@ public class Logger {
 
 	/**
 	 * Logs a warning message.
+	 *
 	 * @param message the message to log
 	 */
 	public void warn(String message) {
@@ -64,6 +68,7 @@ public class Logger {
 
 	/**
 	 * Logs an informational message.
+	 *
 	 * @param message the message to log
 	 */
 	public void info(String message) {
@@ -72,6 +77,7 @@ public class Logger {
 
 	/**
 	 * Logs a debug message.
+	 *
 	 * @param message the message to log
 	 */
 	public void debug(String message) {
@@ -96,8 +102,9 @@ public class Logger {
 
 	/**
 	 * Enqueues a formatted log entry for writing.
+	 *
 	 * @param level the log level
-	 * @param msg the log message
+	 * @param msg   the log message
 	 */
 	private void enqueue(String level, String msg) {
 		if (!running) return;

@@ -1,12 +1,5 @@
 package org.R4ZXRN3T.firstpass;
 
-import java.awt.*;
-import java.awt.datatransfer.StringSelection;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -17,17 +10,22 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class AccountTable extends JTable {
 
 	private final String[] columns = {"Provider", "Username", "Password", "URL", "Comment"};
+	private final Set<Integer> revealedPasswordRows = new HashSet<>();
 	private String[][] data;
 	private Firstpass firstpass;
 	private int hoverRow = -1;
 	private int hoverCol = -1;
-
-	private final Set<Integer> revealedPasswordRows = new HashSet<>();
 
 	/**
 	 * Initializes the account table with given accounts and a reference to the main Firstpass instance.
@@ -110,6 +108,19 @@ public class AccountTable extends JTable {
 	}
 
 	/**
+	 * Converts an ArrayList of Account objects to a 2D String array for table display.
+	 *
+	 * @param inputArrayList the list of Account objects
+	 * @return 2D String array representing the account data
+	 *
+	 */
+	private static String[][] AccountArrayListToArray(ArrayList<Account> inputArrayList) {
+		String[][] finalArray = new String[inputArrayList.size()][5];
+		for (int i = 0; i < inputArrayList.size(); i++) finalArray[i] = inputArrayList.get(i).toArray();
+		return finalArray;
+	}
+
+	/**
 	 * Creates a custom model from table data. Needed to make the cells non-editable
 	 *
 	 * @param tableData 2D array of table data
@@ -123,19 +134,6 @@ public class AccountTable extends JTable {
 				return false;
 			}
 		};
-	}
-
-	/**
-	 * Converts an ArrayList of Account objects to a 2D String array for table display.
-	 *
-	 * @param inputArrayList the list of Account objects
-	 * @return 2D String array representing the account data
-	 *
-	 */
-	private static String[][] AccountArrayListToArray(ArrayList<Account> inputArrayList) {
-		String[][] finalArray = new String[inputArrayList.size()][5];
-		for (int i = 0; i < inputArrayList.size(); i++) finalArray[i] = inputArrayList.get(i).toArray();
-		return finalArray;
 	}
 
 	/**
@@ -231,6 +229,29 @@ public class AccountTable extends JTable {
 	}
 
 	/**
+	 * Styles a button to be used in the cell renderer.
+	 *
+	 * @param btn the JButton to style
+	 */
+	private void styleButton(JButton btn) {
+		btn.setBorderPainted(false);
+		btn.setFocusPainted(false);
+		btn.setMargin(new Insets(0, 0, 0, 0));
+		btn.setEnabled(false); // renderer only paints; actual click handled in mousePressed
+	}
+
+	/**
+	 * Copies the given value to the system clipboard and shows a toast notification.
+	 *
+	 * @param value the value to copy
+	 */
+	private void copyToClipboard(Object value) {
+		String text = value == null ? "" : value.toString();
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
+		Tools.showToast(SwingUtilities.getWindowAncestor(this), "Copied to clipboard", 1500, Config.getDarkMode());
+	}
+
+	/**
 	 * Custom cell renderer that shows copy and reveal buttons on hover.
 	 */
 	private class HoverCopyRenderer extends DefaultTableCellRenderer {
@@ -276,28 +297,5 @@ public class AccountTable extends JTable {
 			}
 			return panel;
 		}
-	}
-
-	/**
-	 * Styles a button to be used in the cell renderer.
-	 *
-	 * @param btn the JButton to style
-	 */
-	private void styleButton(JButton btn) {
-		btn.setBorderPainted(false);
-		btn.setFocusPainted(false);
-		btn.setMargin(new Insets(0, 0, 0, 0));
-		btn.setEnabled(false); // renderer only paints; actual click handled in mousePressed
-	}
-
-	/**
-	 * Copies the given value to the system clipboard and shows a toast notification.
-	 *
-	 * @param value the value to copy
-	 */
-	private void copyToClipboard(Object value) {
-		String text = value == null ? "" : value.toString();
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
-		Tools.showToast(SwingUtilities.getWindowAncestor(this), "Copied to clipboard", 1500, Config.getDarkMode());
 	}
 }

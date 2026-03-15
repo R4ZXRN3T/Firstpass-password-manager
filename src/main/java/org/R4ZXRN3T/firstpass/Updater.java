@@ -110,7 +110,7 @@ class Updater {
 
 					Map<String, List<String>> header = http.getHeaderFields();
 					while (isRedirected(header)) {
-						link = header.get("Location").getFirst();
+						link = header.get("Location").get(0);
 						url = new URI(link).toURL();
 						http = (HttpURLConnection) url.openConnection();
 						header = http.getHeaderFields();

@@ -1,11 +1,10 @@
 package org.R4ZXRN3T.firstpass;
 
-import static org.R4ZXRN3T.firstpass.Tools.returnOriginalValue;
-import static org.R4ZXRN3T.firstpass.Tools.validateForXML;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +12,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import static org.R4ZXRN3T.firstpass.Tools.returnOriginalValue;
+import static org.R4ZXRN3T.firstpass.Tools.validateForXML;
 
 public class ImportExportManager {
 
