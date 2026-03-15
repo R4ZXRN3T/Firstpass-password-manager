@@ -5,7 +5,9 @@
 ; Application Constants
 ; -----------------------------
 #define MyAppName "Firstpass Password Manager"
+#ifndef MyAppVersion
 #define MyAppVersion "2.1.1"
+#endif
 #define MyAppPublisher "R4ZXRN3T"
 #define MyAppURL "https://github.com/R4ZXRN3T/Firstpass-password-manager"
 #define MyAppExeName "Firstpass.exe"
@@ -30,7 +32,7 @@ DisableProgramGroupPage=yes
 LicenseFile=.\License Agreement.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=none
-OutputDir=.\
+OutputDir=..\final
 OutputBaseFilename=Firstpass_setup
 SetupIconFile=.\Firstpass.ico
 WizardStyle=modern dark
@@ -61,9 +63,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; -----------------------------
 ; Files to Install
 ; -----------------------------
-Source: ".\..\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\..\build\tmp\installer-construo\windows-x86_64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: ".\..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: ".\..\jre\*"; DestDir: "{app}\jre"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

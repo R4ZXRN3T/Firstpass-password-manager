@@ -13,7 +13,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Stack;
@@ -257,7 +256,6 @@ public class Firstpass {
 		accountList.clear();
 		new File(AccountLoader.ACCOUNTS_PATH).delete();
 		new File(Config.CONFIG_PATH).delete();
-		if (!Config.isPortableVersion()) new File(Paths.get(System.getenv("APPDATA")) + "\\Firstpass").delete();
 		System.exit(0);
 	}
 
@@ -426,7 +424,7 @@ public class Firstpass {
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
-			Path parentPath = Config.getConfigFilePath().toAbsolutePath().getParent();
+			Path parentPath = AccountLoader.getAccountFilePath().toAbsolutePath().getParent();
 			if (!parentPath.toFile().exists()) return;
 			new File(parentPath + "/Firstpass_setup.msi").delete();
 			new File(parentPath + "/Firstpass_setup.msi.tmp").delete();

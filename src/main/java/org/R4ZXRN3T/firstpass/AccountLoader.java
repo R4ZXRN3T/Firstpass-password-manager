@@ -241,7 +241,7 @@ public class AccountLoader {
 	 * @return The path to the vault file, using a local file in portable mode or an OS-specific
 	 * application data directory otherwise.
 	 */
-	private static Path getAccountFilePath() {
+	public static Path getAccountFilePath() {
 		String os = System.getProperty("os.name").toLowerCase();
 		String parentDir = "Firstpass";
 		String fileName = "accounts.vault";

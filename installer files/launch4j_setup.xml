@@ -2,8 +2,8 @@
 <launch4jConfig>
 	<dontWrapJar>false</dontWrapJar>
 	<headerType>gui</headerType>
-	<jar>..\Firstpass.jar</jar>
-	<outfile>..\Firstpass.exe</outfile>
+	<jar>.\Firstpass.jar</jar>
+	<outfile>..\final\Firstpass.exe</outfile>
 	<errTitle></errTitle>
 	<cmdLine></cmdLine>
 	<chdir>.</chdir>
@@ -18,7 +18,7 @@
 		<path>.\jre\bin;%JAVA_HOME%</path>
 		<requiresJdk>false</requiresJdk>
 		<requires64Bit>true</requires64Bit>
-		<minVersion>14</minVersion>
+		<minVersion>25</minVersion>
 		<maxVersion></maxVersion>
 	</jre>
 </launch4jConfig>
