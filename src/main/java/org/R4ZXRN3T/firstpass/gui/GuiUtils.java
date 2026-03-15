@@ -51,7 +51,7 @@ public class GuiUtils {
 		int fadeSteps = 10;
 		int stay = Math.max(0, durationMs - fadeDelay * fadeSteps);
 
-		// stay timer -> then fade timer (fade uses window visibility; avoid window.setOpacity to preserve ClearType)
+		// stay timer -> then fade timer (fade uses window opacity via setOpacity for a smooth fade-out)
 		new Timer(stay, e -> {
 			((Timer) e.getSource()).stop();
 			Timer fade = new Timer(fadeDelay, null);
