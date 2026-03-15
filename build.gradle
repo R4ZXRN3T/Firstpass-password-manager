@@ -2,7 +2,7 @@ plugins {
 	id 'java'
 	id 'application'
 	id 'org.beryx.jlink' version '3.3.0-beta3'
-	id 'org.gradlex.extra-java-module-info' version '1.13.1'
+	id 'org.gradlex.extra-java-module-info' version '1.14'
 }
 
 group = 'org.R4ZXRN3T'
