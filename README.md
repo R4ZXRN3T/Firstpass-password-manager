@@ -1,7 +1,7 @@
 # Firstpass Password Manager
 
 A tiny, offline, Java password manager focused on being simple and transparent. No cloud, no tracking—just a local
-encrypted list you control.
+encrypted vault you control.
 
 Latest Release / Downloads:
 
@@ -16,12 +16,13 @@ Quick Links:
 Core Features:
 
 - Add / edit / remove accounts (with undo for deletions)
-- Optional master password (per‑field encryption at rest)
-- Fast search & field filtering
+- Optional master password — vault encrypted at rest with AES-256-GCM (PBKDF2-HMAC-SHA256 key derivation)
+- Master password hashed with Argon2id
+- Fast search & field filtering (All, Name, Username, Password, URL, Comment)
 - Export / import (TXT, CSV, JSON, XML)
-- Built‑in password generator
-- Theme selection (light/dark & more)
-- In‑app update checker
+- Built-in password generator (length 1–64, configurable character sets)
+- 8 theme choices (FlatLaf Light/Dark variants, Swing Metal, System Default)
+- In-app update checker & one-click updater
 
 If something breaks or you have ideas, open an issue.
 

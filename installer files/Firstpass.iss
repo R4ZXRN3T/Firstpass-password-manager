@@ -6,7 +6,7 @@
 ; -----------------------------
 #define MyAppName "Firstpass Password Manager"
 #ifndef MyAppVersion
-#define MyAppVersion "2.1.1"
+#define MyAppVersion "2.1.3"
 #endif
 #define MyAppPublisher "R4ZXRN3T"
 #define MyAppURL "https://github.com/R4ZXRN3T/Firstpass-password-manager"

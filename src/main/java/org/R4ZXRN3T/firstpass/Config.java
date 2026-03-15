@@ -159,20 +159,25 @@ public class Config {
 		return portableVersion;
 	}
 
+	/**
+	 * Resolves the location of the {@code accounts.vault} file for the current runtime.
+	 *
+	 * @return The path to the vault file, using a local file in portable mode or an OS-specific
+	 * application data directory otherwise.
+	 */
 	public static Path getConfigFilePath() {
 		String os = System.getProperty("os.name").toLowerCase();
-		String fileName = "Firstpass/config.json";
+		String parentDir = "Firstpass";
+		String fileName = "config.json";
+		String userHome = System.getProperty("user.home");
 		if (isPortableVersion()) {
-			return Paths.get("config.json");
+			return Paths.get(fileName);
 		} else if (os.contains("win")) {
-			String appData = System.getenv("APPDATA");
-			return Paths.get(appData, fileName);
+			return Paths.get(userHome, "AppData", "Roaming", parentDir, fileName);
 		} else if (os.contains("mac")) {
-			String userHome = System.getProperty("user.home");
-			return Paths.get(userHome, "Library", "Application Support", fileName);
+			return Paths.get(userHome, "Library", "Application Support", parentDir, fileName);
 		} else { // Linux and others
-			String userHome = System.getProperty("user.home");
-			return Paths.get(userHome, ".config", fileName);
+			return Paths.get(userHome, ".config", parentDir, fileName);
 		}
 	}
 

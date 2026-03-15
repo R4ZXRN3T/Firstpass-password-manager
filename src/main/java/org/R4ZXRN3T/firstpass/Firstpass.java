@@ -21,7 +21,7 @@ import static org.R4ZXRN3T.firstpass.gui.Icons.*;
 
 public class Firstpass {
 
-	public static final String CURRENT_VERSION = "2.1.2";
+	public static final String CURRENT_VERSION = "2.1.3";
 	private final ArrayList<Account> accountList = new ArrayList<>();
 	private final Stack<Account> undoStack = new Stack<>();
 	private JFrame frame;

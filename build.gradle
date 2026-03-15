@@ -1,7 +1,6 @@
 plugins {
 	id 'java'
 	id 'application'
-	id 'org.beryx.jlink' version '3.3.0-beta3'
 	id 'org.gradlex.extra-java-module-info' version '1.14'
 	id 'io.github.fourlastor.construo' version '2.1.0'
 }
@@ -9,13 +8,18 @@ plugins {
 import io.github.fourlastor.construo.Target
 
 group = 'org.R4ZXRN3T'
-version = '2.1.2'
+version = '2.1.3'
 
 def mainModuleName = 'org.R4ZXRN3T.firstpass'
 def mainClassName = 'org.R4ZXRN3T.firstpass.Main'
 def appJarName = 'Firstpass.jar'
 def portableJarName = 'Firstpass_portable.jar'
-def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+def osNameLower = System.getProperty('os.name').toLowerCase()
+def isWindows = osNameLower.contains('windows')
+def isLinux   = osNameLower.contains('linux')
+def isMacOs   = osNameLower.contains('mac')
+def archLower = System.getProperty('os.arch').toLowerCase()
+def isArm64   = archLower.contains('aarch64') || archLower.contains('arm64')
 def finalDir = layout.projectDirectory.dir('final')
 def installerDir = layout.projectDirectory.dir('installer files')
 def construoDistDir = finalDir.dir('construo')
@@ -129,7 +133,7 @@ def configureFatJar = { jarTask, boolean includeAssets ->
 }
 
 tasks.named('jar').configure {
-	description = 'Builds the modular application JAR used by jlink.'
+	description = 'Builds the modular application JAR (used as module-path input for tooling).'
 	archiveFileName = 'Firstpass_modular.jar'
 	manifest {
 		attributes(manifestAttributes)
@@ -187,43 +191,9 @@ tasks.register('copyPortableJarToRoot') {
 	}
 }
 
-// ─── JRE tasks ────────────────────────────────────────────────────────────────
-
-jlink {
-	imageName = 'firstpass-jre'
-	options = ['--compress=zip-0', '--no-header-files', '--no-man-pages', '--strip-debug']
-}
-
-// Creates the jlink runtime image at ./jre for local packaging.
-tasks.register('createJre', Sync) {
-	group = 'distribution'
-	description = 'Creates the custom runtime image in ./final/jre.'
-	dependsOn tasks.named('jlink')
-
-	from(provider {
-		def direct = layout.buildDirectory.dir('firstpass-jre').get().asFile
-		def nested = layout.buildDirectory.dir('image/firstpass-jre').get().asFile
-		direct.exists() ? direct : (nested.exists() ? nested : layout.buildDirectory.dir('image').get().asFile)
-	})
-	into finalDir.dir('jre')
-}
-
-// Stages launch4j runtime inputs in installer files/, where launch4j_setup.xml expects them.
-tasks.register('stageLaunch4jInputs', Copy) {
-	group = 'distribution'
-	description = 'Stages Firstpass.jar and jre under installer files/ for launch4j.'
-	dependsOn tasks.named('copyJarToRoot')
-	dependsOn tasks.named('createJre')
-
-	from(finalDir.file(appJarName))
-	from(finalDir.dir('jre')) {
-		into 'jre'
-	}
-	into installerDir
-}
 
 // ─── Windows packaging tasks ──────────────────────────────────────────────────
-// Requires launch4j and Inno Setup to be installed and on PATH.
+// Requires Inno Setup to be installed and on PATH.
 
 def commandExists = { String command ->
 	def process = new ProcessBuilder('cmd', '/c', "where ${command}")
@@ -241,16 +211,6 @@ def rawConstruoZipByTarget = { String targetName ->
 	file("${construoDistDir.asFile}/${project.name}-${targetName}.zip")
 }
 
-// Wraps Firstpass.jar into Firstpass.exe via launch4j.
-tasks.register('createExe', Exec) {
-	group = 'distribution'
-	description = 'Creates Firstpass.exe using launch4j (Windows only).'
-	dependsOn tasks.named('stageLaunch4jInputs')
-	onlyIf { isWindows && commandExists('launch4jc') }
-
-	workingDir file("${projectDir}/installer files")
-	commandLine 'launch4jc', 'launch4j_setup.xml'
-}
 
 tasks.register('stageConstruoWindowsForInstaller') {
 	group = 'distribution'
@@ -296,8 +256,61 @@ tasks.register('createInstaller', Exec) {
 	dependsOn tasks.named('stageConstruoWindowsForInstaller')
 	onlyIf { isWindows && commandExists('iscc') }
 
-	workingDir file("${projectDir}/installer files")
+	workingDir installerDir
 	commandLine 'iscc', "/DMyAppVersion=${project.version}", 'Firstpass.iss'
+}
+
+// Normalizes (rename + inject assets) a single Construo zip in-place.
+// cfg = [target: <construoTargetName>, os: <'Windows'|'Linux'|'macOS'>, arch: <'x86_64'|'aarch64'>]
+def normalizeSingleConstruoTarget = { Map cfg ->
+	def has7zip = commandExists('7z')
+	if (use7zipForConstruoZips.get() && !has7zip) {
+		throw new GradleException("7z not found on PATH. Install 7-Zip or run without -Puse7zip=true.")
+	}
+
+	def sourceZip    = rawConstruoZipByTarget(cfg.target)
+	def normalizedZip = file("${construoDistDir.asFile}/${construoReleaseZipName(cfg.os, cfg.arch)}")
+	def inputZip     = sourceZip.exists() ? sourceZip : normalizedZip
+	if (!inputZip.exists()) {
+		throw new GradleException("Missing Construo artifact: ${sourceZip}")
+	}
+
+	def tempExtractDir = layout.buildDirectory.dir("tmp/construo-repack/${cfg.target}").get().asFile
+	delete(tempExtractDir)
+
+	if (has7zip) {
+		def proc = new ProcessBuilder('7z', 'x', '-y', inputZip.absolutePath, "-o${tempExtractDir.absolutePath}")
+				.redirectErrorStream(true).start()
+		def out = proc.inputStream.text
+		if (proc.waitFor() != 0) throw new GradleException("7-Zip extract failed for ${cfg.target}: ${out}")
+	} else {
+		copy { from zipTree(inputZip); into tempExtractDir }
+	}
+
+	def assetsTargetDir
+	if (cfg.os == 'macOS') {
+		def expectedAppDir = file("${tempExtractDir}/Firstpass Password Manager.app")
+		def macAppDir = expectedAppDir.exists() ? expectedAppDir : fileTree(tempExtractDir).matching {
+			include '**/*.app'
+		}.files.find { it.isDirectory() }
+		if (macAppDir == null) throw new GradleException("Could not find macOS .app bundle in ${inputZip.name}")
+		assetsTargetDir = file("${macAppDir}/Contents/MacOS/assets")
+	} else {
+		assetsTargetDir = file("${tempExtractDir}/assets")
+	}
+	copy { from('assets'); into assetsTargetDir }
+
+	delete(normalizedZip)
+	if (use7zipForConstruoZips.get()) {
+		def proc = new ProcessBuilder('7z', 'a', '-tzip', '-mm=LZMA', '-mx=9', '-md=3840m', '-mfb=273', '-mmt=3',
+				normalizedZip.absolutePath, '.').directory(tempExtractDir).redirectErrorStream(true).start()
+		def out = proc.inputStream.text
+		if (proc.waitFor() != 0) throw new GradleException("7-Zip repack failed for ${cfg.target}: ${out}")
+	} else {
+		ant.zip(destfile: normalizedZip, basedir: tempExtractDir)
+	}
+
+	if (!sourceZip.name.equalsIgnoreCase(normalizedZip.name)) delete(sourceZip)
 }
 
 tasks.register('normalizeConstruoZips') {
@@ -310,81 +323,13 @@ tasks.register('normalizeConstruoZips') {
 	dependsOn tasks.named('packageMacOsArm64')
 
 	doLast {
-		def targets = [
-			[target: 'windowsX64', os: 'Windows', arch: 'x86_64'],
-			[target: 'linuxX64', os: 'Linux', arch: 'x86_64'],
-			[target: 'linuxArm64', os: 'Linux', arch: 'aarch64'],
-			[target: 'macOsX64', os: 'macOS', arch: 'x86_64'],
-			[target: 'macOsArm64', os: 'macOS', arch: 'aarch64']
-		]
-		def has7zip = commandExists('7z')
-		if (use7zipForConstruoZips.get() && !has7zip) {
-			throw new GradleException("7z not found on PATH. Install 7-Zip or run without -Puse7zip=true.")
-		}
-
-		targets.each { cfg ->
-			def sourceZip = rawConstruoZipByTarget(cfg.target)
-			def normalizedZip = file("${construoDistDir.asFile}/${construoReleaseZipName(cfg.os, cfg.arch)}")
-			def inputZip = sourceZip.exists() ? sourceZip : normalizedZip
-			if (!inputZip.exists()) {
-				throw new GradleException("Missing Construo artifact: ${sourceZip}")
-			}
-
-			def tempExtractDir = layout.buildDirectory.dir("tmp/construo-repack/${cfg.target}").get().asFile
-			delete(tempExtractDir)
-
-			if (has7zip) {
-				def extractProcess = new ProcessBuilder('7z', 'x', '-y', inputZip.absolutePath, "-o${tempExtractDir.absolutePath}")
-						.redirectErrorStream(true)
-						.start()
-				def extractOutput = extractProcess.inputStream.text
-				if (extractProcess.waitFor() != 0) {
-					throw new GradleException("7-Zip extract failed for ${cfg.target}: ${extractOutput}")
-				}
-			} else {
-				copy {
-					from zipTree(inputZip)
-					into tempExtractDir
-				}
-			}
-
-			def assetsTargetDir
-			if (cfg.os == 'macOS') {
-				def expectedAppDir = file("${tempExtractDir}/Firstpass Password Manager.app")
-				def macAppDir = expectedAppDir.exists() ? expectedAppDir : fileTree(tempExtractDir).matching {
-					include '**/*.app'
-				}.files.find { it.isDirectory() }
-				if (macAppDir == null) {
-					throw new GradleException("Could not find macOS .app bundle in ${inputZip.name}")
-				}
-				assetsTargetDir = file("${macAppDir}/Contents/MacOS/assets")
-			} else {
-				assetsTargetDir = file("${tempExtractDir}/assets")
-			}
-
-			copy {
-				from('assets')
-				into assetsTargetDir
-			}
-
-			delete(normalizedZip)
-			if (use7zipForConstruoZips.get()) {
-				def repackProcess = new ProcessBuilder('7z', 'a', '-tzip', '-mm=LZMA', '-mx=9', '-md=3840m', '-mfb=273', '-mmt=3', normalizedZip.absolutePath, '.')
-						.directory(tempExtractDir)
-						.redirectErrorStream(true)
-						.start()
-				def repackOutput = repackProcess.inputStream.text
-				if (repackProcess.waitFor() != 0) {
-					throw new GradleException("7-Zip repack failed for ${cfg.target}: ${repackOutput}")
-				}
-			} else {
-				ant.zip(destfile: normalizedZip, basedir: tempExtractDir)
-			}
-
-			if (!sourceZip.name.equalsIgnoreCase(normalizedZip.name)) {
-				delete(sourceZip)
-			}
-		}
+		[
+			[target: 'windowsX64',  os: 'Windows', arch: 'x86_64'],
+			[target: 'linuxX64',    os: 'Linux',   arch: 'x86_64'],
+			[target: 'linuxArm64',  os: 'Linux',   arch: 'aarch64'],
+			[target: 'macOsX64',    os: 'macOS',   arch: 'x86_64'],
+			[target: 'macOsArm64',  os: 'macOS',   arch: 'aarch64'],
+		].each { normalizeSingleConstruoTarget(it) }
 	}
 }
 
@@ -392,6 +337,33 @@ tasks.register('packageConstruoTargets') {
 	group = 'distribution'
 	description = 'Builds all Construo targets and writes normalized release zip names to ./final/construo.'
 	dependsOn tasks.named('normalizeConstruoZips')
+}
+
+// Builds only the artifacts relevant to the OS Gradle is currently running on.
+// Produces: Firstpass.jar, Firstpass_portable.jar, and the platform zip in ./final/construo/.
+tasks.register('packageCurrentOs') {
+	group = 'distribution'
+	description = 'Builds JAR artifacts and the Construo package for the current OS only (faster than packageAll).'
+	dependsOn tasks.named('copyJarToRoot')
+	dependsOn tasks.named('copyPortableJarToRoot')
+
+	if (isWindows) {
+		dependsOn tasks.named('packageWindowsX64')
+	} else if (isLinux) {
+		dependsOn isArm64 ? tasks.named('packageLinuxArm64') : tasks.named('packageLinuxX64')
+	} else if (isMacOs) {
+		dependsOn isArm64 ? tasks.named('packageMacOsArm64') : tasks.named('packageMacOsX64')
+	}
+
+	doLast {
+		def cfg = isWindows       ? [target: 'windowsX64',  os: 'Windows', arch: 'x86_64']
+				: (isLinux && isArm64)  ? [target: 'linuxArm64',  os: 'Linux',   arch: 'aarch64']
+				: isLinux               ? [target: 'linuxX64',    os: 'Linux',   arch: 'x86_64']
+				: (isMacOs && isArm64)  ? [target: 'macOsArm64',  os: 'macOS',   arch: 'aarch64']
+				: isMacOs               ? [target: 'macOsX64',    os: 'macOS',   arch: 'x86_64']
+				: null
+		if (cfg) normalizeSingleConstruoTarget(cfg)
+	}
 }
 
 tasks.register('packageAll') {
@@ -417,13 +389,10 @@ tasks.register('doAll') {
 
 // ─── Lifecycle wiring ─────────────────────────────────────────────────────────
 // `build` creates the standard runnable JAR only.
-// Portable JAR, JRE image, EXE, and installer are opt-in via their dedicated tasks.
+// Portable JAR, platform packages, and the Windows installer are opt-in via their dedicated tasks.
 
 tasks.named('clean') {
 	delete file("${projectDir}/final")
-	delete file("${projectDir}/installer files/Firstpass.jar")
-	delete file("${projectDir}/installer files/jre")
-	delete file("${projectDir}/installer files/Firstpass_setup.exe")
 	delete layout.buildDirectory.dir('tmp/installer-construo').get().asFile
 	delete layout.buildDirectory.dir('tmp/construo-repack').get().asFile
 }
