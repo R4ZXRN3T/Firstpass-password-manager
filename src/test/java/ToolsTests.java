@@ -14,7 +14,7 @@ class ToolsTests {
 		String encoded = Tools.encodePassword(password);
 		assertTrue(encoded.startsWith("$argon2id$"), "Hash should be an Argon2id encoded string");
 
-		// Correct password + salt should verify successfully
+		// Correct password should verify successfully against the encoded hash
 		assertTrue(Tools.verifyPassword(password, encoded));
 
 		// Different password should not verify
