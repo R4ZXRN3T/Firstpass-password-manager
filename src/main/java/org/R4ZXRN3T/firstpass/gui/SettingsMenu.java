@@ -1,6 +1,10 @@
-package org.R4ZXRN3T.firstpass;
+package org.R4ZXRN3T.firstpass.gui;
 
+import org.R4ZXRN3T.firstpass.Config;
 import org.R4ZXRN3T.firstpass.Config.ConfigKey;
+import org.R4ZXRN3T.firstpass.Firstpass;
+import org.R4ZXRN3T.firstpass.Main;
+import org.R4ZXRN3T.firstpass.Updater;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +12,7 @@ import java.util.HashMap;
 
 import static org.R4ZXRN3T.firstpass.Config.ConfigKey.*;
 
-class SettingsMenu {
+public class SettingsMenu {
 
 	private final HashMap<ConfigKey, String> currentSettings = new HashMap<>();
 	private final Firstpass firstpass;
@@ -61,7 +65,7 @@ class SettingsMenu {
 		String[] themeOptions = {"Flat Light", "Flat Dark", "Flat Mac Light", "Flat Mac Dark", "Flat IntelliJ", "Flat Darcula", "Swing Metal", "System Default"};
 		JComboBox<String> themeSelector = new JComboBox<>(themeOptions);
 		themeSelector.setSelectedIndex(Integer.parseInt(currentSettings.get(LOOK_AND_FEEL)));
-		themeSelector.addActionListener(e -> {
+		themeSelector.addActionListener(_ -> {
 			currentSettings.replace(LOOK_AND_FEEL, String.valueOf(themeSelector.getSelectedIndex()));
 			needsRestart = true;
 		});
@@ -75,10 +79,10 @@ class SettingsMenu {
 		JPanel passwordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		passwordPanel.setBorder(BorderFactory.createTitledBorder("Password"));
 
-		changePasswordButton = new CustomButton("Change Password", e -> changePassword(), new Dimension(140, 30));
+		changePasswordButton = new CustomButton("Change Password", _ -> changePassword(), new Dimension(140, 30));
 		passwordPanel.add(changePasswordButton);
 
-		removePasswordButton = new CustomButton("Remove Password", e -> removePasswordDialog(), new Dimension(140, 30));
+		removePasswordButton = new CustomButton("Remove Password", _ -> removePasswordDialog(), new Dimension(140, 30));
 		passwordPanel.add(removePasswordButton);
 
 		refreshButton();
@@ -88,7 +92,7 @@ class SettingsMenu {
 	private JPanel getFullDeletePane() {
 		JPanel deletePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		deletePanel.setBorder(BorderFactory.createTitledBorder("Delete"));
-		deletePanel.add(new CustomButton("Delete Everything", null, e -> fullDeleteDialog(), false, true, new Dimension(140, 30), null, Color.RED, null));
+		deletePanel.add(new CustomButton("Delete Everything", null, _ -> fullDeleteDialog(), false, true, new Dimension(140, 30), null, Color.RED, null));
 		JLabel deleteLabel = new JLabel("Delete all data");
 		deletePanel.add(deleteLabel);
 		return deletePanel;
@@ -98,7 +102,7 @@ class SettingsMenu {
 		JPanel updatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		updatePanel.setBorder(BorderFactory.createTitledBorder("Update"));
 
-		updatePanel.add(new CustomButton("Check for Updates", e -> {
+		updatePanel.add(new CustomButton("Check for Updates", _ -> {
 			firstpass.setUpdateAvailable(Updater.checkVersion(true).compareToIgnoreCase(Firstpass.CURRENT_VERSION) > 0);
 			firstpass.getTopToolBar().getUpdateButton().setVisible(firstpass.isUpdateAvailable());
 			if (firstpass.isUpdateAvailable()) Updater.update();
@@ -108,7 +112,7 @@ class SettingsMenu {
 
 		JCheckBox updateCheckBox = new JCheckBox("Check for updates on startup");
 		updateCheckBox.setSelected(Boolean.parseBoolean(currentSettings.get(CHECK_FOR_UPDATES)));
-		updateCheckBox.addActionListener(e -> currentSettings.replace(CHECK_FOR_UPDATES, String.valueOf(updateCheckBox.isSelected())));
+		updateCheckBox.addActionListener(_ -> currentSettings.replace(CHECK_FOR_UPDATES, String.valueOf(updateCheckBox.isSelected())));
 		updatePanel.add(updateCheckBox);
 
 		return updatePanel;
@@ -119,8 +123,8 @@ class SettingsMenu {
 		JToolBar bottomToolbar = new JToolBar();
 		bottomToolbar.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		bottomToolbar.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-		bottomToolbar.add(new CustomButton("Apply", Config.getDarkMode() ? Icons.APPLY_ICON_WHITE_SCALED : Icons.APPLY_ICON_SCALED, e -> applySettings(), false, false, new Dimension(90, 30), Config.getDarkMode() ? new Color(50, 50, 50) : Color.lightGray, null, null));
-		bottomToolbar.add(new CustomButton("Cancel", Config.getDarkMode() ? Icons.CANCEL_ICON_WHITE_SCALED : Icons.CANCEL_ICON_SCALED, e -> {
+		bottomToolbar.add(new CustomButton("Apply", Config.getDarkMode() ? Icons.APPLY_ICON_WHITE_SCALED : Icons.APPLY_ICON_SCALED, _ -> applySettings(), false, false, new Dimension(90, 30), Config.getDarkMode() ? new Color(50, 50, 50) : Color.lightGray, null, null));
+		bottomToolbar.add(new CustomButton("Cancel", Config.getDarkMode() ? Icons.CANCEL_ICON_WHITE_SCALED : Icons.CANCEL_ICON_SCALED, _ -> {
 			firstpass.getFrame().setEnabled(true);
 			settingsFrame.dispose();
 		}, false, false, new Dimension(90, 30), Config.getDarkMode() ? new Color(50, 50, 50) : Color.lightGray, null, null));
@@ -151,7 +155,7 @@ class SettingsMenu {
 
 		do {
 			if (!firstRun) {
-				Tools.showToast(settingsFrame, "Old password is incorrect", 2000, Config.getDarkMode(), 70);
+				GuiUtils.showToast(settingsFrame, "Old password is incorrect", 2000, Config.getDarkMode(), 70);
 				oldPassword.setText("");
 				newPassword.setText("");
 			}
@@ -164,7 +168,7 @@ class SettingsMenu {
 		currentSettings.replace(PASSWORD, String.valueOf(newPassword.getPassword()));
 		setPasswordSet(true);
 		refreshButton();
-		Tools.showToast(settingsFrame, "Password successfully changed.", 1500, true, 70);
+		GuiUtils.showToast(settingsFrame, "Password successfully changed.", 1500, true, 70);
 	}
 
 	// apply the settings and restart the program if necessary
@@ -215,7 +219,7 @@ class SettingsMenu {
 
 		currentSettings.replace(PASSWORD, "");
 		setPasswordSet(false);
-		Tools.showToast(settingsFrame, "Password successfully removed", 2000, Config.getDarkMode(), 70);
+		GuiUtils.showToast(settingsFrame, "Password successfully removed", 2000, Config.getDarkMode(), 70);
 		refreshButton();
 	}
 

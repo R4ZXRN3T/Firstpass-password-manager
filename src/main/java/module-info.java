@@ -6,8 +6,9 @@ module org.R4ZXRN3T.firstpass {
 	// Third-party libraries
 	requires org.json;
 	requires com.formdev.flatlaf;
-	requires jasypt;
+	requires de.mkammerer.argon2.nolibs;
 	requires java.compiler;
 
 	exports org.R4ZXRN3T.firstpass;
+	exports org.R4ZXRN3T.firstpass.gui;
 }

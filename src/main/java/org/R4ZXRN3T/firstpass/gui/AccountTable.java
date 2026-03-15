@@ -1,4 +1,8 @@
-package org.R4ZXRN3T.firstpass;
+package org.R4ZXRN3T.firstpass.gui;
+
+import org.R4ZXRN3T.firstpass.Account;
+import org.R4ZXRN3T.firstpass.Config;
+import org.R4ZXRN3T.firstpass.Firstpass;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -248,7 +252,7 @@ public class AccountTable extends JTable {
 	private void copyToClipboard(Object value) {
 		String text = value == null ? "" : value.toString();
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
-		Tools.showToast(SwingUtilities.getWindowAncestor(this), "Copied to clipboard", 1500, Config.getDarkMode());
+		GuiUtils.showToast(SwingUtilities.getWindowAncestor(this), "Copied to clipboard", 1500, Config.getDarkMode());
 	}
 
 	/**

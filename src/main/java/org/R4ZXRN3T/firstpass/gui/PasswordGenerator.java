@@ -1,4 +1,6 @@
-package org.R4ZXRN3T.firstpass;
+package org.R4ZXRN3T.firstpass.gui;
+
+import org.R4ZXRN3T.firstpass.Tools;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,7 +34,7 @@ public class PasswordGenerator {
 		lengthSlider.setBackground(Color.LIGHT_GRAY);
 		JLabel lengthLabel = new JLabel("Length:");
 		JLabel lengthValue = new JLabel("16");
-		lengthSlider.addChangeListener(e -> lengthValue.setText(String.valueOf(lengthSlider.getValue())));
+		lengthSlider.addChangeListener(_ -> lengthValue.setText(String.valueOf(lengthSlider.getValue())));
 
 		uppercase.setSelected(true);
 		lowercase.setSelected(true);
@@ -66,7 +68,7 @@ public class PasswordGenerator {
 		outputPanel.add(copyButton, BorderLayout.EAST);
 
 		CustomButton generateButton = new CustomButton("Generate!",
-				e -> passwordField.setText(generatePassword(lengthSlider.getValue(), uppercase.isSelected(), lowercase.isSelected(), numbers.isSelected(), specialCharacters.isSelected())),
+				_ -> passwordField.setText(generatePassword(lengthSlider.getValue(), uppercase.isSelected(), lowercase.isSelected(), numbers.isSelected(), specialCharacters.isSelected())),
 				new Dimension(100, 35));
 		generateButton.setToolTipText("Generate a new password");
 		generateButton.setBackground(UIManager.getColor("Button.background").brighter());
@@ -85,9 +87,9 @@ public class PasswordGenerator {
 		JButton copyButton = new JButton();
 		copyButton.setIcon(darkMode ? Icons.COPY_ICON_WHITE_SCALED : Icons.COPY_ICON_SCALED);
 		copyButton.setToolTipText("Copy password to clipboard");
-		copyButton.addActionListener(e -> {
+		copyButton.addActionListener(_ -> {
 			Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(passwordField.getText()), null);
-			Tools.showToast(frame, "Password copied to clipboard", 1500, darkMode, -50);
+			GuiUtils.showToast(frame, "Password copied to clipboard", 1500, darkMode, -50);
 		});
 		copyButton.setPreferredSize(new Dimension(40, 40));
 		return copyButton;

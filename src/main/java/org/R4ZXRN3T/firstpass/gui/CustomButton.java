@@ -1,10 +1,10 @@
-package org.R4ZXRN3T.firstpass;
+package org.R4ZXRN3T.firstpass.gui;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-class CustomButton extends JButton {
+public class CustomButton extends JButton {
 
 	private final JLabel textLabel;
 
@@ -55,7 +55,7 @@ class CustomButton extends JButton {
 		if (listenForTableSelection || table != null) {
 			this.setEnabled(table != null && table.isRowSelected() && table.isFocused());
 			if (table != null)
-				table.addRowSelectionListener(e -> this.setEnabled(table.isRowSelected() && table.isFocused()));
+				table.addRowSelectionListener(_ -> this.setEnabled(table.isRowSelected() && table.isFocused()));
 		}
 
 		// add stuff
