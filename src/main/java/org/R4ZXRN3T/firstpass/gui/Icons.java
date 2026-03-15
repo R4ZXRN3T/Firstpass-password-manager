@@ -1,4 +1,4 @@
-package org.R4ZXRN3T.firstpass;
+package org.R4ZXRN3T.firstpass.gui;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,7 +6,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-class Icons {
+public class Icons {
 
 	public static final ImageIcon FIRSTPASS_ICON = new ImageIcon(getFile("assets/firstpass_icon.png"));
 	public static final ImageIcon ADD_ICON = new ImageIcon(getFile("assets/add_icon.png"));

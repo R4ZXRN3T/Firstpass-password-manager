@@ -1,5 +1,6 @@
 package org.R4ZXRN3T.firstpass;
 
+import org.R4ZXRN3T.firstpass.gui.ThemeManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,13 +14,10 @@ import java.util.HashMap;
 import java.util.Objects;
 
 import static org.R4ZXRN3T.firstpass.Tools.encodePassword;
-import static org.R4ZXRN3T.firstpass.Tools.generateRandomString;
 
 public class Config {
 
-	public static final int SALT_LENGTH = 16;
 	private static final String DEFAULT_LAF = "0";
-	private static final int PASSWORD_LENGTH = 64;
 	private static final String DEFAULT_EXPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
 	private static final String DEFAULT_IMPORT_LOCATION = Paths.get(System.getProperty("user.home")).toString();
 	private static HashMap<String, String> configList;
@@ -89,11 +87,9 @@ public class Config {
 
 	private static void setDefaultConfig() {
 		try {
-			String defaultSalt = generateRandomString(SALT_LENGTH);
-			String defaultPassword = encodePassword("", defaultSalt);
+			String defaultPassword = encodePassword("");
 
 			setConfig(ConfigKey.PASSWORD, defaultPassword);
-			setConfig(ConfigKey.SALT, defaultSalt);
 			setConfig(ConfigKey.LOOK_AND_FEEL, DEFAULT_LAF);
 			setConfig(ConfigKey.LAST_EXPORT_LOCATION, DEFAULT_EXPORT_LOCATION);
 			setConfig(ConfigKey.LAST_IMPORT_LOCATION, DEFAULT_IMPORT_LOCATION);
@@ -112,11 +108,7 @@ public class Config {
 		try {
 			switch (key) {
 				case ALL -> setDefaultConfig();
-				case PASSWORD, SALT -> {
-					String tempSalt = generateRandomString(SALT_LENGTH);
-					setConfig(ConfigKey.PASSWORD, encodePassword("", tempSalt));
-					setConfig(ConfigKey.SALT, tempSalt);
-				}
+				case PASSWORD -> setConfig(ConfigKey.PASSWORD, encodePassword(""));
 				case LOOK_AND_FEEL -> setConfig(key, DEFAULT_LAF);
 				case LAST_EXPORT_LOCATION -> setConfig(key, DEFAULT_EXPORT_LOCATION);
 				case LAST_IMPORT_LOCATION -> setConfig(key, DEFAULT_IMPORT_LOCATION);
@@ -132,10 +124,7 @@ public class Config {
 
 	private static void checkConfig() {
 		String tempPassword = getConfig(ConfigKey.PASSWORD);
-		if (tempPassword == null || tempPassword.length() != PASSWORD_LENGTH) setDefault(ConfigKey.PASSWORD);
-
-		String tempSalt = getConfig(ConfigKey.SALT);
-		if (tempSalt == null || tempSalt.length() != SALT_LENGTH) setDefault(ConfigKey.SALT);
+		if (tempPassword == null || !tempPassword.startsWith("$argon2id$")) setDefault(ConfigKey.PASSWORD);
 
 		try {
 			int tempLaF = Integer.parseInt(Objects.requireNonNull(getConfig(ConfigKey.LOOK_AND_FEEL)));
@@ -199,7 +188,6 @@ public class Config {
 	public enum ConfigKey {
 		ALL("all"),
 		PASSWORD("password"),
-		SALT("salt"),
 		LOOK_AND_FEEL("lookAndFeel"),
 		LAST_EXPORT_LOCATION("export"),
 		LAST_IMPORT_LOCATION("import"),

@@ -1,5 +1,10 @@
 package org.R4ZXRN3T.firstpass;
 
+import org.R4ZXRN3T.firstpass.gui.AccountTable;
+import org.R4ZXRN3T.firstpass.gui.BottomToolBar;
+import org.R4ZXRN3T.firstpass.gui.SearchPanel;
+import org.R4ZXRN3T.firstpass.gui.TopToolBar;
+
 import javax.swing.*;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
@@ -11,10 +16,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Stack;
 
-import static org.R4ZXRN3T.firstpass.Icons.*;
+import static org.R4ZXRN3T.firstpass.gui.Icons.*;
 
 public class Firstpass {
 
@@ -59,9 +63,28 @@ public class Firstpass {
 		topToolBar = new TopToolBar(this);
 
 		new Thread(() -> {
-			accountList.addAll(Files.getAccounts(correctPassword));
-			table.setMain(this);
-			table.setContent(accountList);
+			try {
+				accountList.addAll(AccountLoader.getAccounts(correctPassword));
+				table.setMain(this);
+				table.setContent(accountList);
+			} catch (Exception e) {
+				SwingUtilities.invokeLater(() -> {
+					int option = JOptionPane.showOptionDialog(
+							frame,
+							"Failed to load account vault:\n" + e.getMessage() + "\nThe vault is probably corrupted.\nDo you want to delete the vault?",
+							"Vault Error",
+							JOptionPane.DEFAULT_OPTION,
+							JOptionPane.ERROR_MESSAGE,
+							null,
+							new String[]{"Delete", "Exit"},
+							1
+					);
+					if (option == 0) {
+						if (JOptionPane.showConfirmDialog(frame, "Are you sure you want to delete the account vault?") == 0)
+							AccountLoader.deleteAccountsFile();
+					} else System.exit(0);
+				});
+			}
 		}).start();
 
 		initializeFrame();
@@ -222,11 +245,8 @@ public class Firstpass {
 	 * Saves all accounts to file, generates a new salt, hashes it with the password and then saves the config file
 	 */
 	public void save() {
-		Files.saveAccounts(accountList, correctPassword);
-		// generate new salt and thus also new encoded password; *VERY* important for security :)
-		String newSalt = Tools.generateRandomString(Config.SALT_LENGTH);
-		Config.setConfig(Config.ConfigKey.SALT, newSalt);
-		Config.setConfig(Config.ConfigKey.PASSWORD, Tools.encodePassword(correctPassword, newSalt));
+		AccountLoader.saveAccounts(accountList, correctPassword);
+		Config.setConfig(Config.ConfigKey.PASSWORD, Tools.encodePassword(correctPassword));
 		Config.saveConfig();
 	}
 
@@ -235,7 +255,7 @@ public class Firstpass {
 	 */
 	public void fullDelete() {
 		accountList.clear();
-		new File(Files.ACCOUNTS_PATH).delete();
+		new File(AccountLoader.ACCOUNTS_PATH).delete();
 		new File(Config.CONFIG_PATH).delete();
 		if (!Config.isPortableVersion()) new File(Paths.get(System.getenv("APPDATA")) + "\\Firstpass").delete();
 		System.exit(0);
@@ -351,11 +371,10 @@ public class Firstpass {
 	 *
 	 */
 	private String checkPassword() {
-		String currentSalt = Config.getConfig(Config.ConfigKey.SALT);
 		String encodedPassword = Config.getConfig(Config.ConfigKey.PASSWORD);
 
 		// If no password is set (null, empty, or equals hash of empty password with current salt) skip prompt
-		if (encodedPassword == null || currentSalt == null || encodedPassword.isEmpty() || Objects.equals(encodedPassword, Tools.encodePassword("", currentSalt))) {
+		if (encodedPassword == null || encodedPassword.isEmpty() || Tools.verifyPassword("", encodedPassword)) {
 			return ""; // no password set
 		}
 
@@ -389,7 +408,7 @@ public class Firstpass {
 			if (option != JOptionPane.OK_OPTION) System.exit(0);
 
 			firstRun = false;
-		} while (!Tools.encodePassword(String.valueOf(passwordField.getPassword()), currentSalt).equals(encodedPassword));
+		} while (!Tools.verifyPassword(String.valueOf(passwordField.getPassword()), encodedPassword));
 
 		tempFrame.dispose();
 		return String.valueOf(passwordField.getPassword());

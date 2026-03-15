@@ -14,9 +14,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-// It's not your time yet
-
-class Updater {
+public class Updater {
 	private static final String REPO_URL = "https://api.github.com/repos/R4ZXRN3T/Firstpass-password-manager/releases/latest";
 	private static final String DOWNLOAD_URL = "https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/download/";
 	private static final Logger logger = new org.R4ZXRN3T.firstpass.Logger(Config.LOG_PATH);
@@ -110,7 +108,7 @@ class Updater {
 
 					Map<String, List<String>> header = http.getHeaderFields();
 					while (isRedirected(header)) {
-						link = header.get("Location").get(0);
+						link = header.get("Location").getFirst();
 						url = new URI(link).toURL();
 						http = (HttpURLConnection) url.openConnection();
 						header = http.getHeaderFields();

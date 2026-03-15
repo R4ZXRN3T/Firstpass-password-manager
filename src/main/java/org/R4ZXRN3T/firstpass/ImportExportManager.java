@@ -1,5 +1,6 @@
 package org.R4ZXRN3T.firstpass;
 
+import org.R4ZXRN3T.firstpass.gui.GuiUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -91,7 +92,7 @@ public class ImportExportManager {
 			}
 			writer.close();
 			Config.setConfig(Config.ConfigKey.LAST_EXPORT_LOCATION, exportFile.getParent());
-			Tools.showToast(firstpass.getFrame(), "Data successfully exported under: " + exportFile.getAbsolutePath(), 3000, Config.getDarkMode());
+			GuiUtils.showToast(firstpass.getFrame(), "Data successfully exported under: " + exportFile.getAbsolutePath(), 3000, Config.getDarkMode());
 		} catch (Exception e) {
 			logger.error("Error exporting data: " + e.getMessage());
 			System.out.println("Error exporting data: " + e.getMessage());
@@ -209,7 +210,7 @@ public class ImportExportManager {
 
 			Config.setConfig(Config.ConfigKey.LAST_IMPORT_LOCATION, importFile.getParent());
 
-			Tools.showToast(firstpass.getFrame(), "Data successfully imported", 1500, Config.getDarkMode());
+			GuiUtils.showToast(firstpass.getFrame(), "Data successfully imported", 1500, Config.getDarkMode());
 			firstpass.refreshTable();
 			firstpass.setChangeMade(true);
 		} catch (IOException e) {

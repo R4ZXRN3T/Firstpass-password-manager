@@ -8,29 +8,21 @@ class ToolsTests {
 	@Test
 	void testPasswordEncoding() {
 		String password = "testPassword";
-		String salt = "testSalt";
 
-		// Test password encoding produces consistent results
-		String encoded1 = Tools.encodePassword(password, salt);
-		String encoded2 = Tools.encodePassword(password, salt);
-		assertEquals(encoded1, encoded2);
+		// Argon2id hashes are non-deterministic (each call embeds a new random salt),
+		// so we verify via verifyPassword rather than equality.
+		String encoded = Tools.encodePassword(password);
+		assertTrue(encoded.startsWith("$argon2id$"), "Hash should be an Argon2id encoded string");
 
-		// Different passwords should produce different encodings
-		String otherPassword = "differentPassword";
-		String encodedOther = Tools.encodePassword(otherPassword, salt);
-		assertNotEquals(encoded1, encodedOther);
+		// Correct password + salt should verify successfully
+		assertTrue(Tools.verifyPassword(password, encoded));
 
-		// Same password, different salt should produce different encodings
-		String otherSalt = "differentSalt";
-		String encodedOtherSalt = Tools.encodePassword(password, otherSalt);
-		assertNotEquals(encoded1, encodedOtherSalt);
+		// Different password should not verify
+		assertFalse(Tools.verifyPassword("differentPassword", encoded));
 	}
 
 	@Test
 	void testRandomStringGeneration() {
-		// Test length
-		String random1 = Tools.generateRandomString(10);
-		assertEquals(10, random1.length());
 
 		// Test with custom character set
 		String customSet = "ABC123";
