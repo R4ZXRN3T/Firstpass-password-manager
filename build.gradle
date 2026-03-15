@@ -109,18 +109,32 @@ tasks.register('portableJar', Jar) {
 	configureFatJar(delegate, true)
 }
 
-tasks.register('copyJarToRoot', Copy) {
+tasks.register('copyJarToRoot') {
 	description = 'Copies Firstpass.jar to the project root for downstream packaging tasks.'
 	dependsOn tasks.named('fatJar')
-	from(tasks.named('fatJar', Jar).flatMap { it.archiveFile })
-	into(layout.projectDirectory)
+	def fatJarFile = tasks.named('fatJar', Jar).flatMap { it.archiveFile }
+	inputs.file(fatJarFile)
+	outputs.file(layout.projectDirectory.file(appJarName))
+	doLast {
+		copy {
+			from(fatJarFile)
+			into(layout.projectDirectory)
+		}
+	}
 }
 
-tasks.register('copyPortableJarToRoot', Copy) {
+tasks.register('copyPortableJarToRoot') {
 	description = 'Copies Firstpass_portable.jar to the project root.'
 	dependsOn tasks.named('portableJar')
-	from(tasks.named('portableJar', Jar).flatMap { it.archiveFile })
-	into(layout.projectDirectory)
+	def portableJarFile = tasks.named('portableJar', Jar).flatMap { it.archiveFile }
+	inputs.file(portableJarFile)
+	outputs.file(layout.projectDirectory.file(portableJarName))
+	doLast {
+		copy {
+			from(portableJarFile)
+			into(layout.projectDirectory)
+		}
+	}
 }
 
 // ─── JRE tasks ────────────────────────────────────────────────────────────────
@@ -148,13 +162,11 @@ tasks.register('createJre', Sync) {
 // Requires launch4j and Inno Setup to be installed and on PATH.
 
 def commandExists = { String command ->
-	def result = exec {
-		commandLine 'cmd', '/c', "where ${command}"
-		standardOutput = new ByteArrayOutputStream()
-		errorOutput = new ByteArrayOutputStream()
-		ignoreExitValue = true
-	}
-	result.exitValue == 0
+	def process = new ProcessBuilder('cmd', '/c', "where ${command}")
+			.redirectErrorStream(true)
+			.start()
+	process.inputStream.text
+	process.waitFor() == 0
 }
 
 // Wraps Firstpass.jar into Firstpass.exe via launch4j.
@@ -178,6 +190,12 @@ tasks.register('createInstaller', Exec) {
 
 	workingDir file("${projectDir}/installer files")
 	commandLine 'iscc', 'Firstpass.iss'
+}
+
+tasks.register('doAll') {
+	dependsOn tasks.named('clean')
+	dependsOn tasks.named('createInstaller')
+	dependsOn tasks.named('copyPortableJarToRoot')
 }
 
 // ─── Lifecycle wiring ─────────────────────────────────────────────────────────
