@@ -2,6 +2,7 @@ package org.R4ZXRN3T.firstpass;
 
 import org.jasypt.util.text.StrongTextEncryptor;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
@@ -10,8 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.*;
 
 // all file shit in here
 class Files {
@@ -64,7 +63,7 @@ class Files {
 
 			@Override
 			protected void process(List<Integer> chunks) {
-				progressBar.setValue(chunks.getLast());
+				progressBar.setValue(chunks.get(chunks.size() - 1));
 			}
 
 			@Override
@@ -124,7 +123,7 @@ class Files {
 
 			@Override
 			protected void process(List<Integer> chunks) {
-				progressBar.setValue(chunks.getLast());
+				progressBar.setValue(chunks.get(chunks.size() - 1));
 			}
 
 			@Override

@@ -1,0 +1,193 @@
+plugins {
+	id 'java'
+	id 'application'
+	id 'org.beryx.jlink' version '3.3.0-beta3'
+	id 'org.gradlex.extra-java-module-info' version '1.13.1'
+}
+
+group = 'org.R4ZXRN3T'
+version = '2.1.2'
+
+def mainModuleName = 'org.R4ZXRN3T.firstpass'
+def mainClassName = 'org.R4ZXRN3T.firstpass.Main'
+def appJarName = 'Firstpass.jar'
+def portableJarName = 'Firstpass_portable.jar'
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+def manifestAttributes = [
+		'Main-Class'            : mainClassName,
+		'Implementation-Title'  : project.name,
+		'Implementation-Version': project.version
+]
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+	modularity.inferModulePath = true
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.json:json:20251224'
+	// implementation 'org.bouncycastle:bcprov-jdk18on:1.83'
+	implementation 'org.jasypt:jasypt:1.9.3'
+	implementation 'com.formdev:flatlaf:3.7'
+
+	testImplementation 'org.junit.jupiter:junit-jupiter:6.0.2'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.0.2'
+}
+
+extraJavaModuleInfo {
+	// jasypt has no module-info; define a stable automatic module name for JPMS builds.
+	automaticModule('org.jasypt:jasypt', 'jasypt')
+}
+
+application {
+	mainModule = mainModuleName
+	mainClass = mainClassName
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+	options.release = 25
+}
+
+tasks.withType(Jar).configureEach {
+	// Keep archive contents deterministic across machines/builds.
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+}
+
+tasks.test {
+	useJUnitPlatform()
+}
+
+// ─── JAR tasks ────────────────────────────────────────────────────────────────
+
+def configureFatJar = { jarTask, boolean includeAssets ->
+	jarTask.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	jarTask.manifest {
+		attributes(manifestAttributes)
+	}
+	jarTask.from(sourceSets.main.output)
+	jarTask.from({
+		configurations.runtimeClasspath.collect { dependency ->
+			dependency.isDirectory() ? dependency : zipTree(dependency)
+		}
+	}) {
+		exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+	}
+	if (includeAssets) {
+		jarTask.from('assets') {
+			into 'assets'
+		}
+	}
+}
+
+tasks.named('jar').configure {
+	description = 'Builds the modular application JAR used by jlink.'
+	archiveFileName = 'Firstpass_modular.jar'
+	manifest {
+		attributes(manifestAttributes)
+	}
+}
+
+tasks.register('fatJar', Jar) {
+	group = 'build'
+	description = 'Builds the standard runnable fat JAR without bundled assets.'
+	archiveFileName = appJarName
+	configureFatJar(delegate, false)
+}
+
+tasks.register('portableJar', Jar) {
+	group = 'build'
+	description = 'Builds the portable runnable JAR with the assets folder included.'
+	archiveFileName = portableJarName
+	configureFatJar(delegate, true)
+}
+
+tasks.register('copyJarToRoot', Copy) {
+	description = 'Copies Firstpass.jar to the project root for downstream packaging tasks.'
+	dependsOn tasks.named('fatJar')
+	from(tasks.named('fatJar', Jar).flatMap { it.archiveFile })
+	into(layout.projectDirectory)
+}
+
+tasks.register('copyPortableJarToRoot', Copy) {
+	description = 'Copies Firstpass_portable.jar to the project root.'
+	dependsOn tasks.named('portableJar')
+	from(tasks.named('portableJar', Jar).flatMap { it.archiveFile })
+	into(layout.projectDirectory)
+}
+
+// ─── JRE tasks ────────────────────────────────────────────────────────────────
+
+jlink {
+	imageName = 'firstpass-jre'
+	options = ['--compress=zip-0', '--no-header-files', '--no-man-pages', '--strip-debug']
+}
+
+// Creates the jlink runtime image at ./jre for local packaging.
+tasks.register('createJre', Sync) {
+	group = 'distribution'
+	description = 'Creates the custom runtime image in ./jre.'
+	dependsOn tasks.named('jlink')
+
+	from(provider {
+		def direct = file("$buildDir/firstpass-jre")
+		def nested = file("$buildDir/image/firstpass-jre")
+		direct.exists() ? direct : (nested.exists() ? nested : file("$buildDir/image"))
+	})
+	into layout.projectDirectory.dir('jre')
+}
+
+// ─── Windows packaging tasks ──────────────────────────────────────────────────
+// Requires launch4j and Inno Setup to be installed and on PATH.
+
+def commandExists = { String command ->
+	def result = exec {
+		commandLine 'cmd', '/c', "where ${command}"
+		standardOutput = new ByteArrayOutputStream()
+		errorOutput = new ByteArrayOutputStream()
+		ignoreExitValue = true
+	}
+	result.exitValue == 0
+}
+
+// Wraps Firstpass.jar into Firstpass.exe via launch4j.
+tasks.register('createExe', Exec) {
+	group = 'distribution'
+	description = 'Creates Firstpass.exe using launch4j (Windows only).'
+	dependsOn tasks.named('copyJarToRoot')
+	dependsOn tasks.named('createJre')
+	onlyIf { isWindows && commandExists('launch4jc') }
+
+	workingDir file("${projectDir}/installer files")
+	commandLine 'launch4jc', 'launch4j_setup.xml'
+}
+
+// Packages Firstpass.exe + assets + jre into a Windows installer via Inno Setup.
+tasks.register('createInstaller', Exec) {
+	group = 'distribution'
+	description = 'Creates the Windows installer (Firstpass_setup.exe) using Inno Setup (Windows only).'
+	dependsOn tasks.named('createExe')
+	onlyIf { isWindows && commandExists('iscc') }
+
+	workingDir file("${projectDir}/installer files")
+	commandLine 'iscc', 'Firstpass.iss'
+}
+
+// ─── Lifecycle wiring ─────────────────────────────────────────────────────────
+// `build` creates the standard runnable JAR only.
+// Portable JAR, JRE image, EXE, and installer are opt-in via their dedicated tasks.
+
+tasks.named('clean') {
+	delete file("${projectDir}/Firstpass.jar")
+	delete file("${projectDir}/Firstpass_portable.jar")
+	delete file("${projectDir}/Firstpass.exe")
+	delete file("${projectDir}/jre")
+	delete file("${projectDir}/installer files/Firstpass_setup.exe")
+}

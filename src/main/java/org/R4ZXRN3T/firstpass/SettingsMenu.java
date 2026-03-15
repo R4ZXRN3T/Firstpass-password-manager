@@ -1,13 +1,12 @@
 package org.R4ZXRN3T.firstpass;
 
-import static org.R4ZXRN3T.firstpass.Config.ConfigKey.*;
-
 import org.R4ZXRN3T.firstpass.Config.ConfigKey;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-import javax.swing.*;
+import static org.R4ZXRN3T.firstpass.Config.ConfigKey.*;
 
 class SettingsMenu {
 

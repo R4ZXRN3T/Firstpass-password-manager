@@ -1,11 +1,9 @@
 package org.R4ZXRN3T.firstpass;
 
-import static org.R4ZXRN3T.firstpass.Tools.encodePassword;
-import static org.R4ZXRN3T.firstpass.Tools.generateRandomString;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,7 +12,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Objects;
 
-import javax.swing.*;
+import static org.R4ZXRN3T.firstpass.Tools.encodePassword;
+import static org.R4ZXRN3T.firstpass.Tools.generateRandomString;
 
 public class Config {
 
@@ -78,7 +77,8 @@ public class Config {
 				return;
 			}
 			JSONObject jsonToSave = new JSONObject(configList);
-			for (String key : configList.keySet()) System.out.println("Saving config: " + key + " = " + configList.get(key));
+			for (String key : configList.keySet())
+				System.out.println("Saving config: " + key + " = " + configList.get(key));
 			writer.write(jsonToSave.toString(4));
 			writer.flush();
 		} catch (IOException e) {

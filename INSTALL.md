@@ -4,8 +4,10 @@
 
 Grab the latest release here:
 
-- Windows Installer (EXE): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_setup.exe
-- Portable JAR (all platforms): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_portable.jar
+- Windows Installer (
+  EXE): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_setup.exe
+- Portable JAR (all
+  platforms): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_portable.jar
 
 ## Windows (Installer)
 

@@ -12,3 +12,5 @@ launch4j.log
 firstpass.log
 jre.zip
 jre/
+.gradle/
+build

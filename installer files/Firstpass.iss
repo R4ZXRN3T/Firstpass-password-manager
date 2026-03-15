@@ -33,9 +33,17 @@ LicenseFile=.\License Agreement.txt
 OutputDir=.\
 OutputBaseFilename=Firstpass_setup
 SetupIconFile=.\Firstpass.ico
-Compression=lzma2/ultra64
-SolidCompression=yes
 WizardStyle=modern dark
+
+; Compression  settings
+SolidCompression=yes
+Compression=lzma2/ultra64
+LZMABlockSize=262144
+LZMADictionarySize=262144
+LZMAUseSeparateProcess=yes
+LZMAMatchFinder=BT
+LZMANumBlockThreads=3
+LZMANumFastBytes=273
 
 [Languages]
 ; -----------------------------
