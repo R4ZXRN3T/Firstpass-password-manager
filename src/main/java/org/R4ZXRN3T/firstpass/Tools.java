@@ -14,8 +14,6 @@ public class Tools {
 
 	/**
 	 * Hash a password with Argon2id.
-	 * The {@code salt} is used as a pepper (appended to the password before hashing)
-	 * so that the stored salt value still contributes to security.
 	 * The Argon2 library embeds its own cryptographic salt in the returned hash string.
 	 *
 	 * @param password The plaintext password
