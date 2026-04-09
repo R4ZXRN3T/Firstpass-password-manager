@@ -4,6 +4,9 @@ plugins {
 	id 'com.gradleup.shadow' version '9.4.1'
 }
 
+
+
+
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 
@@ -271,5 +274,131 @@ tasks.register('makeJlinkPackage') {
 		copy { from tmpDir; into finalDest }
 
 		println "Created packaged artifact directory: ${finalDest}"
+	}
+}
+
+// Create a macOS .app bundle by wrapping the artifact produced by `makeJlinkPackage`.
+// This task expects `makeJlinkPackage` to have produced a packaged directory under `final/`
+// (e.g. `final/Firstpass-<version>-MacOS-<arch>`). It will wrap the produced app/, assets/, and jre/
+// content into a proper macOS bundle at `final/Firstpass.app`.
+tasks.register('makeMacApp') {
+	dependsOn tasks.named('makeJlinkPackage')
+
+	doLast {
+		def outDir = file('final')
+		if (!outDir.exists()) {
+			throw new GradleException("Expected output directory 'final' not found. Run makeJlinkPackage first.")
+		}
+
+		// Find the most recent package directory produced by makeJlinkPackage that contains an app/ folder
+		def candidates = outDir.listFiles()?.findAll { it.isDirectory() && new File(it, 'app').exists() }
+		if (!candidates || candidates.isEmpty()) {
+			throw new GradleException("No packaged jlink artifact found under 'final/'. Ensure makeJlinkPackage succeeded.")
+		}
+		// pick the most recently modified candidate
+		def packageRoot = candidates.sort { -it.lastModified() }[0]
+
+		println "Using packaged artifact: ${packageRoot}"
+
+		// Create the .app bundle directory structure
+		def appBundle = new File(outDir, 'Firstpass.app')
+		if (appBundle.exists()) appBundle.deleteDir()
+
+		def contents = new File(appBundle, 'Contents')
+		contents.mkdirs()
+		def macosDir = new File(contents, 'MacOS')
+		macosDir.mkdirs()
+		def resourcesDir = new File(contents, 'Resources')
+		resourcesDir.mkdirs()
+
+		// Copy packaged app/ into Contents/Resources/app
+		def packagedApp = new File(packageRoot, 'app')
+		if (packagedApp.exists()) {
+			copy { from packagedApp; into new File(resourcesDir, 'app') }
+		} else {
+			throw new GradleException("Packaged artifact does not contain an 'app' directory: ${packageRoot}")
+		}
+
+		// Copy assets if present
+		def packagedAssets = new File(packageRoot, 'assets')
+		if (packagedAssets.exists()) {
+			copy { from packagedAssets; into new File(resourcesDir, 'assets') }
+		}
+
+		// Copy jre if present
+		def packagedJre = new File(packageRoot, 'jre')
+		def hasJre = false
+		if (packagedJre.exists()) {
+			copy { from packagedJre; into new File(resourcesDir, 'jre') }
+			hasJre = true
+		}
+
+		// If the packaged artifact included a launcher script at root (firstpass), prefer to reuse it
+		def packagedLauncher = new File(packageRoot, 'firstpass')
+
+		// Copy macOS icon (.icns) into Resources if present under installer files/
+		def installerIcon = file('installer files/Firstpass.icns')
+		def iconFileName = null
+		if (installerIcon.exists()) {
+			copy { from installerIcon; into resourcesDir }
+			// CFBundleIconFile typically references the icon name without extension
+			def dot = installerIcon.name.lastIndexOf('.')
+			def iconBase = (dot >= 0) ? installerIcon.name[0..dot-1] : installerIcon.name
+			iconFileName = iconBase
+			println "Included icon: ${installerIcon} -> Contents/Resources/${installerIcon.name} (plist entry: ${iconFileName})"
+		}
+
+		// Determine main jar filename from the packaged app directory (take the first jar)
+		def resourcesAppDir = new File(resourcesDir, 'app')
+		def jarFile = resourcesAppDir.listFiles()?.find { it.name.toLowerCase().endsWith('.jar') }
+		if (jarFile == null) {
+			throw new GradleException("No jar found in packaged app directory: ${resourcesAppDir}")
+		}
+
+		// Create MacOS executable launcher that runs the packaged jre if present, otherwise system java
+		def launcher = new File(macosDir, 'Firstpass')
+		if (hasJre) {
+			launcher.text = '#!/usr/bin/env sh\n' +
+					'exec "$(dirname "$0")/../Resources/jre/bin/java" -jar "$(dirname "$0")/../Resources/app/' + jarFile.name + '" "$@"\n'
+		} else {
+			launcher.text = '#!/usr/bin/env sh\n' +
+					'exec java -jar "$(dirname "$0")/../Resources/app/' + jarFile.name + '" "$@"\n'
+		}
+		launcher.setExecutable(true)
+
+		// Create a minimal Info.plist for the app bundle
+		def bundleId = project.hasProperty('bundleId') ? project.property('bundleId') : group ?: 'org.R4ZXRN3T.firstpass'
+		def plist = new File(contents, 'Info.plist')
+		def iconEntry = iconFileName ? "  <key>CFBundleIconFile</key>\n  <string>${iconFileName}</string>\n" : ''
+
+		def plistText = """<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"> 
+<plist version=\"1.0\"> 
+<dict>
+  <key>CFBundleName</key>
+  <string>${meta.name}</string>
+  <key>CFBundleDisplayName</key>
+  <string>${meta.name}</string>
+${iconEntry}
+  <key>CFBundleIdentifier</key>
+  <string>${bundleId}</string>
+  <key>CFBundleVersion</key>
+  <string>${project.version}</string>
+  <key>CFBundleShortVersionString</key>
+  <string>${project.version}</string>
+  <key>CFBundleExecutable</key>
+  <string>Firstpass</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>10.12</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+</dict>
+</plist>
+"""
+		plist.text = plistText
+
+		println "Created macOS .app bundle at: ${appBundle} (wrapped from ${packageRoot})"
 	}
 }
