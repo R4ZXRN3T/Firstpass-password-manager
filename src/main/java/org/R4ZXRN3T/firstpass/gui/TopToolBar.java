@@ -37,7 +37,7 @@ public class TopToolBar {
 
 		JButton settingsButton = new JButton("Settings");
 		settingsButton.addActionListener(_ -> new SettingsMenu(firstpass).showSettings());
-		settingsButton.setBackground(firstpass.getFrame().getBackground());
+		settingsButton.setBackground(toolBar.getBackground());
 		settingsButton.setBorderPainted(false);
 		settingsButton.setFocusable(false);
 
