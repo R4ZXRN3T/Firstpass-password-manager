@@ -63,7 +63,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; -----------------------------
 ; Files to Install
 ; -----------------------------
-Source: ".\..\final\Firstpass-*-Windows-*\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Allow flexible matching of the built Windows package directory. Some CI builds
+; may name the directory slightly differently (architecture, casing, etc.), so
+; match any directory name that contains 'Windows'.
+Source: ".\..\final\*Windows*\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: ".\..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
