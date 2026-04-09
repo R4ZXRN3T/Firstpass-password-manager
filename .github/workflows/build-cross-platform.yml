@@ -37,8 +37,7 @@ jobs:
 
       - name: Grant execute permission for gradlew
         if: runner.os != 'Windows'
-        run: chmod +x ./gradlew
-            echo $(uname -m)
+        run: chmod +x ./gradlew && echo $(uname -m)
 
       - name: Build (Linux)
         if: runner.os == 'Linux'
