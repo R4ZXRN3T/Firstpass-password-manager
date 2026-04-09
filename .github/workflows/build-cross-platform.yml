@@ -2,9 +2,9 @@ name: Build cross-platform
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -66,17 +66,12 @@ jobs:
           Write-Host "Running Inno Setup compiler on $iss"
           & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' $iss
 
-      - name: List final directory
-        run: |
-          ls -la final || true
-
       - name: Upload final artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: final-${{ matrix.os }}
+          name: Firstpass-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}.zip
           path: |
             final/**
-            build/**/construo/**
 
   release:
     name: Create release with built artifacts
