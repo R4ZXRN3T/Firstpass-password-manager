@@ -69,30 +69,6 @@ jobs:
       - name: Upload final artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: Firstpass-${{ env.VERSION }}-${{ matrix.os }}-${{ matrix.arch }}.zip
+          name: final-${{ matrix.os }}-${{ matrix.arch }}.zip
           path: |
             final/**
-
-  release:
-    name: Create release with built artifacts
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Get project version
-        id: get_version
-        run: |
-          echo "VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
-
-      - name: Create GitHub Release and upload artifacts
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ env.VERSION }}-build-${{ github.run_number }}
-          name: Firstpass ${{ env.VERSION }} (build ${{ github.run_number }})
-          files: artifacts/**/**
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

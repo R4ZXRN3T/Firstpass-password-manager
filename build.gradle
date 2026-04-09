@@ -191,7 +191,7 @@ tasks.register('makeJlinkPackage') {
 		def osLabel
 		def archLabel
 		if (host.isLinux()) osLabel = 'Linux'
-		else if (host.isMacOsX()) osLabel = 'Mac'
+		else if (host.isMacOsX()) osLabel = 'MacOS'
 		else if (host.isWindows()) osLabel = 'Windows'
 		else osLabel = 'Unknown'
 
