@@ -21,7 +21,7 @@ import static org.R4ZXRN3T.firstpass.gui.Icons.*;
 
 public class Firstpass {
 
-	public static final String CURRENT_VERSION = "2.1.3";
+	public static final String CURRENT_VERSION = Firstpass.class.getPackage().getImplementationVersion() != null ? Firstpass.class.getPackage().getImplementationVersion() : "Dev";
 	private final ArrayList<Account> accountList = new ArrayList<>();
 	private final Stack<Account> undoStack = new Stack<>();
 	private JFrame frame;
@@ -44,7 +44,7 @@ public class Firstpass {
 
 		// check whether an update is available
 		// in a separate thread, as on slow internet connection this might take a while
-		if (Boolean.parseBoolean(Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES))) new Thread(() -> {
+		if (Boolean.parseBoolean(Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES)) && !CURRENT_VERSION.equals("Dev")) new Thread(() -> {
 			String newVersion = Updater.checkVersion(false);
 			if (newVersion == null || newVersion.isBlank()) return;
 			setUpdateAvailable(Tools.compareVersion(newVersion, CURRENT_VERSION) > 0);
