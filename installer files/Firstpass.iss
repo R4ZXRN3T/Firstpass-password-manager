@@ -10,7 +10,7 @@
 #endif
 #define MyAppPublisher "R4ZXRN3T"
 #define MyAppURL "https://github.com/R4ZXRN3T/Firstpass-password-manager"
-#define MyAppExeName "Firstpass.exe"
+#define MyAppExeName "firstpass.bat"
 #define DesktopShortcutName "Firstpass"
 
 [Setup]
