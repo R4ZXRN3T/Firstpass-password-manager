@@ -1,0 +1,108 @@
+name: Build cross-platform
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: x64
+          - os: ubuntu-latest
+            arch: arm64
+          - os: macos-latest
+            arch: x64
+          - os: macos-latest
+            arch: arm64
+          - os: windows-latest
+            arch: x64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          architecture: ${{ matrix.arch }}
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ matrix.os }}-${{ matrix.arch }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties','**/*.gradle*','**/build.gradle*') }}
+          restore-keys: |
+            gradle-${{ matrix.os }}-${{ matrix.arch }}-
+
+      - name: Grant execute permission for gradlew
+        if: runner.os != 'Windows'
+        run: chmod +x ./gradlew
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        run: ./gradlew -s shadowJar portableJar copyJarsToFinal makeJlinkPackage -PbuildNumber=${{ github.run_number }} -PincludeManifest=false --no-daemon
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: ./gradlew -s shadowJar portableJar copyJarsToFinal makeJlinkPackage -PbuildNumber=${{ github.run_number }} -PincludeManifest=false --no-daemon
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: .\gradlew.bat -s shadowJar portableJar copyJarsToFinal makeJlinkPackage -PbuildNumber=${{ github.run_number }} -PincludeManifest=false --no-daemon
+
+      - name: Build installer (Inno Setup)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          choco install innosetup -y
+          $iss = 'installer files\\Firstpass.iss'
+          Write-Host "Running Inno Setup compiler on $iss"
+          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' $iss
+
+      - name: List final directory
+        run: |
+          ls -la final || true
+
+      - name: Upload final artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: final-${{ matrix.os }}
+          path: |
+            final/**
+            build/**/construo/**
+
+  release:
+    name: Create release with built artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Get project version
+        id: get_version
+        run: |
+          echo "VERSION=$(grep '^version=' gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+
+      - name: Create GitHub Release and upload artifacts
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}-build-${{ github.run_number }}
+          name: Firstpass ${{ env.VERSION }} (build ${{ github.run_number }})
+          files: artifacts/**/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
