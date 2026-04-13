@@ -12,7 +12,10 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Stack;
@@ -45,7 +48,7 @@ public class Firstpass {
 		// check whether an update is available
 		// in a separate thread, as on slow internet connection this might take a while
 		if (Boolean.parseBoolean(Config.getConfig(Config.ConfigKey.CHECK_FOR_UPDATES)) && !CURRENT_VERSION.equals("Dev")) new Thread(() -> {
-			String newVersion = Updater.checkVersion(false);
+			String newVersion = Updater.checkVersion(false, true);
 			if (newVersion == null || newVersion.isBlank()) return;
 			setUpdateAvailable(Tools.compareVersion(newVersion, CURRENT_VERSION) > 0);
 			if (getTopToolBar() != null) getTopToolBar().getUpdateButton().setVisible(isUpdateAvailable());
@@ -417,23 +420,48 @@ public class Firstpass {
 	 */
 	private void deleteFiles() {
 		new Thread(() -> {
-			// delete installer files if existing
-			// in new thread as I need a delay. If deletion happens too quickly the files are still open, thus can't be deleted
+			// delete installer/update related files if existing
+			// run in separate thread and wait a little so running processes release handles
 			try {
 				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+			} catch (InterruptedException _) {
 			}
+
 			Path parentPath = AccountLoader.getAccountFilePath().toAbsolutePath().getParent();
 			if (!parentPath.toFile().exists()) return;
-			new File(parentPath + "/Firstpass_setup.msi").delete();
-			new File(parentPath + "/Firstpass_setup.msi.tmp").delete();
-			new File(parentPath + "/Firstpass_setup.exe").delete();
-			new File(parentPath + "/Firstpass_setup.exe.tmp").delete();
-			new File(parentPath + "/Firstpass_portable.jar.tmp").delete();
-			new File(parentPath + "/rename.bat").delete();
-			new File(parentPath + "/rename.sh").delete();
+			try (java.nio.file.DirectoryStream<Path> ds = Files.newDirectoryStream(parentPath)) {
+				for (Path p : ds) {
+					String name = p.getFileName().toString();
+					String lower = name.toLowerCase(Locale.ROOT);
+
+					boolean shouldDelete = ((lower.equals("rename.bat") || lower.equals("rename.sh")) || lower.startsWith("firstpass_update_")) || lower.contains("firstpass") && lower.contains("setup") || lower.contains(".tmp");
+
+					if (shouldDelete) {
+						try {
+							if (Files.isDirectory(p)) deleteRecursively(p);
+							else Files.deleteIfExists(p);
+						} catch (IOException ignored) {
+						}
+					}
+				}
+			} catch (IOException ignored) {
+			}
 		}).start();
+	}
+
+	/**
+	 * Recursively delete a directory and its contents. Any exceptions are propagated to caller.
+	 */
+	private static void deleteRecursively(Path path) throws IOException {
+		if (!Files.exists(path)) return;
+		try (java.util.stream.Stream<Path> walk = Files.walk(path)) {
+			walk.sorted(Comparator.reverseOrder()).forEach(p -> {
+				try {
+					Files.deleteIfExists(p);
+				} catch (IOException ignored) {
+				}
+			});
+		}
 	}
 
 	/**

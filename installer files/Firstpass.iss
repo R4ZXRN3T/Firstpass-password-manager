@@ -10,7 +10,7 @@
 #endif
 #define MyAppPublisher "R4ZXRN3T"
 #define MyAppURL "https://github.com/R4ZXRN3T/Firstpass-password-manager"
-#define MyAppExeName "firstpass.bat"
+#define MyAppExeName "Firstpass.exe"
 #define DesktopShortcutName "Firstpass"
 
 [Setup]
@@ -33,7 +33,7 @@ LicenseFile=..\LICENSE
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=none
 OutputDir=..\final
-OutputBaseFilename=Firstpass_setup
+OutputBaseFilename=Firstpass-{#MyAppVersion}-setup
 SetupIconFile=.\Firstpass.ico
 WizardStyle=modern dark
 
