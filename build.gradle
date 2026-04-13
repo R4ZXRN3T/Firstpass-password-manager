@@ -4,9 +4,7 @@ plugins {
 	id 'com.gradleup.shadow' version '9.4.1'
 }
 
-
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 
 repositories {
 	mavenCentral()
@@ -50,8 +48,10 @@ application {
 def _sysJavaVer = System.getProperty('java.version') ?: '0'
 def _sysJavaMajor = _sysJavaVer.tokenize('.')[0].toInteger()
 if (_sysJavaMajor < 25) {
-	throw new GradleException("JDK 25 or greater is required for jlink image creation. Detected Java version: ${_sysJavaVer}")
+	throw new GradleException("JDK 25 or greater is required for bulding and jlink image creation. Detected Java version: ${_sysJavaVer}")
 }
+
+def currentDistributionType = 'other'
 
 tasks.named('jar') {
 	enabled = false
@@ -74,6 +74,7 @@ tasks.named('distZip') {
 
 tasks.named('shadowJar') {
 	archiveClassifier.set('')
+	archiveFileName.set(provider { "${archiveBaseName.get()}.jar" })
 
 	exclude('assets/**')
 
@@ -84,7 +85,8 @@ tasks.named('shadowJar') {
 					'Implementation-Title': project.name,
 					'Implementation-Version': project.version,
 					'Implementation-Vendor': meta.vendor,
-					'Implementation-URL': meta.homepage
+					'Implementation-URL': meta.homepage,
+					'Distribution-Type': currentDistributionType
 			)
 		}
 	}
@@ -112,7 +114,8 @@ tasks.register('portableJar', ShadowJar) {
 					'Implementation-Title': project.name,
 					'Implementation-Version': project.version,
 					'Implementation-Vendor': meta.vendor,
-					'Implementation-URL': meta.homepage
+					'Implementation-URL': meta.homepage,
+					'Distribution-Type': 'portable'
 			)
 		}
 	}
@@ -145,6 +148,7 @@ tasks.register('copyPortableJarToFinal', Copy) {
 
 // Convenience task that copies both jars
 tasks.register('copyJarsToFinal') {
+	currentDistributionType = 'other'
 	dependsOn tasks.named('copyJarToFinal')
 	dependsOn tasks.named('copyPortableJarToFinal')
 }
@@ -154,19 +158,15 @@ tasks.register('copyJarsToFinal') {
 tasks.register('jlinkImage') {
 	dependsOn tasks.named('shadowJar')
 	// declare outputs so Gradle can reason about up-to-date/caching
-	def _imageDirPath = "${buildDir}/jlink/image"
+	def _imageDirPath = "${layout.buildDirectory.get().asFile}/jlink/image"
 	outputs.dir(_imageDirPath)
 	doLast {
-		def host = org.gradle.internal.os.OperatingSystem.current()
 		def modules = 'java.base,java.desktop,java.logging'
 		def imageDir = file(_imageDirPath)
 		if (imageDir.exists()) imageDir.deleteDir()
-		// Do NOT create the output directory before invoking jlink: jlink fails
-		// if the output directory already exists. jlink will create the directory
-		// on success.
 
 		// Invoke jlink using a Java ProcessBuilder to avoid Gradle exec resolution issues
-		def jlinkCmd = ['jlink', '--add-modules', modules, '--output', imageDir.absolutePath, '--strip-debug', '--no-header-files', '--no-man-pages', '--compress=0']
+		def jlinkCmd = ['jlink', '--add-modules', modules, '--output', imageDir.absolutePath, '--strip-debug', '--no-header-files', '--no-man-pages', '--compress=zip-0']
 		logger.lifecycle("Running: ${jlinkCmd.join(' ')}")
 		def pb = new ProcessBuilder(jlinkCmd)
 		pb.redirectErrorStream(true)
@@ -181,6 +181,9 @@ tasks.register('jlinkImage') {
 }
 
 tasks.register('makeJlinkPackage') {
+	if (currentDistributionType == 'other') {
+		currentDistributionType = 'packaged'
+	}
 	dependsOn tasks.named('shadowJar')
 	// Ensure the runtime image is available
 	dependsOn tasks.named('jlinkImage')
@@ -203,68 +206,63 @@ tasks.register('makeJlinkPackage') {
 		def outDir = file('final')
 		outDir.mkdirs()
 
-		def tmpDir = file("${buildDir}/tmp/jlink-package")
+		def tmpDir = file("${layout.buildDirectory.get().asFile}/tmp/jlink-package")
 		if (tmpDir.exists()) tmpDir.deleteDir()
 		tmpDir.mkdirs()
 
-		// Prefer packaging the jlink image (if present) so the final artifact is
-		// runnable without an external JDK. Fall back to jars if the image is missing.
-		def imageDir = file("${buildDir}/jlink/image")
-		if (imageDir.exists()) {
-			// Packaging layout: root contains the jars and launchers, assets/ alongside, and jre/ for runtime
-			// Copy the main shadow jar and portable jar into app/
-			def appOut = new File(tmpDir, 'app')
-			appOut.mkdirs()
-			copy { from(tasks.named('shadowJar').flatMap { it.archiveFile }); into appOut }
-			copy { from(tasks.named('portableJar').flatMap { it.archiveFile }); into appOut }
+		def imageDir = file("${layout.buildDirectory.get().asFile}/jlink/image")
+		// Packaging layout: root contains the jars and launchers, assets/ alongside, and jre/ for runtime
+		// Copy the main shadow jar and portable jar into app/
+		def appOut = new File(tmpDir, 'app')
+		appOut.mkdirs()
+		copy { from(tasks.named('shadowJar').flatMap { it.archiveFile }); into appOut }
 
-			// Copy assets into assets/
-			def assetsSrc = file('assets')
-			if (assetsSrc.exists()) {
-				copy { from assetsSrc; into new File(tmpDir, 'assets') }
-			}
-
-			// Place the jlink runtime image under jre/
-			def jreOut = new File(tmpDir, 'jre')
-			copy { from imageDir; into jreOut }
-
-			// Create launchers at the package root that invoke jre/bin/java -jar app/<jar>
-			def shadowFile = tasks.named('shadowJar').get().archiveFile.get().asFile
-			if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-				def bat = new File(tmpDir, 'firstpass.bat')
-				bat.text = "@echo off\r\n\"%~dp0\\jre\\bin\\java\" -jar \"%~dp0\\app\\${shadowFile.name}\" %*\r\n"
-			} else {
-				def sh = new File(tmpDir, 'firstpass')
-				sh.text = '#!/usr/bin/env sh\n' +
-						'exec "$(dirname \"$0\")/jre/bin/java" -jar "$(dirname \"$0\")/app/' + shadowFile.name + '" "$@"\n'
-				sh.setExecutable(true)
-			}
-		} else {
-			// Fallback: place jars and assets at package root
-			// Fallback: place jars into app/ at package root
-			def appOut = new File(tmpDir, 'app')
-			appOut.mkdirs()
-			copy {
-				from(tasks.named('shadowJar').flatMap { it.archiveFile })
-				into appOut
-			}
-			def assetsSrc = file('assets')
-			if (assetsSrc.exists()) {
-				copy { from assetsSrc; into new File(tmpDir, 'assets') }
-			}
-			// Create simple launchers at root that use system java to run app/<jar> (fallback)
-			def shadowFile = tasks.named('shadowJar').get().archiveFile.get().asFile
-			if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-				def bat = new File(tmpDir, 'firstpass.bat')
-				bat.text = "@echo off\r\njava -jar \"%~dp0\\app\\${shadowFile.name}\" %*\r\n"
-			} else {
-				def sh = new File(tmpDir, 'firstpass')
-				sh.text = '#!/usr/bin/env sh\n' +
-						'exec java -jar "$(dirname \"$0\")/app/' + shadowFile.name + '" "$@"\n'
-				sh.setExecutable(true)
-			}
+		// Copy assets into assets/
+		def assetsSrc = file('assets')
+		if (assetsSrc.exists()) {
+			copy { from assetsSrc; into new File(tmpDir, 'assets') }
 		}
 
+		// Place the jlink runtime image under jre/
+		def jreOut = new File(tmpDir, 'jre')
+		copy { from imageDir; into jreOut }
+
+		// Create launchers at the package root that invoke jre/bin/java -jar app/<jar>
+		def shadowFile = tasks.named('shadowJar').get().archiveFile.get().asFile
+		if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+			def launch4jPath = "C:\\Program Files (x86)\\Launch4j\\launch4jc.exe"
+			if (!file(launch4jPath).exists()) {
+				throw new GradleException("Launch4j not found at expected path: ${launch4jPath}. Please install Launch4j.")
+			}
+			copy {
+				from 'installer files/launch4j_setup.xml'
+				into tmpDir
+				rename { 'launch4j_setup.xml' }
+			}
+			copy {
+				from 'installer files/Firstpass.ico'
+				into tmpDir
+				rename { 'Firstpass.ico' }
+			}
+			// Use a Java ProcessBuilder instead of project.exec to avoid dynamic method resolution
+			// issues in this script environment (matches the jlink invocation above).
+			def pbLaunch4j = new ProcessBuilder(launch4jPath, 'launch4j_setup.xml')
+			pbLaunch4j.redirectErrorStream(true)
+			pbLaunch4j.directory(tmpDir)
+			def procLaunch4j = pbLaunch4j.start()
+			procLaunch4j.inputStream.withReader { r -> r.eachLine { logger.lifecycle(it) } }
+			def rcLaunch4j = procLaunch4j.waitFor()
+			if (rcLaunch4j != 0) {
+				throw new GradleException("launch4jc failed with exit code ${rcLaunch4j}")
+			}
+			delete { delete new File(tmpDir, 'launch4j_setup.xml') }
+			delete { delete new File(tmpDir, 'Firstpass.ico') }
+		} else {
+			def sh = new File(tmpDir, 'firstpass')
+			sh.text = '#!/usr/bin/env sh\n' +
+					'exec "$(dirname \"$0\")/jre/bin/java" -jar "$(dirname \"$0\")/app/' + shadowFile.name + '" "$@"\n'
+			sh.setExecutable(true)
+		}
 		def finalDest = new File(outDir, outName.replaceAll(/\.zip$/, ''))
 		if (finalDest.exists()) finalDest.deleteDir()
 		finalDest.mkdirs()
@@ -276,6 +274,7 @@ tasks.register('makeJlinkPackage') {
 }
 
 tasks.register('makeMacApp') {
+	currentDistributionType = 'packaged'
 	// Always ensure the main jar and the jlink runtime image are created.
 	dependsOn tasks.named('shadowJar')
 	dependsOn tasks.named('jlinkImage')
@@ -293,7 +292,7 @@ tasks.register('makeMacApp') {
 		outDir.mkdirs()
 
 		// Prepare a temporary packaging dir similar to makeJlinkPackage behaviour
-		def tmpDir = file("${buildDir}/tmp/makeMacApp")
+		def tmpDir = file("${layout.buildDirectory.get().asFile}/tmp/makeMacApp")
 		if (tmpDir.exists()) tmpDir.deleteDir()
 		tmpDir.mkdirs()
 
@@ -309,7 +308,7 @@ tasks.register('makeMacApp') {
 		}
 
 		// Place the jlink runtime image under jre/
-		def imageDir = file("${buildDir}/jlink/image")
+		def imageDir = file("${layout.buildDirectory.get().asFile}/jlink/image")
 		def hasJre = false
 		if (imageDir.exists()) {
 			copy { from imageDir; into new File(tmpDir, 'jre') }
@@ -383,12 +382,7 @@ tasks.register('makeMacApp') {
 		def plist = new File(contents, 'Info.plist')
 		def iconEntry = iconFileName ? "  <key>CFBundleIconFile</key>\n  <string>${iconFileName}</string>\n" : ''
 
-		def plistText = """<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-	<dict>
-  		<key>CFBundleName</key>
-		<string>${meta.name}</string>
+		def plistText = """https://${meta.name}</string>
   		<key>CFBundleDisplayName</key>
 		<string>${meta.name}</string>
 ${iconEntry}  <key>CFBundleIdentifier</key>
@@ -411,5 +405,36 @@ ${iconEntry}  <key>CFBundleIdentifier</key>
 		plist.text = plistText
 
 		println "Created macOS .app bundle at: ${appBundle} (packaged under ${packageRoot})"
+	}
+}
+
+tasks.register('makeWindowsInstaller') {
+	currentDistributionType = 'installer'
+	dependsOn tasks.named('makeJlinkPackage')
+
+	doLast {
+		def host = org.gradle.internal.os.OperatingSystem.current()
+		if (!host.isWindows()) {
+			throw new GradleException("makeWindowsInstaller mirrors the Windows CI step and must be run on Windows.")
+		}
+
+		// Ensure installer script exists
+		def iss = file('installer files/Firstpass.iss')
+		if (!iss.exists()) {
+			throw new GradleException("installer files/Firstpass.iss not found")
+		}
+
+		println "Running Inno Setup compiler on ${iss}"
+		def iscc = 'C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe'
+		// Invoke Inno Setup compiler via ProcessBuilder instead of project.exec
+		def pbIscc = new ProcessBuilder(iscc, iss.absolutePath)
+		pbIscc.redirectErrorStream(true)
+		pbIscc.directory(project.projectDir)
+		def procIscc = pbIscc.start()
+		procIscc.inputStream.withReader { r -> r.eachLine { println it } }
+		def rcIscc = procIscc.waitFor()
+		if (rcIscc != 0) {
+			throw new GradleException("ISCC.exe failed with exit code ${rcIscc}")
+		}
 	}
 }

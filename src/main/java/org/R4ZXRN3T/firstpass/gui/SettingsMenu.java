@@ -1,16 +1,17 @@
 package org.R4ZXRN3T.firstpass.gui;
 
+import static org.R4ZXRN3T.firstpass.Config.ConfigKey.*;
+
 import org.R4ZXRN3T.firstpass.Config;
 import org.R4ZXRN3T.firstpass.Config.ConfigKey;
 import org.R4ZXRN3T.firstpass.Firstpass;
 import org.R4ZXRN3T.firstpass.Main;
 import org.R4ZXRN3T.firstpass.Updater;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-import static org.R4ZXRN3T.firstpass.Config.ConfigKey.*;
+import javax.swing.*;
 
 public class SettingsMenu {
 
@@ -18,6 +19,7 @@ public class SettingsMenu {
 	private final Firstpass firstpass;
 	private JDialog settingsFrame;
 	private boolean needsRestart = false;
+	private boolean updateAllowed = true;
 	private CustomButton changePasswordButton;
 	private CustomButton removePasswordButton;
 
@@ -28,6 +30,8 @@ public class SettingsMenu {
 	}
 
 	public void showSettings() {
+
+		updateAllowed = !(Config.getDistributionType() == Updater.DistributionType.UNKNOWN);
 
 		setCurrentSettings();
 		setPasswordSet(!firstpass.getCorrectPassword().isEmpty());
@@ -99,11 +103,12 @@ public class SettingsMenu {
 	}
 
 	private JPanel getUpdatePanel() {
+		if (!updateAllowed) return new JPanel();
 		JPanel updatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		updatePanel.setBorder(BorderFactory.createTitledBorder("Update"));
 
 		updatePanel.add(new CustomButton("Check for Updates", _ -> {
-			firstpass.setUpdateAvailable(Updater.checkVersion(true).compareToIgnoreCase(Firstpass.CURRENT_VERSION) > 0);
+			firstpass.setUpdateAvailable(Updater.checkVersion(true, true).compareToIgnoreCase(Firstpass.CURRENT_VERSION) > 0);
 			firstpass.getTopToolBar().getUpdateButton().setVisible(firstpass.isUpdateAvailable());
 			if (firstpass.isUpdateAvailable()) Updater.update();
 			else
@@ -114,6 +119,9 @@ public class SettingsMenu {
 		updateCheckBox.setSelected(Boolean.parseBoolean(currentSettings.get(CHECK_FOR_UPDATES)));
 		updateCheckBox.addActionListener(_ -> currentSettings.replace(CHECK_FOR_UPDATES, String.valueOf(updateCheckBox.isSelected())));
 		updatePanel.add(updateCheckBox);
+
+		if (!updateAllowed)
+			updatePanel.setToolTipText("Unknown distribution type. Please check for updates manually or perform them with your package manager.");
 
 		return updatePanel;
 	}

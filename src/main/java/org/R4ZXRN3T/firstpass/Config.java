@@ -23,14 +23,14 @@ public class Config {
 	private static HashMap<String, String> configList;
 	private static Firstpass firstpass;
 	private static boolean darkMode;
-	private static Boolean portableVersion;
+	private static Updater.DistributionType distributionType;
 	public static final String CONFIG_PATH = String.valueOf(getConfigFilePath());
 	public static final String LOG_PATH = CONFIG_PATH.replace("config.json", "logs/log.txt");
 	private static final Logger logger = new Logger(LOG_PATH);
 
 	public static void init(Firstpass firstpassInstance) {
 		firstpass = firstpassInstance;
-		portableVersion = Firstpass.class.getResource("/assets/firstpass_icon.png") != null;
+		distributionType = Updater.getDistributionType();
 		configList = new HashMap<>();
 		readConfig();
 		checkConfig();
@@ -153,10 +153,8 @@ public class Config {
 		return darkMode;
 	}
 
-	public static boolean isPortableVersion() {
-		if (portableVersion != null) return portableVersion;
-		portableVersion = Firstpass.class.getResource("/assets/firstpass_icon.png") != null;
-		return portableVersion;
+	public static Updater.DistributionType getDistributionType() {
+		return distributionType;
 	}
 
 	/**
@@ -170,7 +168,7 @@ public class Config {
 		String parentDir = "Firstpass";
 		String fileName = "config.json";
 		String userHome = System.getProperty("user.home");
-		if (isPortableVersion()) {
+		if (getDistributionType() == Updater.DistributionType.PORTABLE) {
 			return Paths.get(fileName);
 		} else if (os.contains("win")) {
 			return Paths.get(userHome, "AppData", "Roaming", parentDir, fileName);

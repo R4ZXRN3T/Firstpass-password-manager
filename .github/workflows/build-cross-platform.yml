@@ -19,10 +19,10 @@ jobs:
           - os: Linux
             runner: ubuntu-24.04-arm
             arch: aarch64
-          - os: macOS
+          - os: MacOS
             runner: macos-26-intel
             arch: x86_64
-          - os: macOS
+          - os: MacOS
             runner: macos-latest
             arch: aarch64
           - os: Windows
@@ -42,29 +42,23 @@ jobs:
 
       - name: Grant execute permission for gradlew
         if: runner.os != 'Windows'
-        run: chmod +x ./gradlew && echo $(uname -m)
+        run: chmod +x ./gradlew
 
       - name: Build (Linux)
         if: runner.os == 'Linux'
         run: ./gradlew makeJlinkPackage
 
       - name: Build (macOS)
-        if: runner.os == 'macOS'
+        if: runner.os == 'MacOS'
         run: ./gradlew makeMacApp
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
         shell: powershell
-        run: .\gradlew.bat makeJlinkPackage
-
-      - name: Build installer (Inno Setup)
-        if: runner.os == 'Windows'
-        shell: powershell
         run: |
           choco install innosetup -y
-          $iss = 'installer files\\Firstpass.iss'
-          Write-Host "Running Inno Setup compiler on $iss"
-          & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' $iss
+          choco install launch4j -y
+          .\gradlew.bat makeWindowsInstaller
 
       - name: Upload final artifacts
         uses: actions/upload-artifact@v7
