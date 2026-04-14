@@ -104,6 +104,22 @@ jobs:
           } catch {
             Write-Host "where.exe java failed: $_"
           }
+          # Populate the Java registry keys that Launch4j (and other Windows tools) query.
+          # This helps older Launch4j versions that detect Java via the registry rather than PATH.
+          if ($Env:JAVA_HOME) {
+            $javaHome = $Env:JAVA_HOME
+            Write-Host "Setting Java registry entries to point to: $javaHome"
+            # 64-bit view
+            reg add "HKLM\SOFTWARE\JavaSoft\Java Runtime Environment" /v CurrentVersion /d "26" /f
+            reg add "HKLM\SOFTWARE\JavaSoft\Java Runtime Environment\26" /v JavaHome /d "$javaHome" /f
+            reg add "HKLM\SOFTWARE\JavaSoft\Java Runtime Environment\26" /v RuntimeLib /d "$javaHome\bin\server\jvm.dll" /f
+            # 32-bit view (WOW6432Node) for 32-bit launch4j if needed
+            reg add "HKLM\SOFTWARE\WOW6432Node\JavaSoft\Java Runtime Environment" /v CurrentVersion /d "26" /f
+            reg add "HKLM\SOFTWARE\WOW6432Node\JavaSoft\Java Runtime Environment\26" /v JavaHome /d "$javaHome" /f
+            reg add "HKLM\SOFTWARE\WOW6432Node\JavaSoft\Java Runtime Environment\26" /v RuntimeLib /d "$javaHome\bin\server\jvm.dll" /f
+          } else {
+            Write-Host "Skipping registry entries because JAVA_HOME is not set"
+          }
           choco install innosetup -y
           choco install launch4j -y
           .\gradlew.bat makeWindowsInstaller --no-daemon
