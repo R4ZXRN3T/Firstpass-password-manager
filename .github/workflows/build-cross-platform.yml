@@ -40,6 +40,15 @@ jobs:
           java-version: '26'
           architecture: ${{ matrix.arch }}
 
+      - name: Ensure Java bin on PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Write-Host "JAVA_HOME: $Env:JAVA_HOME"
+          # Add the JDK bin directory to the PATH for subsequent steps so tools like Launch4j can find java.exe
+          Add-Content -Path $Env:GITHUB_PATH -Value ("$Env:JAVA_HOME\bin")
+          Write-Host "Added $Env:JAVA_HOME\bin to PATH"
+
       - name: Grant execute permission for gradlew
         if: runner.os != 'Windows'
         run: chmod +x ./gradlew
