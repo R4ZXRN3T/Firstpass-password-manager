@@ -56,8 +56,18 @@ jobs:
           Write-Host "--- Verify environment before installing Launch4j ---"
           Write-Host "GITHUB_PATH contents:"; Get-Content -Path $Env:GITHUB_PATH -ErrorAction SilentlyContinue
           Write-Host "Effective PATH (from env): $Env:PATH"
-          Write-Host "java -version:"; java -version 2>&1 | Write-Host
-          Write-Host "where.exe java:"; where.exe java 2>&1 | Write-Host
+          Write-Host "java -version:"
+          try {
+            & java -version 2>&1 | ForEach-Object { Write-Host $_ }
+          } catch {
+            Write-Host "java -version failed: $_"
+          }
+          Write-Host "where.exe java:"
+          try {
+            & where.exe java 2>&1 | ForEach-Object { Write-Host $_ }
+          } catch {
+            Write-Host "where.exe java failed: $_"
+          }
 
       - name: Grant execute permission for gradlew
         if: runner.os != 'Windows'
@@ -65,11 +75,11 @@ jobs:
 
       - name: Build (Linux)
         if: runner.os == 'Linux'
-        run: ./gradlew makeJlinkPackage
+        run: ./gradlew makeJlinkPackage --no-daemon
 
       - name: Build (macOS)
         if: runner.os == 'MacOS'
-        run: ./gradlew makeMacApp
+        run: ./gradlew makeMacApp --no-daemon
 
       - name: Build (Windows)
         if: runner.os == 'Windows'
@@ -82,11 +92,21 @@ jobs:
           } else {
             Write-Host "WARNING: JAVA_HOME is not set in this session"
           }
-          Write-Host "java -version:"; java -version 2>&1 | Write-Host
-          Write-Host "where.exe java:"; where.exe java 2>&1 | Write-Host
+          Write-Host "java -version:"
+          try {
+            & java -version 2>&1 | ForEach-Object { Write-Host $_ }
+          } catch {
+            Write-Host "java -version failed: $_"
+          }
+          Write-Host "where.exe java:"
+          try {
+            & where.exe java 2>&1 | ForEach-Object { Write-Host $_ }
+          } catch {
+            Write-Host "where.exe java failed: $_"
+          }
           choco install innosetup -y
           choco install launch4j -y
-          .\gradlew.bat makeWindowsInstaller
+          .\gradlew.bat makeWindowsInstaller --no-daemon
 
       - name: Upload final artifacts
         uses: actions/upload-artifact@v7
