@@ -39,35 +39,16 @@ jobs:
           distribution: temurin
           java-version: '26'
           architecture: ${{ matrix.arch }}
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
 
       - name: Ensure Java bin on PATH (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
           Write-Host "JAVA_HOME: $Env:JAVA_HOME"
-          # Add the JDK bin directory to the PATH for subsequent steps so tools like Launch4j can find java.exe
           Add-Content -Path $Env:GITHUB_PATH -Value ("$Env:JAVA_HOME\bin")
           Write-Host "Added $Env:JAVA_HOME\bin to PATH"
-
-      - name: Verify Java on PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          Write-Host "--- Verify environment before installing Launch4j ---"
-          Write-Host "GITHUB_PATH contents:"; Get-Content -Path $Env:GITHUB_PATH -ErrorAction SilentlyContinue
-          Write-Host "Effective PATH (from env): $Env:PATH"
-          Write-Host "java -version:"
-          try {
-            & java -version 2>&1 | ForEach-Object { Write-Host $_ }
-          } catch {
-            Write-Host "java -version failed: $_"
-          }
-          Write-Host "where.exe java:"
-          try {
-            & where.exe java 2>&1 | ForEach-Object { Write-Host $_ }
-          } catch {
-            Write-Host "where.exe java failed: $_"
-          }
 
       - name: Grant execute permission for gradlew
         if: runner.os != 'Windows'
@@ -85,38 +66,18 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          # Ensure the current PowerShell session PATH includes the JDK bin directory so tools run in this step can find java.exe
           if ($Env:JAVA_HOME) {
             $Env:PATH = "$Env:JAVA_HOME\bin;$Env:PATH"
             Write-Host "Session PATH updated to include: $Env:JAVA_HOME\bin"
           } else {
             Write-Host "WARNING: JAVA_HOME is not set in this session"
           }
-          Write-Host "java -version:"
-          try {
-            & java -version 2>&1 | ForEach-Object { Write-Host $_ }
-          } catch {
-            Write-Host "java -version failed: $_"
-          }
-          Write-Host "where.exe java:"
-          try {
-            & where.exe java 2>&1 | ForEach-Object { Write-Host $_ }
-          } catch {
-            Write-Host "where.exe java failed: $_"
-          }
-          # Populate the Java registry keys that Launch4j (and other Windows tools) query.
-          # This helps older Launch4j versions that detect Java via the registry rather than PATH.
           if ($Env:JAVA_HOME) {
             $javaHome = $Env:JAVA_HOME
             Write-Host "Setting Java registry entries to point to: $javaHome"
-            # 64-bit view
             reg add "HKLM\SOFTWARE\JavaSoft\Java Runtime Environment" /v CurrentVersion /d "26" /f
             reg add "HKLM\SOFTWARE\JavaSoft\Java Runtime Environment\26" /v JavaHome /d "$javaHome" /f
             reg add "HKLM\SOFTWARE\JavaSoft\Java Runtime Environment\26" /v RuntimeLib /d "$javaHome\bin\server\jvm.dll" /f
-            # 32-bit view (WOW6432Node) for 32-bit launch4j if needed
-            reg add "HKLM\SOFTWARE\WOW6432Node\JavaSoft\Java Runtime Environment" /v CurrentVersion /d "26" /f
-            reg add "HKLM\SOFTWARE\WOW6432Node\JavaSoft\Java Runtime Environment\26" /v JavaHome /d "$javaHome" /f
-            reg add "HKLM\SOFTWARE\WOW6432Node\JavaSoft\Java Runtime Environment\26" /v RuntimeLib /d "$javaHome\bin\server\jvm.dll" /f
           } else {
             Write-Host "Skipping registry entries because JAVA_HOME is not set"
           }
