@@ -1,12 +1,10 @@
 import org.R4ZXRN3T.firstpass.Account;
 import org.R4ZXRN3T.firstpass.AccountLoader;
-import org.R4ZXRN3T.firstpass.Config;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,7 +18,6 @@ class AccountLoaderTests {
 
 	private String originalUserHome;
 	private String originalOsName;
-	private Boolean originalPortableVersion;
 
 	private static Path getVaultPath() throws Exception {
 		Method method = AccountLoader.class.getDeclaredMethod("getAccountFilePath");
@@ -28,35 +25,21 @@ class AccountLoaderTests {
 		return (Path) method.invoke(null);
 	}
 
-	private static Boolean getPortableVersion() throws Exception {
-		Field field = Config.class.getDeclaredField("portableVersion");
-		field.setAccessible(true);
-		return (Boolean) field.get(null);
-	}
-
-	private static void setPortableVersion(Boolean value) throws Exception {
-		Field field = Config.class.getDeclaredField("portableVersion");
-		field.setAccessible(true);
-		field.set(null, value);
-	}
 
 	@BeforeEach
 	void setup() throws Exception {
 		originalUserHome = System.getProperty("user.home");
 		originalOsName = System.getProperty("os.name");
-		originalPortableVersion = getPortableVersion();
 
 		Path tempHome = Files.createTempDirectory("firstpass-vault-test-");
 		System.setProperty("user.home", tempHome.toString());
 		System.setProperty("os.name", "Windows 11");
-		setPortableVersion(false);
 	}
 
 	@AfterEach
-	void teardown() throws Exception {
+	void teardown() {
 		System.setProperty("user.home", originalUserHome);
 		System.setProperty("os.name", originalOsName);
-		setPortableVersion(originalPortableVersion);
 	}
 
 	@Test
@@ -98,4 +81,3 @@ class AccountLoaderTests {
 		assertThrows(IllegalStateException.class, () -> AccountLoader.getAccounts("master-password"));
 	}
 }
-

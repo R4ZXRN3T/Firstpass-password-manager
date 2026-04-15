@@ -23,14 +23,11 @@ public class Config {
 	private static HashMap<String, String> configList;
 	private static Firstpass firstpass;
 	private static boolean darkMode;
-	private static Boolean portableVersion;
-	public static final String CONFIG_PATH = String.valueOf(getConfigFilePath());
-	public static final String LOG_PATH = CONFIG_PATH.replace("config.json", "logs/log.txt");
-	private static final Logger logger = new Logger(LOG_PATH);
+	private static final Updater.DistributionType distributionType = Updater.getDistributionType();
+	private static final Logger logger = new Logger(getLogFilePath().toString());
 
 	public static void init(Firstpass firstpassInstance) {
 		firstpass = firstpassInstance;
-		portableVersion = Firstpass.class.getResource("/assets/firstpass_icon.png") != null;
 		configList = new HashMap<>();
 		readConfig();
 		checkConfig();
@@ -43,7 +40,7 @@ public class Config {
 
 	private static void readConfig() {
 		try {
-			File configFile = new File(new File(Config.CONFIG_PATH).getAbsolutePath());
+			File configFile = getConfigFilePath().toAbsolutePath().toFile();
 			System.out.println("Reading config from " + configFile.getAbsolutePath());
 			if (!configFile.exists() || configFile.length() == 0) {
 				setDefaultConfig(); // No restart here
@@ -68,7 +65,7 @@ public class Config {
 	}
 
 	private static void writeConfig() {
-		File configFile = new File(new File(Config.CONFIG_PATH).getAbsolutePath());
+		File configFile = getConfigFilePath().toAbsolutePath().toFile();
 		try (FileWriter writer = new FileWriter(configFile)) {
 			if (!configFile.getParentFile().exists() && !configFile.getParentFile().mkdirs()) {
 				System.err.println("Failed to create config directory");
@@ -97,7 +94,6 @@ public class Config {
 
 			saveConfig();
 			System.out.println("Default config set");
-			// Removed Main.restart(firstpass);
 		} catch (Exception e) {
 			logger.error("Error setting default config: " + e.getMessage());
 			System.out.println("Error setting default config: " + e.getMessage());
@@ -153,24 +149,22 @@ public class Config {
 		return darkMode;
 	}
 
-	public static boolean isPortableVersion() {
-		if (portableVersion != null) return portableVersion;
-		portableVersion = Firstpass.class.getResource("/assets/firstpass_icon.png") != null;
-		return portableVersion;
+	public static Updater.DistributionType getDistributionType() {
+		return distributionType;
 	}
 
 	/**
-	 * Resolves the location of the {@code accounts.vault} file for the current runtime.
+	 * Resolves the location of the {@code config.json} file for the current runtime.
 	 *
-	 * @return The path to the vault file, using a local file in portable mode or an OS-specific
-	 * application data directory otherwise.
+	 * @return The path to the config file, using a local file in portable mode or an OS-specific
+	 * application config directory otherwise.
 	 */
 	public static Path getConfigFilePath() {
 		String os = System.getProperty("os.name").toLowerCase();
 		String parentDir = "Firstpass";
 		String fileName = "config.json";
 		String userHome = System.getProperty("user.home");
-		if (isPortableVersion()) {
+		if (getDistributionType() == Updater.DistributionType.PORTABLE) {
 			return Paths.get(fileName);
 		} else if (os.contains("win")) {
 			return Paths.get(userHome, "AppData", "Roaming", parentDir, fileName);
@@ -179,6 +173,10 @@ public class Config {
 		} else { // Linux and others
 			return Paths.get(userHome, ".config", parentDir, fileName);
 		}
+	}
+
+	public static Path getLogFilePath() {
+		return Paths.get(getConfigFilePath().toString().replace("config.json", "logs/log.txt"));
 	}
 
 	public static void setConfig(ConfigKey key, String value) {

@@ -5,8 +5,11 @@ import org.R4ZXRN3T.firstpass.Firstpass;
 import org.R4ZXRN3T.firstpass.ImportExportManager;
 import org.R4ZXRN3T.firstpass.Updater;
 
-import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.*;
 
 public class TopToolBar {
 
@@ -19,6 +22,9 @@ public class TopToolBar {
 
 	public JMenuBar getTopToolBar() {
 		JMenuBar toolBar = new JMenuBar();
+		UIManager.put("MenuBar.background", firstpass.getCenterPanel().getBackground());
+		toolBar.setBackground(firstpass.getCenterPanel().getBackground());
+		toolBar.setBorderPainted(false);
 
 		JMenuItem saveItem = new JMenuItem("Save");
 		saveItem.addActionListener(_ -> {
@@ -35,12 +41,6 @@ public class TopToolBar {
 		importAsItem.setIcon(Config.getDarkMode() ? Icons.IMPORT_ICON_WHITE_SCALED : Icons.IMPORT_ICON_SCALED);
 		importAsItem.addActionListener(_ -> ImportExportManager.importData(firstpass));
 
-		JButton settingsButton = new JButton("Settings");
-		settingsButton.addActionListener(_ -> new SettingsMenu(firstpass).showSettings());
-		settingsButton.setBackground(toolBar.getBackground());
-		settingsButton.setBorderPainted(false);
-		settingsButton.setFocusable(false);
-
 		JMenuItem exitItem = new JMenuItem("Save & Exit");
 		exitItem.addActionListener(_ -> firstpass.exit());
 		exitItem.setIcon(Config.getDarkMode() ? Icons.EXIT_ICON_WHITE_SCALED : Icons.EXIT_ICON_SCALED);
@@ -50,6 +50,8 @@ public class TopToolBar {
 		fileItem.add(exportAsItem);
 		fileItem.add(importAsItem);
 		fileItem.add(exitItem);
+
+		JMenu settingsButton = getSettingsButton();
 
 		updateButton.setForeground(new Color(0, 180, 255));
 		updateButton.setBorderPainted(true);
@@ -61,6 +63,31 @@ public class TopToolBar {
 		toolBar.add(updateButton);
 
 		return toolBar;
+	}
+
+	/**
+	 * Use a JMenu so it visually matches the other menus (hover/selection
+	 * painting from the L&F). Prevent the normal popup behavior and invoke
+	 * the settings dialog on click so it behaves like a button.
+	 */
+	private JMenu getSettingsButton() {
+		JMenu settingsButton = new JMenu("Settings") {
+			@Override
+			public void setPopupMenuVisible(boolean b) {
+				super.setPopupMenuVisible(false);
+			}
+		};
+
+		settingsButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				SwingUtilities.invokeLater(() -> {
+					new SettingsMenu(firstpass).showSettings();
+					MenuSelectionManager.defaultManager().clearSelectedPath();
+				});
+			}
+		});
+		return settingsButton;
 	}
 
 	public JButton getUpdateButton() {

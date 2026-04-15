@@ -21,11 +21,9 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
 
-import static org.R4ZXRN3T.firstpass.Config.isPortableVersion;
-
 public class AccountLoader {
 	public static final String ACCOUNTS_PATH = String.valueOf(getAccountFilePath());
-	private static final Logger logger = new Logger(Config.LOG_PATH);
+	private static final Logger logger = new Logger(Config.getConfigFilePath().toString());
 
 	private static final int VAULT_VERSION = 1;
 	private static final int PBKDF2_ITERATIONS = 210_000;
@@ -246,7 +244,7 @@ public class AccountLoader {
 		String parentDir = "Firstpass";
 		String fileName = "accounts.vault";
 		String userHome = System.getProperty("user.home");
-		if (isPortableVersion()) {
+		if (Config.getDistributionType() == Updater.DistributionType.PORTABLE) {
 			return Paths.get(fileName);
 		} else if (os.contains("win")) {
 			return Paths.get(userHome, "AppData", "Roaming", parentDir, fileName);

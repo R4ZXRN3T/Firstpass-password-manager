@@ -1,46 +1,35 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
 	id 'java'
 	id 'application'
-	id 'org.gradlex.extra-java-module-info' version '1.14'
-	id 'io.github.fourlastor.construo' version '2.1.0'
-}
-
-import io.github.fourlastor.construo.Target
-
-group = 'org.R4ZXRN3T'
-version = '2.1.3'
-
-def mainModuleName = 'org.R4ZXRN3T.firstpass'
-def mainClassName = 'org.R4ZXRN3T.firstpass.Main'
-def appJarName = 'Firstpass.jar'
-def portableJarName = 'Firstpass_portable.jar'
-def osNameLower = System.getProperty('os.name').toLowerCase()
-def isWindows = osNameLower.contains('windows')
-def isLinux   = osNameLower.contains('linux')
-def isMacOs   = osNameLower.contains('mac')
-def archLower = System.getProperty('os.arch').toLowerCase()
-def isArm64   = archLower.contains('aarch64') || archLower.contains('arm64')
-def finalDir = layout.projectDirectory.dir('final')
-def installerDir = layout.projectDirectory.dir('installer files')
-def construoDistDir = finalDir.dir('construo')
-def installerConstruoStageDir = layout.buildDirectory.dir('tmp/installer-construo/windows-x86_64')
-def use7zipForConstruoZips = providers.gradleProperty('use7zip').map { it.toBoolean() }.orElse(false)
-def manifestAttributes = [
-		'Main-Class'            : mainClassName,
-		'Implementation-Title'  : project.name,
-		'Implementation-Version': project.version
-]
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(25)
-	}
-	modularity.inferModulePath = true
+	id 'com.gradleup.shadow' version '9.4.1'
 }
 
 repositories {
 	mavenCentral()
 }
+
+java.sourceCompatibility = 25
+java.targetCompatibility = 25
+
+group = project.findProperty('group') ?: 'org.R4ZXRN3T.firstpass'
+version = project.findProperty('version') ?: '1.0.0'
+project.description = project.findProperty('description') ?: 'Firstpass Password Manager'
+
+// --- project metadata (single source of truth) ---
+ext.meta = [
+		name       : project.findProperty('name') ?: 'Firstpass Password Manager',
+		homepage   : project.findProperty('homepage') ?: 'https://github.com/R4ZXRN3T/Firstpass-password-manager',
+		license    : project.findProperty('license') ?: 'MIT',
+		authors    : project.findProperty('authors') ?: 'Unknown',
+		vendor     : project.findProperty('vendor') ?: project.findProperty('authors') ?: 'Unknown',
+		buildNumber: project.findProperty('buildNumber') ?: System.getenv('GITHUB_RUN_NUMBER') ?: 'local'
+]
+
+// Control whether jars include the custom manifest attributes.
+// Default to true for local dev; CI should pass -PincludeManifest=false to omit custom attributes.
+def includeJarManifest = project.hasProperty('includeManifest') ? project.property('includeManifest').toString().toBoolean() : true
 
 dependencies {
 	implementation 'org.json:json:20251224'
@@ -53,346 +42,406 @@ dependencies {
 }
 
 application {
-	mainModule = mainModuleName
-	mainClass = mainClassName
+	mainClass = 'org.R4ZXRN3T.firstpass.Main'
 }
 
-construo {
-	name.set('Firstpass')
-	humanName.set('Firstpass Password Manager')
-	mainClass.set(mainClassName)
-	jarTask.set('construoJar')
-	outputDir.set(construoDistDir.asFile)
-
-	targets.configure {
-		register('linuxX64', Target.Linux) {
-			architecture.set(Target.Architecture.X86_64)
-			jdkUrl.set('https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.2%2B10/OpenJDK25U-jdk_x64_linux_hotspot_25.0.2_10.tar.gz')
-		}
-		register('linuxArm64', Target.Linux) {
-			architecture.set(Target.Architecture.AARCH64)
-			jdkUrl.set('https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.2%2B10/OpenJDK25U-jdk_aarch64_linux_hotspot_25.0.2_10.tar.gz')
-		}
-		register('windowsX64', Target.Windows) {
-			architecture.set(Target.Architecture.X86_64)
-			jdkUrl.set('https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.2%2B10/OpenJDK25U-jdk_x64_windows_hotspot_25.0.2_10.zip')
-			icon.set(file('assets/firstpass_icon.png'))
-		}
-		register ('macOsX64', Target.MacOs) {
-			architecture.set(Target.Architecture.X86_64)
-			jdkUrl.set('https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.2%2B10/OpenJDK25U-jdk_x64_mac_hotspot_25.0.2_10.tar.gz')
-			identifier.set('org.r4zxrnt.firstpass')
-			buildNumber.set(project.version.toString())
-			versionNumber.set(project.version.toString())
-		}
-		register('macOsArm64', Target.MacOs) {
-			architecture.set(Target.Architecture.AARCH64)
-			jdkUrl.set('https://github.com/adoptium/temurin25-binaries/releases/download/jdk-25.0.2%2B10/OpenJDK25U-jdk_aarch64_mac_hotspot_25.0.2_10.tar.gz')
-			identifier.set('org.r4zxrnt.firstpass')
-			buildNumber.set(project.version.toString())
-			versionNumber.set(project.version.toString())
-		}
-	}
+def _sysJavaVer = System.getProperty('java.version') ?: '0'
+def _sysJavaMajor = _sysJavaVer.tokenize('.')[0].toInteger()
+if (_sysJavaMajor < 25) {
+	throw new GradleException("JDK 25 or greater is required for bulding and jlink image creation. Detected Java version: ${_sysJavaVer}")
 }
 
-tasks.withType(JavaCompile).configureEach {
-	options.encoding = 'UTF-8'
-	options.release = 25
+def currentDistributionType = 'other'
+
+tasks.named('jar') {
+	enabled = false
 }
 
-tasks.withType(Jar).configureEach {
-	// Keep archive contents deterministic across machines/builds.
-	preserveFileTimestamps = false
-	reproducibleFileOrder = true
+// Make the assemble lifecycle create the shadow jar
+tasks.named('assemble') {
+	dependsOn tasks.named('shadowJar')
 }
 
-tasks.test {
-	useJUnitPlatform()
+tasks.named('startScripts') {
+	dependsOn tasks.named('shadowJar')
+}
+tasks.named('distTar') {
+	dependsOn tasks.named('shadowJar')
+}
+tasks.named('distZip') {
+	dependsOn tasks.named('shadowJar')
 }
 
-// ─── JAR tasks ────────────────────────────────────────────────────────────────
+tasks.named('shadowJar') {
+	archiveClassifier.set('')
+	archiveFileName.set(provider { "${archiveBaseName.get()}.jar" })
 
-def configureFatJar = { jarTask, boolean includeAssets ->
-	jarTask.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	jarTask.manifest {
-		attributes(manifestAttributes)
-	}
-	jarTask.from(sourceSets.main.output)
-	jarTask.from({
-		configurations.runtimeClasspath.collect { dependency ->
-			dependency.isDirectory() ? dependency : zipTree(dependency)
-		}
-	}) {
-		exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
-	}
-	if (includeAssets) {
-		jarTask.from('assets') {
-			into 'assets'
+	exclude('assets/**')
+
+	if (includeJarManifest) {
+		manifest {
+			attributes(
+					'Main-Class': 'org.R4ZXRN3T.firstpass.Main',
+					'Implementation-Title': project.name,
+					'Implementation-Version': project.version,
+					'Implementation-Vendor': meta.vendor,
+					'Implementation-URL': meta.homepage,
+					'Distribution-Type': currentDistributionType
+			)
 		}
 	}
 }
 
-tasks.named('jar').configure {
-	description = 'Builds the modular application JAR (used as module-path input for tooling).'
-	archiveFileName = 'Firstpass_modular.jar'
-	manifest {
-		attributes(manifestAttributes)
+tasks.register('portableJar', ShadowJar) {
+	// produce a filename like Firstpass_portable.jar (underscore separator)
+	// instead of the default baseName-<classifier>.jar which gave you "-_portable"
+	archiveClassifier.set('portable')
+	archiveFileName.set(provider { "${archiveBaseName.get()}-${project.version}-portable.jar" })
+
+	from sourceSets.main.output
+
+	configurations = [project.configurations.runtimeClasspath]
+
+	// explicitly include assets (normally included anyway if in resources)
+	from('assets') {
+		into 'assets'
 	}
-}
 
-tasks.register('fatJar', Jar) {
-	group = 'build'
-	description = 'Builds the standard runnable fat JAR without bundled assets.'
-	archiveFileName = appJarName
-	configureFatJar(delegate, false)
-}
-
-tasks.register('portableJar', Jar) {
-	group = 'build'
-	description = 'Builds the portable runnable JAR with the assets folder included.'
-	archiveFileName = portableJarName
-	configureFatJar(delegate, true)
-}
-
-tasks.register('construoJar', Jar) {
-	group = 'build'
-	description = 'Builds a non-modular fat JAR for Construo runtime image generation.'
-	archiveFileName = 'Firstpass_construo.jar'
-	configureFatJar(delegate, false)
-	// Construo runs jdeps without extra module-path dependencies; remove module metadata.
-	exclude 'module-info.class'
-}
-
-tasks.register('copyJarToRoot') {
-	description = 'Copies Firstpass.jar to ./final for downstream packaging tasks.'
-	dependsOn tasks.named('fatJar')
-	def fatJarFile = tasks.named('fatJar', Jar).flatMap { it.archiveFile }
-	inputs.file(fatJarFile)
-	outputs.file(finalDir.file(appJarName))
-	doLast {
-		copy {
-			from(fatJarFile)
-			into(finalDir)
+	if (includeJarManifest) {
+		manifest {
+			attributes(
+					'Main-Class': 'org.R4ZXRN3T.firstpass.Main',
+					'Implementation-Title': project.name,
+					'Implementation-Version': project.version,
+					'Implementation-Vendor': meta.vendor,
+					'Implementation-URL': meta.homepage,
+					'Distribution-Type': 'portable'
+			)
 		}
 	}
 }
 
-tasks.register('copyPortableJarToRoot') {
-	description = 'Copies Firstpass_portable.jar to ./final.'
-	dependsOn tasks.named('portableJar')
-	def portableJarFile = tasks.named('portableJar', Jar).flatMap { it.archiveFile }
-	inputs.file(portableJarFile)
-	outputs.file(finalDir.file(portableJarName))
-	doLast {
-		copy {
-			from(portableJarFile)
-			into(finalDir)
-		}
-	}
-}
+// Copy the main shadow jar into the project's `final/` directory
+tasks.register('copyJarToFinal', Copy) {
+	dependsOn tasks.named('shadowJar')
 
-
-// ─── Windows packaging tasks ──────────────────────────────────────────────────
-// Requires Inno Setup to be installed and on PATH.
-
-def commandExists = { String command ->
-	def process = new ProcessBuilder('cmd', '/c', "where ${command}")
-			.redirectErrorStream(true)
-			.start()
-	process.inputStream.text
-	process.waitFor() == 0
-}
-
-def construoReleaseZipName = { String osName, String arch ->
-	"Firstpass-${project.version}-${osName}-${arch}.zip"
-}
-
-def rawConstruoZipByTarget = { String targetName ->
-	file("${construoDistDir.asFile}/${project.name}-${targetName}.zip")
-}
-
-
-tasks.register('stageConstruoWindowsForInstaller') {
-	group = 'distribution'
-	description = 'Extracts the Construo Windows bundle for the installer input stage.'
-	dependsOn tasks.named('packageConstruoTargets')
-
-	def zipProvider = provider { file("${construoDistDir.asFile}/${construoReleaseZipName('Windows', 'x86_64')}") }
-	inputs.file(zipProvider)
-	outputs.dir(installerConstruoStageDir)
-
-	doLast {
-		def sourceZip = zipProvider.get()
-		def stageDir = installerConstruoStageDir.get().asFile
-		delete(stageDir)
-		def has7zip = commandExists('7z')
-		def use7zipExtract = use7zipForConstruoZips.get() || has7zip
-
-		if (use7zipForConstruoZips.get() && !has7zip) {
-				throw new GradleException("7z not found on PATH. Install 7-Zip or run without -Puse7zip=true.")
-		}
-
-		if (use7zipExtract) {
-			def extractProcess = new ProcessBuilder('7z', 'x', '-y', sourceZip.absolutePath, "-o${stageDir.absolutePath}")
-					.redirectErrorStream(true)
-					.start()
-			def extractOutput = extractProcess.inputStream.text
-			if (extractProcess.waitFor() != 0) {
-				throw new GradleException("7-Zip extract failed for installer staging: ${extractOutput}")
-			}
-		} else {
-			copy {
-				from zipTree(sourceZip)
-				into stageDir
-			}
-		}
-	}
-}
-
-// Packages the Construo Windows bundle (+ project assets) into a Windows installer via Inno Setup.
-tasks.register('createInstaller', Exec) {
-	group = 'distribution'
-	description = 'Creates the Windows installer (Firstpass_setup.exe) from Construo Windows binaries.'
-	dependsOn tasks.named('stageConstruoWindowsForInstaller')
-	onlyIf { isWindows && commandExists('iscc') }
-
-	workingDir installerDir
-	commandLine 'iscc', "/DMyAppVersion=${project.version}", 'Firstpass.iss'
-}
-
-// Normalizes (rename + inject assets) a single Construo zip in-place.
-// cfg = [target: <construoTargetName>, os: <'Windows'|'Linux'|'macOS'>, arch: <'x86_64'|'aarch64'>]
-def normalizeSingleConstruoTarget = { Map cfg ->
-	def has7zip = commandExists('7z')
-	if (use7zipForConstruoZips.get() && !has7zip) {
-		throw new GradleException("7z not found on PATH. Install 7-Zip or run without -Puse7zip=true.")
-	}
-
-	def sourceZip    = rawConstruoZipByTarget(cfg.target)
-	def normalizedZip = file("${construoDistDir.asFile}/${construoReleaseZipName(cfg.os, cfg.arch)}")
-	def inputZip     = sourceZip.exists() ? sourceZip : normalizedZip
-	if (!inputZip.exists()) {
-		throw new GradleException("Missing Construo artifact: ${sourceZip}")
-	}
-
-	def tempExtractDir = layout.buildDirectory.dir("tmp/construo-repack/${cfg.target}").get().asFile
-	delete(tempExtractDir)
-
-	if (has7zip) {
-		def proc = new ProcessBuilder('7z', 'x', '-y', inputZip.absolutePath, "-o${tempExtractDir.absolutePath}")
-				.redirectErrorStream(true).start()
-		def out = proc.inputStream.text
-		if (proc.waitFor() != 0) throw new GradleException("7-Zip extract failed for ${cfg.target}: ${out}")
-	} else {
-		copy { from zipTree(inputZip); into tempExtractDir }
-	}
-
-	def assetsTargetDir
-	if (cfg.os == 'macOS') {
-		def expectedAppDir = file("${tempExtractDir}/Firstpass Password Manager.app")
-		def macAppDir = expectedAppDir.exists() ? expectedAppDir : fileTree(tempExtractDir).matching {
-			include '**/*.app'
-		}.files.find { it.isDirectory() }
-		if (macAppDir == null) throw new GradleException("Could not find macOS .app bundle in ${inputZip.name}")
-		assetsTargetDir = file("${macAppDir}/Contents/MacOS/assets")
-	} else {
-		assetsTargetDir = file("${tempExtractDir}/assets")
-	}
-	copy { from('assets'); into assetsTargetDir }
-
-	delete(normalizedZip)
-	if (use7zipForConstruoZips.get()) {
-		def proc = new ProcessBuilder('7z', 'a', '-tzip', '-mm=LZMA', '-mx=9', '-md=3840m', '-mfb=273', '-mmt=3',
-				normalizedZip.absolutePath, '.').directory(tempExtractDir).redirectErrorStream(true).start()
-		def out = proc.inputStream.text
-		if (proc.waitFor() != 0) throw new GradleException("7-Zip repack failed for ${cfg.target}: ${out}")
-	} else {
-		ant.zip(destfile: normalizedZip, basedir: tempExtractDir)
-	}
-
-	if (!sourceZip.name.equalsIgnoreCase(normalizedZip.name)) delete(sourceZip)
-}
-
-tasks.register('normalizeConstruoZips') {
-	group = 'distribution'
-	description = 'Creates versioned Construo zip names and optionally repacks with 7-Zip.'
-	dependsOn tasks.named('packageLinuxX64')
-	dependsOn tasks.named('packageLinuxArm64')
-	dependsOn tasks.named('packageWindowsX64')
-	dependsOn tasks.named('packageMacOsX64')
-	dependsOn tasks.named('packageMacOsArm64')
-
-	doLast {
-		[
-			[target: 'windowsX64',  os: 'Windows', arch: 'x86_64'],
-			[target: 'linuxX64',    os: 'Linux',   arch: 'x86_64'],
-			[target: 'linuxArm64',  os: 'Linux',   arch: 'aarch64'],
-			[target: 'macOsX64',    os: 'macOS',   arch: 'x86_64'],
-			[target: 'macOsArm64',  os: 'macOS',   arch: 'aarch64'],
-		].each { normalizeSingleConstruoTarget(it) }
-	}
-}
-
-tasks.register('packageConstruoTargets') {
-	group = 'distribution'
-	description = 'Builds all Construo targets and writes normalized release zip names to ./final/construo.'
-	dependsOn tasks.named('normalizeConstruoZips')
-}
-
-// Builds only the artifacts relevant to the OS Gradle is currently running on.
-// Produces: Firstpass.jar, Firstpass_portable.jar, and the platform zip in ./final/construo/.
-tasks.register('packageCurrentOs') {
-	group = 'distribution'
-	description = 'Builds JAR artifacts and the Construo package for the current OS only (faster than packageAll).'
-	dependsOn tasks.named('copyJarToRoot')
-	dependsOn tasks.named('copyPortableJarToRoot')
-
-	if (isWindows) {
-		dependsOn tasks.named('packageWindowsX64')
-	} else if (isLinux) {
-		dependsOn isArm64 ? tasks.named('packageLinuxArm64') : tasks.named('packageLinuxX64')
-	} else if (isMacOs) {
-		dependsOn isArm64 ? tasks.named('packageMacOsArm64') : tasks.named('packageMacOsX64')
-	}
-
-	doLast {
-		def cfg = isWindows       ? [target: 'windowsX64',  os: 'Windows', arch: 'x86_64']
-				: (isLinux && isArm64)  ? [target: 'linuxArm64',  os: 'Linux',   arch: 'aarch64']
-				: isLinux               ? [target: 'linuxX64',    os: 'Linux',   arch: 'x86_64']
-				: (isMacOs && isArm64)  ? [target: 'macOsArm64',  os: 'macOS',   arch: 'aarch64']
-				: isMacOs               ? [target: 'macOsX64',    os: 'macOS',   arch: 'x86_64']
-				: null
-		if (cfg) normalizeSingleConstruoTarget(cfg)
-	}
-}
-
-tasks.register('packageAll') {
-	group = 'distribution'
-	description = 'Builds all configured distribution artifacts into ./final.'
+	// ensure the directory exists (Copy would create it, but be explicit)
 	doFirst {
-		delete file("${projectDir}/final/installer-construo")
+		file('final').mkdirs()
 	}
-	dependsOn tasks.named('copyJarToRoot')
-	dependsOn tasks.named('copyPortableJarToRoot')
-	if (tasks.findByName('packageConstruoTargets') != null) {
-		dependsOn tasks.named('packageConstruoTargets')
+
+	from(tasks.named('shadowJar').flatMap { it.archiveFile })
+	into 'final'
+}
+
+// Copy the portable jar (classifier 'portable') into `final/`
+tasks.register('copyPortableJarToFinal', Copy) {
+	dependsOn tasks.named('portableJar')
+
+	doFirst {
+		file('final').mkdirs()
 	}
-	if (isWindows) {
-		dependsOn tasks.named('createInstaller')
+
+	from(tasks.named('portableJar').flatMap { it.archiveFile })
+	into 'final'
+}
+
+// Convenience task that copies both jars
+tasks.register('copyJarsToFinal') {
+	currentDistributionType = 'other'
+	dependsOn tasks.named('copyJarToFinal')
+	dependsOn tasks.named('copyPortableJarToFinal')
+}
+
+// Task: create a jlink runtime image using the system jlink (no JDK downloads).
+// This is registered as its own task so it can be invoked independently.
+tasks.register('jlinkImage') {
+	dependsOn tasks.named('shadowJar')
+	// declare outputs so Gradle can reason about up-to-date/caching
+	def _imageDirPath = "${layout.buildDirectory.get().asFile}/jlink/image"
+	outputs.dir(_imageDirPath)
+	doLast {
+		def modules = 'java.base,java.desktop,java.logging'
+		def imageDir = file(_imageDirPath)
+		if (imageDir.exists()) imageDir.deleteDir()
+
+		// Invoke jlink using a Java ProcessBuilder to avoid Gradle exec resolution issues
+		def jlinkCmd = ['jlink', '--add-modules', modules, '--output', imageDir.absolutePath, '--strip-debug', '--no-header-files', '--no-man-pages', '--compress=zip-0']
+		logger.lifecycle("Running: ${jlinkCmd.join(' ')}")
+		def pb = new ProcessBuilder(jlinkCmd)
+		pb.redirectErrorStream(true)
+		pb.directory(project.projectDir)
+		def proc = pb.start()
+		proc.inputStream.withReader { r -> r.eachLine { logger.lifecycle(it) } }
+		def rc = proc.waitFor()
+		if (rc != 0) {
+			throw new GradleException("jlink failed with exit code ${rc}")
+		}
 	}
 }
 
-tasks.register('doAll') {
-	dependsOn tasks.named('clean')
-	dependsOn tasks.named('packageAll')
+tasks.register('makeJlinkPackage') {
+	if (currentDistributionType == 'other') {
+		currentDistributionType = 'packaged'
+	}
+	dependsOn tasks.named('shadowJar')
+	// Ensure the runtime image is available
+	dependsOn tasks.named('jlinkImage')
+
+	doLast {
+		def host = org.gradle.internal.os.OperatingSystem.current()
+		def hostArch = (System.getProperty('os.arch') ?: '').toLowerCase()
+
+		def osLabel
+		def archLabel
+		if (host.isLinux()) osLabel = 'Linux'
+		else if (host.isMacOsX()) osLabel = 'MacOS'
+		else if (host.isWindows()) osLabel = 'Windows'
+		else osLabel = 'Unknown'
+
+		if (hostArch.contains('aarch64') || hostArch.contains('arm')) archLabel = 'aarch64'
+		else archLabel = 'x86_64'
+
+		def outName = "Firstpass-${project.version}-${osLabel}-${archLabel}.zip"
+		def outDir = file('final')
+		outDir.mkdirs()
+
+		def tmpDir = file("${layout.buildDirectory.get().asFile}/tmp/jlink-package")
+		if (tmpDir.exists()) tmpDir.deleteDir()
+		tmpDir.mkdirs()
+
+		def imageDir = file("${layout.buildDirectory.get().asFile}/jlink/image")
+		// Packaging layout: root contains the jars and launchers, assets/ alongside, and jre/ for runtime
+		// Copy the main shadow jar and portable jar into app/
+		def appOut = new File(tmpDir, 'app')
+		appOut.mkdirs()
+		copy { from(tasks.named('shadowJar').flatMap { it.archiveFile }); into appOut }
+
+		// Copy assets into assets/
+		def assetsSrc = file('assets')
+		if (assetsSrc.exists()) {
+			copy { from assetsSrc; into new File(tmpDir, 'assets') }
+		}
+
+		// Place the jlink runtime image under jre/
+		def jreOut = new File(tmpDir, 'jre')
+		copy { from imageDir; into jreOut }
+
+		// Create launchers at the package root that invoke jre/bin/java -jar app/<jar>
+		def shadowFile = tasks.named('shadowJar').get().archiveFile.get().asFile
+		if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+			def launch4jPath = "C:\\Program Files (x86)\\Launch4j\\launch4jc.exe"
+			if (!file(launch4jPath).exists()) {
+				throw new GradleException("Launch4j not found at expected path: ${launch4jPath}. Please install Launch4j.")
+			}
+			copy {
+				from 'installer files/launch4j_setup.xml'
+				into tmpDir
+				rename { 'launch4j_setup.xml' }
+			}
+			copy {
+				from 'installer files/Firstpass.ico'
+				into tmpDir
+				rename { 'Firstpass.ico' }
+			}
+			// Use a Java ProcessBuilder instead of project.exec to avoid dynamic method resolution
+			// issues in this script environment (matches the jlink invocation above).
+			def pbLaunch4j = new ProcessBuilder(launch4jPath, 'launch4j_setup.xml')
+			pbLaunch4j.redirectErrorStream(true)
+			pbLaunch4j.directory(tmpDir)
+			def procLaunch4j = pbLaunch4j.start()
+			procLaunch4j.inputStream.withReader { r -> r.eachLine { logger.lifecycle(it) } }
+			def rcLaunch4j = procLaunch4j.waitFor()
+			if (rcLaunch4j != 0) {
+				throw new GradleException("launch4jc failed with exit code ${rcLaunch4j}")
+			}
+			delete { delete new File(tmpDir, 'launch4j_setup.xml') }
+			delete { delete new File(tmpDir, 'Firstpass.ico') }
+		} else {
+			def sh = new File(tmpDir, 'firstpass')
+			sh.text = '#!/usr/bin/env sh\n' +
+					'exec "$(dirname \"$0\")/jre/bin/java" -jar "$(dirname \"$0\")/app/' + shadowFile.name + '" "$@"\n'
+			sh.setExecutable(true)
+		}
+		def finalDest = new File(outDir, outName.replaceAll(/\.zip$/, ''))
+		if (finalDest.exists()) finalDest.deleteDir()
+		finalDest.mkdirs()
+
+		copy { from tmpDir; into finalDest }
+
+		println "Created packaged artifact directory: ${finalDest}"
+	}
 }
 
-// ─── Lifecycle wiring ─────────────────────────────────────────────────────────
-// `build` creates the standard runnable JAR only.
-// Portable JAR, platform packages, and the Windows installer are opt-in via their dedicated tasks.
+tasks.register('makeMacApp') {
+	currentDistributionType = 'packaged'
+	// Always ensure the main jar and the jlink runtime image are created.
+	dependsOn tasks.named('shadowJar')
+	dependsOn tasks.named('jlinkImage')
 
-tasks.named('clean') {
-	delete file("${projectDir}/final")
-	delete layout.buildDirectory.dir('tmp/installer-construo').get().asFile
-	delete layout.buildDirectory.dir('tmp/construo-repack').get().asFile
+	doLast {
+		def hostArch = (System.getProperty('os.arch') ?: '').toLowerCase()
+
+		def osLabel = 'MacOS'
+		def archLabel
+
+		if (hostArch.contains('aarch64') || hostArch.contains('arm')) archLabel = 'aarch64'
+		else archLabel = 'x86_64'
+
+		def outDir = file('final')
+		outDir.mkdirs()
+
+		// Prepare a temporary packaging dir similar to makeJlinkPackage behaviour
+		def tmpDir = file("${layout.buildDirectory.get().asFile}/tmp/makeMacApp")
+		if (tmpDir.exists()) tmpDir.deleteDir()
+		tmpDir.mkdirs()
+
+		// Copy shadow jar and portable jar into app/
+		def appOut = new File(tmpDir, 'app')
+		appOut.mkdirs()
+		copy { from(tasks.named('shadowJar').flatMap { it.archiveFile }); into appOut }
+
+		// Copy assets if present
+		def assetsSrc = file('assets')
+		if (assetsSrc.exists()) {
+			copy { from assetsSrc; into new File(tmpDir, 'assets') }
+		}
+
+		// Place the jlink runtime image under jre/
+		def imageDir = file("${layout.buildDirectory.get().asFile}/jlink/image")
+		def hasJre = false
+		if (imageDir.exists()) {
+			copy { from imageDir; into new File(tmpDir, 'jre') }
+			hasJre = true
+		}
+
+		// Build the macOS .app bundle directly from tmpDir, then place it inside a
+		// versioned output folder: final/Firstpass-<version>-<os>-<arch>/Firstpass.app
+		def packageName = "Firstpass-${project.version}-${osLabel}-${archLabel}"
+		def packageRoot = new File(outDir, packageName)
+		if (packageRoot.exists()) packageRoot.deleteDir()
+		packageRoot.mkdirs()
+
+		def appBundle = new File(packageRoot, 'Firstpass.app')
+		if (appBundle.exists()) appBundle.deleteDir()
+
+		def contents = new File(appBundle, 'Contents')
+		contents.mkdirs()
+		def macosDir = new File(contents, 'MacOS')
+		macosDir.mkdirs()
+		def resourcesDir = new File(contents, 'Resources')
+		resourcesDir.mkdirs()
+
+		// Copy app/ into Contents/Resources/app
+		def packagedApp = new File(tmpDir, 'app')
+		if (packagedApp.exists()) {
+			copy { from packagedApp; into new File(resourcesDir, 'app') }
+		} else {
+			throw new GradleException("Packaged app directory not found: ${packagedApp}")
+		}
+
+		// Copy assets into Resources if present
+		def packagedAssets = new File(tmpDir, 'assets')
+		if (packagedAssets.exists()) {
+			copy { from packagedAssets; into new File(resourcesDir, 'assets') }
+		}
+
+		// Copy jre into Resources if present
+		if (hasJre) {
+			copy { from new File(tmpDir, 'jre'); into new File(resourcesDir, 'jre') }
+		}
+
+		// Copy macOS icon (.icns) into Resources if present under installer files/
+		def installerIcon = file('installer files/Firstpass.icns')
+		def iconFileName = null
+		if (installerIcon.exists()) {
+			copy { from installerIcon; into resourcesDir }
+			def dot = installerIcon.name.lastIndexOf('.')
+			def iconBase = (dot >= 0) ? installerIcon.name[0..dot - 1] : installerIcon.name
+			iconFileName = iconBase
+			println "Included icon: ${installerIcon} -> ${new File(resourcesDir, installerIcon.name)} (plist entry: ${iconFileName})"
+		}
+
+		// Determine main jar filename from the packaged app directory (take the first jar)
+		def resourcesAppDir = new File(resourcesDir, 'app')
+		def jarFile = resourcesAppDir.listFiles()?.find { it.name.toLowerCase().endsWith('.jar') }
+		if (jarFile == null) {
+			throw new GradleException("No jar found in packaged app directory: ${resourcesAppDir}")
+		}
+
+		// Create MacOS executable launcher that runs the packaged jre if present, otherwise system java
+		def launcher = new File(macosDir, 'Firstpass')
+		if (hasJre) {
+			launcher.text = '#!/usr/bin/env sh\n' +
+					'exec "$(dirname "$0")/../Resources/jre/bin/java" -jar "$(dirname "$0")/../Resources/app/' + jarFile.name + '" "$@"\n'
+		}
+		launcher.setExecutable(true)
+
+		// Create a minimal Info.plist for the app bundle
+		def bundleId = project.hasProperty('bundleId') ? project.property('bundleId') : group ?: 'org.R4ZXRN3T.firstpass'
+		def plist = new File(contents, 'Info.plist')
+		def iconEntry = iconFileName ? "  <key>CFBundleIconFile</key>\n  <string>${iconFileName}</string>\n" : ''
+
+		def plistText = """https://${meta.name}</string>
+  		<key>CFBundleDisplayName</key>
+		<string>${meta.name}</string>
+${iconEntry}  <key>CFBundleIdentifier</key>
+  		<string>${bundleId}</string>
+  		<key>CFBundleVersion</key>
+		<string>${project.version}</string>
+  		<key>CFBundleShortVersionString</key>
+		<string>${project.version}</string>
+  		<key>CFBundleExecutable</key>
+		<string>Firstpass</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+		<key>LSMinimumSystemVersion</key>
+		<string>10.12</string>
+		<key>NSHighResolutionCapable</key>
+		<true/>
+	</dict>
+</plist>
+"""
+		plist.text = plistText
+
+		println "Created macOS .app bundle at: ${appBundle} (packaged under ${packageRoot})"
+	}
+}
+
+tasks.register('makeWindowsInstaller') {
+	currentDistributionType = 'installer'
+	dependsOn tasks.named('makeJlinkPackage')
+
+	doLast {
+		def host = org.gradle.internal.os.OperatingSystem.current()
+		if (!host.isWindows()) {
+			throw new GradleException("makeWindowsInstaller mirrors the Windows CI step and must be run on Windows.")
+		}
+
+		// Ensure installer script exists
+		def iss = file('installer files/Firstpass.iss')
+		if (!iss.exists()) {
+			throw new GradleException("installer files/Firstpass.iss not found")
+		}
+
+		println "Running Inno Setup compiler on ${iss}"
+		def iscc = 'C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe'
+		// Invoke Inno Setup compiler via ProcessBuilder instead of project.exec
+		def pbIscc = new ProcessBuilder(iscc, iss.absolutePath)
+		pbIscc.redirectErrorStream(true)
+		pbIscc.directory(project.projectDir)
+		def procIscc = pbIscc.start()
+		procIscc.inputStream.withReader { r -> r.eachLine { println it } }
+		def rcIscc = procIscc.waitFor()
+		if (rcIscc != 0) {
+			throw new GradleException("ISCC.exe failed with exit code ${rcIscc}")
+		}
+	}
+}
+
+// Ensure Gradle uses the JUnit Platform (JUnit Jupiter) to discover and run tests.
+// Without this, Gradle's Test task may not discover JUnit Jupiter tests and will
+// fail with "did not discover any tests to execute".
+test {
+	useJUnitPlatform()
 }

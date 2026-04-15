@@ -18,7 +18,7 @@ import static org.R4ZXRN3T.firstpass.Tools.validateForXML;
 
 public class ImportExportManager {
 
-	private static final Logger logger = new org.R4ZXRN3T.firstpass.Logger(Config.LOG_PATH);
+	private static final Logger logger = new org.R4ZXRN3T.firstpass.Logger(Config.getLogFilePath().toString());
 
 	public static void exportData(Firstpass firstpass) {
 		JFileChooser fileChooser = new JFileChooser();
