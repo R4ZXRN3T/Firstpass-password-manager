@@ -1,32 +1,33 @@
 # Firstpass Password Manager
 
-A tiny, offline, Java password manager focused on being simple and transparent. No cloud, no tracking—just a local
-encrypted vault you control.
+Firstpass is a small, offline Java password manager focused on simplicity and transparency. It keeps everything
+local: no cloud, no tracking, just an encrypted vault you control.
 
-Latest Release / Downloads:
+## Downloads / Releases
 
-- Windows (.exe) and Portable JAR: https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest
+- Latest releases (portable JAR, platform packages and Windows installer):
+  https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest
 
-Quick Links:
+## Quick links:
 
-- Installation Guide: [INSTALL.md](INSTALL.md)
-- Usage Guide: [USAGE.md](USAGE.md)
-- License: [MIT](LICENSE)
+- Installation: [INSTALL.md](INSTALL.md)
+- Usage: [USAGE.md](USAGE.md)
+- License: [LICENSE](LICENSE)
 
-Core Features:
+## Highlights: 
 
-- Add / edit / remove accounts (with undo for deletions)
-- Optional master password — vault encrypted at rest with AES-256-GCM (PBKDF2-HMAC-SHA256 key derivation)
-- Master password hashed with Argon2id
-- Fast search & field filtering (All, Name, Username, Password, URL, Comment)
-- Export / import (TXT, CSV, JSON, XML)
-- Built-in password generator (length 1–64, configurable character sets)
-- 8 theme choices (FlatLaf Light/Dark variants, Swing Metal, System Default)
-- In-app update checker & one-click updater
+- Add / edit / remove account entries; deletions can be undone (undo stack)
+- Vault encryption: AES-256-GCM with keys derived via PBKDF2-HMAC-SHA256 (210000 iterations)
+- Master password hashing: Argon2id
+- Search and field-scoped filtering
+- Import / export: TXT, CSV, JSON, XML
+- Built-in password generator (length 1–64, selectable character sets)
+- Eight themes (FlatLaf variants + cross-platform/system look-and-feel)
+- In-app update check and one-click updater
 
-If something breaks or you have ideas, open an issue.
+If you find an issue or have suggestions, please open an issue on GitHub.
 
-## Screenshots
+## Screenshots:
 
 ![Screenshot 2025-03-19 200253](https://github.com/user-attachments/assets/352a382c-82bc-4a2b-867e-f1642fc742a5)
 ![Screenshot 2025-03-19 200219](https://github.com/user-attachments/assets/cab845fa-6d78-4bb6-a215-5c71ac2c2d65)

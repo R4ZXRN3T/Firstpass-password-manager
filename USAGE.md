@@ -1,52 +1,51 @@
 # Usage
 
-## Quick Start
+## Quick start
 
-1. Launch the app. On first start a default config is created.
-2. (Optional) Set a master password: Settings → Password → Change Password.
-3. Click "Add" to create your first entry.
-4. Click "Save" (File → Save) or exit with "Save & Exit" to persist changes.
+1. Launch the app. On first start a default `config.json` is created.
+2. (Optional) Set a master password in Settings → Password → Set Password.
+3. Add accounts with the bottom toolbar Add button.
+4. Save (File → Save) or Save & Quit to persist changes.
 
-## Managing Accounts
+## Managing accounts
 
-- **Add**: Bottom toolbar "Add" — fill in Provider, Username, Password, URL, Comment and click OK.
-- **Edit**: Select a row and click "Edit", or double-click the row.
-- **Remove**: Select a row and click "Remove".
-- **Undo Deletion**: Click "Undo" in the bottom toolbar (stack-based; only deleted entries can be restored, not edits).
+- `Add`: Bottom toolbar "Add" — fill Provider, Username, Password, URL and Comment, then OK.
+- `Edit`: Select a row and click "Edit" or double-click the row.
+- `Remove`: Select a row and click "Remove".
+- `Undo deletion`: "Undo" on the bottom toolbar restores the last deleted entry (stack-based; edits are not undoable).
 
-## Search / Filter
+## Search / filter
 
-Use the search bar at the top; choose a scope from the dropdown for targeted filtering:
+Use the search bar at the top and select the scope dropdown to restrict where the query is matched:
 
-| Scope    | Searches in           |
-|----------|-----------------------|
-| All      | All fields            |
-| Name     | Provider / name field |
-| Username | Username field        |
-| Password | Password field        |
-| URL      | URL field             |
-| Comment  | Comment field         |
+| Scope    | Fields searched |
+|----------|-----------------|
+| All      | All fields      |
+| Provider | Provider field  |
+| Username | Username field  |
+| Password | Password field  |
+| URL      | URL field       |
+| Comment  | Comment field   |
 
-## Password Generator
+## Password generator
 
-Click "Generator" in the bottom toolbar. Configure:
+Open `Generator` from the bottom toolbar. Options:
 
-- **Length**: 1–64 characters (slider)
+- **Length**: 1–64 characters
 - **Character sets**: Uppercase, Lowercase, Numbers, Special Characters (all enabled by default)
 
-Click "Generate!" to produce a password, then use the copy icon to copy it to the clipboard.
+Click `Generate!` to produce a password and use the copy icon to place it on the clipboard (a short toast confirms the
+copy).
 
-## Export / Import
+## Export / import
 
-**File → Export**: Choose TXT / CSV / JSON / XML and pick a save location.  
-**File → Import**: Select a supported file (`.txt`, `.csv`, `.json`, `.xml`), then choose:
-
-- **Merge** — append imported entries to the existing list.
-- **Replace** — overwrite the existing list with the imported entries.
+- File → Export: export formats TXT, CSV, JSON, XML (Change with the file type filter in the file picker).
+- File → Import: supported imports are `.txt`, `.csv`, `.json`, `.xml` — you will be asked to Merge (append) or Replace
+  the current list.
 
 ## Themes
 
-Settings → Theme. Eight themes are available:
+Choose Settings → Theme. Available options (index only relevant for config.json):
 
 | # | Theme          |
 |---|----------------|
@@ -59,26 +58,27 @@ Settings → Theme. Eight themes are available:
 | 6 | Swing Metal    |
 | 7 | System Default |
 
-Theme changes require a restart (you'll be prompted when applying).
+Applying a theme will prompt for restart to take effect.
 
 ## Updates
 
-If enabled (Settings → "Check for updates on startup"), a blue "New version available!" button appears in the menu bar
-when an update exists. Click it — or use Settings → Check for Updates — to download and apply the update automatically.
+If "Check for updates on startup" is enabled (Settings), Firstpass checks for new versions and shows a blue "New version
+available!" indicator in the menu bar when an update is found. Click it or use Settings → Check for Updates to run the
+updater.
 
-- **Installer version**: downloads the new `.exe` installer and launches it.
-- **Portable version**: downloads the new JAR alongside the current one and swaps them on next start.
+- **Installer distribution**: the updater downloads the new installer and runs it.
+- **Portable distribution**: the updater downloads a new JAR and will replace the running JAR.
+- **Packaged distribution**: the updater downloads a new ZIP and replaces the whole folder.
 
-## Security Basics
+## Security basics
 
-- **Vault encryption**: all account data is stored in `accounts.vault`, encrypted with **AES-256-GCM**.  
-  The AES key is derived from the master password using **PBKDF2-HMAC-SHA256** (210 000 iterations).
-- **Master password hashing**: the password itself is hashed with **Argon2id** and stored in `config.json`.
-- **No password set**: the vault is still written using an empty-password key (AES-256-GCM with a blank passphrase).
-  Set a real master password to fully protect the vault at rest.
-- Removing the master password re-encrypts the vault with the blank-password key.
+- **Vault encryption**: account data is stored in `accounts.vault`, encrypted with `AES-256-GCM`. The AES key is derived
+  from the master password using `PBKDF2-HMAC-SHA256` (210000 iterations).
+- **Master password hashing**: the master password is hashed with `Argon2id` and the hash is stored in `config.json`.
+- **No password set**: an empty-password key is used; set a master password to protect your data at rest. Removing the
+  master password re-encrypts the vault using the empty-password key.
 
-## Reset / Data Location
+## Reset / data location
 
 | Platform | Vault                                                    | Config                                                |
 |----------|----------------------------------------------------------|-------------------------------------------------------|
@@ -87,20 +87,19 @@ when an update exists. Click it — or use Settings → Check for Updates — to
 | Linux    | `~/.local/share/Firstpass/accounts.vault`                | `~/.config/Firstpass/config.json`                     |
 | Portable | `accounts.vault` (next to the JAR)                       | `config.json` (next to the JAR)                       |
 
-**Delete both files to fully reset the app — THIS ERASES ALL DATA.**
-
-You can also use Settings → Delete Everything from within the app.
+To fully reset the app delete both files (this erases all account data). From inside the app you can also use Settings →
+Delete Everything.
 
 ## Troubleshooting
 
-| Problem               | Hint                                                                                           |
-|-----------------------|------------------------------------------------------------------------------------------------|
-| Wrong password loop   | Password is case-sensitive; there is no recovery except deleting the vault and the config file |
-| Can't edit            | Select the row first, or double-click it                                                       |
-| Undo disabled         | No deletions in the undo stack yet                                                             |
-| Vault load error      | Vault file may be corrupted; the app will offer to delete it on startup                        |
-| Update button missing | "Check for updates on startup" may be disabled in Settings                                     |
+| Problem               | Hint                                                                                                                                                          |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Wrong password loop   | Passwords are case-sensitive. If you cannot unlock the vault and have no backup, the only recovery is removing the vault and config (You will lose all data). |
+| Can't edit            | Make sure a row is selected or double-click the entry to edit.                                                                                                |
+| Undo disabled         | No deletions have been performed yet.                                                                                                                         |
+| Vault load error      | The vault file may be corrupted; the app offers to delete the vault on startup if it cannot decrypt it.                                                       |
+| Update button missing | "Check for updates on startup" may be disabled in Settings. Alternatively update manually with the `Check for updates` button.                                |
 
 ## Disclaimer
 
-No formal security audit. Use at your own risk.
+No formal security audit — use at your own risk.

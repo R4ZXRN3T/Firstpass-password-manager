@@ -1,94 +1,80 @@
 # Installation
 
-## Download (Recommended)
+This document explains how to get Firstpass running on your machine (recommended downloads, portable JAR and
+building from source). The project requires JDK 25+ for building and for creating the bundled runtime images.
 
-Grab the latest release here:
+## Downloads (recommended):
 
-- Windows Installer (
-  EXE): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_setup.exe
-- Portable JAR (all
-  platforms): https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest/download/Firstpass_portable.jar
+- Releases, packages and installers: https://github.com/R4ZXRN3T/Firstpass-password-manager/releases/latest
 
-## Windows (Installer)
+#### Common packages you will find in Releases:
 
-1. Download the `Firstpass_setup.exe` file.
-2. Run it and follow the wizard.
-3. Launch "Firstpass" from the Start Menu or desktop shortcut.
+- Windows: installer EXE (Firstpass-\<version\>-setup.exe)
+- Zips for all platforms (named like `Firstpass-<version>-<OS>-<arch>.zip`) containing a platform-specific launcher and
+  bundled JRE runtime.
+- Portable: a self-contained JAR (named like `Firstpass-<version>-portable.jar`) that includes assets
 
-## Pre-Built binaries (Windows / Linux / MacOS)
+### Windows (Installer)
 
-1. Download the zip from the releases with the fitting operating system and architecture for your setup
-2. Extract the zip
-3. Run `Firstpass.exe` (just `Firstpass` on Linux and MacOS)
+1. Download `Firstpass-<version>-setup.exe` from the latest release.
+2. Run the installer and follow the wizard.
+3. Launch Firstpass from the Start Menu or desktop shortcut.
 
-You can copy the folder to any location on your computer
+### Pre-built packaged artifacts
 
-## Portable JAR (All platforms)
+1. Download the ZIP for your OS/architecture from Releases.
+2. Extract the archive.
+3. Run the platform launcher in the archive (`Firstpass.exe` / `firstpass`).
 
-1. Install a Java Runtime (JDK/JRE 25+ required!).
-2. Download `Firstpass_portable.jar`.
-3. Double click the jar
+### Portable JAR (All platforms)
 
-or
+1. Ensure you have a Java runtime installed (JRE/JDK 25+).
+2. Download the portable JAR from Releases (e.g. `Firstpass-2.1.3-portable.jar`).
+3. Run the JAR with double-click or via command line:
 
-4. run:
-
-```
-java -jar Firstpass_portable.jar
-```
-
-(on Linux you may need to `chmod +x Firstpass_portable.jar` first)
-
-## Build From Source
-
-Requirements: JDK 25, Gradle (or use the included `gradlew` wrapper).
-
-### JARs only (quickest)
-
-```
-./gradlew fatJar portableJar
+```bash
+java -jar Firstpass-<version>-portable.jar
 ```
 
-Artifacts are written to `build/libs/`:
+## Build from source
 
-- `Firstpass.jar` (requires external `assets/` folder next to it)
-- `Firstpass_portable.jar` (self-contained, assets bundled)
+##### Requirements: JDK 25+, Gradle (you can use the included wrapper).
 
-### Current OS package
+### Available Gradle tasks:
 
-```
-./gradlew packageCurrentOs
-```
+- `./gradlew run` – runs the app with the development configuration (only recommended for development).
+- `./gradlew jar` – builds a JAR without assets (external assets folder required) and the distribution type `other` (
+  auto update disabled).
+- `./gradlew portable` – builds a self-contained portable JAR with embedded assets and the distribution type
+  `portable` (auto update enabled, downloads portable JAR).
+- `./gradlew copyJarToFinal` – copies the JAR from `build/libs` to `final/Firstpass.jar` for easier access.
+- `./gradlew copyPortableJarToFinal` – copies the portable JAR from `build/libs` to
+  `final/Firstpass-<verison>-portable.jar` for easier access.
+- `./gradlew copyJarsToFinal` – runs both copy tasks.
+- `./gradlew makeJlinkPackage` – builds platform-specific (MacOS excluded) runtime images with Jlink (
+  requires [Launch4j](https://launch4j.sourceforge.net/) on Windows).
+- `./gradlew makeMacApp` - builds a MacOS .app bundle (use instead of `makeJlinkPackage`).
+- `./gradlew windowsInstaller` – builds a Windows installer EXE (
+  requires [Inno Setup](https://jrsoftware.org/isinfo.php) and [Launch4j](https://launch4j.sourceforge.net/) installed).
 
-Produces `Firstpass.jar`, `Firstpass_portable.jar`, and a platform zip in `final/construo/`
-with the bundled JRE for the OS you are building on. (Note that you still need the assets folder in the same directory
-when running the normal Firstpass.jar)
+### Updating
 
-### All platforms + Windows installer (release builds)
+- Use the in-app update flow when available. The updater behaves differently for installer vs portable distributions:
+	- Installer: downloads the new `.exe` and launches the installer.
+	- Portable: downloads the new JAR and replaces the old one on next start.
+	- Packaged: Replaces the whole folder.
 
-Requirements: additionally Inno Setup (Windows only, for the `.exe` installer).
+### Uninstall
 
-```
-./gradlew packageAll
-```
+- Installer version: uninstall via the OS (e.g. Windows "Apps & Features").
+- Portable version: remove the JAR and data files (see Data Files below) to fully remove the app and data.
+- Packaged version: remove the folder containing the app (see Data Files below).
 
-Builds all platform zips into `final/construo/` and, on Windows with Inno Setup on `PATH`,
-also creates `final/Firstpass_setup.exe`.
-
-## Updating
-
-Use the in-app update button when shown, or re-download the latest release and replace the old file.
-
-## Uninstall
-
-- Installer version: Use Windows "Apps & Features".
-- Portable version: Delete the JAR (optionally remove the data files listed below if you want to erase all data).
-
-## Data Files
+#### Data files
 
 Firstpass stores two files: the encrypted vault and the configuration.
 
-### Installed (non-portable) version
+Installed (non-portable) locations
 
 | Platform | Vault (`accounts.vault`)                                 | Config (`config.json`)                                |
 |----------|----------------------------------------------------------|-------------------------------------------------------|
@@ -96,11 +82,11 @@ Firstpass stores two files: the encrypted vault and the configuration.
 | macOS    | `~/Library/Application Support/Firstpass/accounts.vault` | `~/Library/Application Support/Firstpass/config.json` |
 | Linux    | `~/.local/share/Firstpass/accounts.vault`                | `~/.config/Firstpass/config.json`                     |
 
-### Portable version
+##### Portable version
 
-Both files are created **next to the JAR** in the same directory:
+Both files are created next to the portable JAR in the same directory:
 
-- `accounts.vault` – encrypted account vault
-- `config.json` – settings + Argon2id password hash
+- `accounts.vault` – encrypted account vault (AES-256-GCM)
+- `config.json` – application settings and Argon2id password hash
 
-Delete both to fully reset the application.
+Delete both files to fully reset the application (THIS ERASES ALL DATA).
