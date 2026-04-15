@@ -34,6 +34,7 @@ public class Firstpass {
 	private boolean updateAvailable = false;
 	private BottomToolBar bottomToolBar;
 	private TopToolBar topToolBar;
+	private JPanel centerPanel;
 
 	/**
 	 * This funtion is the main function responsible for initializing and running the program.
@@ -258,7 +259,7 @@ public class Firstpass {
 	public void fullDelete() {
 		accountList.clear();
 		new File(AccountLoader.ACCOUNTS_PATH).delete();
-		new File(Config.CONFIG_PATH).delete();
+		Config.getConfigFilePath().toFile().delete();
 		System.exit(0);
 	}
 
@@ -293,7 +294,7 @@ public class Firstpass {
 	 */
 	public void initializeFrame() {
 		// create and initialize center panel
-		JPanel centerPanel = new JPanel();
+		centerPanel = new JPanel();
 		centerPanel.setLayout(new BorderLayout(4, 4));
 		centerPanel.setBorder(BorderFactory.createEmptyBorder(8, 16, 32, 16));
 		centerPanel.add(table.getScrollPane(), BorderLayout.CENTER);
@@ -516,6 +517,10 @@ public class Firstpass {
 	 */
 	public AccountTable getTable() {
 		return table;
+	}
+
+	public JPanel getCenterPanel() {
+		return centerPanel;
 	}
 
 	/**
