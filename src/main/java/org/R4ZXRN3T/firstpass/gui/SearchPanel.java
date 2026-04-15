@@ -26,7 +26,7 @@ public class SearchPanel extends JPanel {
 		this.add(Config.getDarkMode() ? new JLabel(Icons.SEARCH_ICON_WHITE_SCALED) : new JLabel(Icons.SEARCH_ICON_SCALED), BorderLayout.WEST);
 
 		// add a combo box to select the field to search in
-		JComboBox<String> searchOptions = new JComboBox<>(new String[]{"All", "Name", "Username", "Password", "URL", "Comment"});
+		JComboBox<String> searchOptions = new JComboBox<>(new String[]{"All", "Provider", "Username", "Password", "URL", "Comment"});
 		searchOptions.setSelectedIndex(0);
 		searchOptions.setFocusable(false);
 		searchOptions.setBackground(Config.getDarkMode() ? BottomToolBar.DARK_MODE_COLOR : new Color(230, 230, 230));
