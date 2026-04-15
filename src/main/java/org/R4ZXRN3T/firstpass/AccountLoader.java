@@ -23,7 +23,7 @@ import java.util.Base64;
 
 public class AccountLoader {
 	public static final String ACCOUNTS_PATH = String.valueOf(getAccountFilePath());
-	private static final Logger logger = new Logger(Config.LOG_PATH);
+	private static final Logger logger = new Logger(Config.getConfigFilePath().toString());
 
 	private static final int VAULT_VERSION = 1;
 	private static final int PBKDF2_ITERATIONS = 210_000;
