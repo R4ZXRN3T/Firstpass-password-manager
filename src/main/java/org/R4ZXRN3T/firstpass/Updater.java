@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -142,7 +143,7 @@ public class Updater {
 					if (contentLength > 0) {
 						int prog = (int) (((double) total / contentLength) * 100);
 						SwingUtilities.invokeLater(() -> progressBar.setValue(Math.min(100, prog)));
-						SwingUtilities.invokeLater(() -> progressLabel.setText((prog < 10 ? prog + "0%" : prog + "%")));
+						SwingUtilities.invokeLater(() -> progressLabel.setText(String.format("%02d%%", Math.min(100, prog))));
 					}
 				}
 			}
@@ -271,7 +272,6 @@ public class Updater {
 				// Centralize download + verification in downloadUpdate to avoid code duplication
 				downloadUpdate(updateFrame, progressBar, progressLabel);
 			}).start();
-			updateFrame.dispose();
 		});
 	}
 
@@ -287,10 +287,11 @@ public class Updater {
 			if (dist == DistributionType.INSTALLER) {
 				File tmp = new File(filePath + "\\" + getDownloadFileName() + ".tmp");
 				File current = new File(filePath + "\\" + getDownloadFileName());
-				if (current.exists()) current.delete();
-				tmp.renameTo(current);
 				try {
-					new ProcessBuilder("cmd", "/c", "start", filePath + "\\Firstpass_setup.exe").start();
+					// Move/rename the temp file to the final installer name (replace if exists)
+					Files.move(tmp.toPath(), current.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					// Use start with an empty title to correctly handle paths with spaces
+					new ProcessBuilder("cmd", "/c", "start", "\"\"", current.getAbsolutePath()).start();
 					System.exit(0);
 				} catch (IOException e) {
 					logger.error("Failed to start installer: " + e.getMessage());

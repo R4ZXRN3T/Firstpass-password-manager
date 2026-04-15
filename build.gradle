@@ -121,6 +121,59 @@ tasks.register('portableJar', ShadowJar) {
 	}
 }
 
+// Create dedicated shadow jar for the packaged distribution. This produces a jar
+// whose manifest contains Distribution-Type: packaged so the packaged artifact
+// in final/ is correct regardless of configuration ordering.
+tasks.register('shadowJarPackaged', ShadowJar) {
+	archiveClassifier.set('packaged')
+	archiveFileName.set(provider { "${archiveBaseName.get()}-${project.version}-packaged.jar" })
+
+	exclude('assets/**')
+
+	from sourceSets.main.output
+
+	configurations = [project.configurations.runtimeClasspath]
+
+	if (includeJarManifest) {
+		manifest {
+			attributes(
+					'Main-Class': 'org.R4ZXRN3T.firstpass.Main',
+					'Implementation-Title': project.name,
+					'Implementation-Version': project.version,
+					'Implementation-Vendor': meta.vendor,
+					'Implementation-URL': meta.homepage,
+					'Distribution-Type': 'packaged'
+			)
+		}
+	}
+}
+
+// Create dedicated shadow jar for the installer distribution. This jar will be
+// included inside the installer and carries Distribution-Type: installer.
+tasks.register('shadowJarInstaller', ShadowJar) {
+	archiveClassifier.set('installer')
+	archiveFileName.set(provider { "${archiveBaseName.get()}-${project.version}-installer.jar" })
+
+	exclude('assets/**')
+
+	from sourceSets.main.output
+
+	configurations = [project.configurations.runtimeClasspath]
+
+	if (includeJarManifest) {
+		manifest {
+			attributes(
+					'Main-Class': 'org.R4ZXRN3T.firstpass.Main',
+					'Implementation-Title': project.name,
+					'Implementation-Version': project.version,
+					'Implementation-Vendor': meta.vendor,
+					'Implementation-URL': meta.homepage,
+					'Distribution-Type': 'installer'
+			)
+		}
+	}
+}
+
 // Copy the main shadow jar into the project's `final/` directory
 tasks.register('copyJarToFinal', Copy) {
 	dependsOn tasks.named('shadowJar')
@@ -181,12 +234,15 @@ tasks.register('jlinkImage') {
 }
 
 tasks.register('makeJlinkPackage') {
-	if (currentDistributionType == 'other') {
-		currentDistributionType = 'packaged'
-	}
 	dependsOn tasks.named('shadowJar')
 	// Ensure the runtime image is available
 	dependsOn tasks.named('jlinkImage')
+
+	// Set distribution type at task execution time so configuration-phase
+	// changes (e.g. other tasks registering themselves) do not overwrite it.
+	doFirst {
+		currentDistributionType = 'packaged'
+	}
 
 	doLast {
 		def host = org.gradle.internal.os.OperatingSystem.current()
@@ -215,7 +271,9 @@ tasks.register('makeJlinkPackage') {
 		// Copy the main shadow jar and portable jar into app/
 		def appOut = new File(tmpDir, 'app')
 		appOut.mkdirs()
-		copy { from(tasks.named('shadowJar').flatMap { it.archiveFile }); into appOut }
+		copy { from(tasks.named('shadowJarPackaged').flatMap { it.archiveFile }); into appOut }
+
+		// packaged jar task already sets the correct Distribution-Type in its manifest
 
 		// Copy assets into assets/
 		def assetsSrc = file('assets')
@@ -228,7 +286,7 @@ tasks.register('makeJlinkPackage') {
 		copy { from imageDir; into jreOut }
 
 		// Create launchers at the package root that invoke jre/bin/java -jar app/<jar>
-		def shadowFile = tasks.named('shadowJar').get().archiveFile.get().asFile
+		def shadowFile = tasks.named('shadowJarPackaged').get().archiveFile.get().asFile
 		if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
 			def launch4jPath = "C:\\Program Files (x86)\\Launch4j\\launch4jc.exe"
 			if (!file(launch4jPath).exists()) {
@@ -409,8 +467,9 @@ ${iconEntry}  <key>CFBundleIdentifier</key>
 }
 
 tasks.register('makeWindowsInstaller') {
-	currentDistributionType = 'installer'
+	// Ensure the packaged jlink artifact exists and build the installer-specific jar
 	dependsOn tasks.named('makeJlinkPackage')
+	dependsOn tasks.named('shadowJarInstaller')
 
 	doLast {
 		def host = org.gradle.internal.os.OperatingSystem.current()
@@ -418,23 +477,78 @@ tasks.register('makeWindowsInstaller') {
 			throw new GradleException("makeWindowsInstaller mirrors the Windows CI step and must be run on Windows.")
 		}
 
-		// Ensure installer script exists
+		// Prepare a staging directory for the installer and ensure the installer
+		// will embed an installer-specific jar (Distribution-Type: installer)
+		def staging = file("${layout.buildDirectory.get().asFile}/tmp/windows-installer-staging")
+		if (staging.exists()) staging.deleteDir()
+		staging.mkdirs()
+
+		// Some Inno Setup scripts reference files relative to the project's root
+		// (for example ../LICENSE when the ISS is in installer files/). When
+		// we run ISCC from the staging directory, those ../ references resolve
+		// to the staging parent (build/tmp). Copy common top-level files there
+		// so the ISS can find them.
+		def stagingParent = staging.getParentFile()
+		if (!stagingParent.exists()) stagingParent.mkdirs()
+		['LICENSE', 'README.md'].each { fname ->
+			def f = file(fname)
+			if (f.exists()) copy { from f; into stagingParent }
+		}
+
+		// Instead of running ISCC from a staging dir in build/tmp, operate on the
+		// final packaged directory so the ISS relative paths resolve normally.
+		def packagedDir = file('final').listFiles()?.find { it.isDirectory() && it.name.startsWith("Firstpass-${project.version}-") }
+		if (packagedDir == null) {
+			throw new GradleException("Packaged artifact not found in final/. Run makeJlinkPackage first or ensure it's produced.")
+		}
+
+		// Locate the app directory and the current application jar(s)
+		def appDir = new File(packagedDir, 'app')
+		if (!appDir.exists()) {
+			throw new GradleException("Packaged app directory not found: ${appDir}")
+		}
+		def existingJars = appDir.listFiles()?.findAll { it.name.toLowerCase().endsWith('.jar') } ?: []
+
+		// Prepare backup directory to restore original jars after building installer
+		def backupDir = file("${layout.buildDirectory.get().asFile}/tmp/installer-original-app-backup")
+		if (backupDir.exists()) backupDir.deleteDir()
+		backupDir.mkdirs()
+
+		// Backup existing jars
+		existingJars.each { jf ->
+			copy { from jf; into backupDir }
+		}
+
+		// Copy the installer-specific jar into the packaged app directory (replacing jars)
+		// This installer jar contains Distribution-Type: installer
+		copy { from(tasks.named('shadowJarInstaller').flatMap { it.archiveFile }); into appDir }
+
+		// Run Inno Setup from the project root using the ISS file in installer files/
 		def iss = file('installer files/Firstpass.iss')
 		if (!iss.exists()) {
 			throw new GradleException("installer files/Firstpass.iss not found")
 		}
 
-		println "Running Inno Setup compiler on ${iss}"
+		println "Running Inno Setup compiler on ${iss} (working dir = project root)"
 		def iscc = 'C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe'
-		// Invoke Inno Setup compiler via ProcessBuilder instead of project.exec
 		def pbIscc = new ProcessBuilder(iscc, iss.absolutePath)
 		pbIscc.redirectErrorStream(true)
 		pbIscc.directory(project.projectDir)
 		def procIscc = pbIscc.start()
 		procIscc.inputStream.withReader { r -> r.eachLine { println it } }
 		def rcIscc = procIscc.waitFor()
-		if (rcIscc != 0) {
-			throw new GradleException("ISCC.exe failed with exit code ${rcIscc}")
+
+		// Restore original jars regardless of success/failure
+		try {
+			if (rcIscc != 0) {
+				throw new GradleException("ISCC.exe failed with exit code ${rcIscc}")
+			}
+		} finally {
+			// Remove installer jar(s) we copied
+			appDir.listFiles()?.findAll { it.name.toLowerCase().endsWith('.jar') }?.each { it.delete() }
+			// Restore backups
+			copy { from backupDir; into appDir }
+			if (backupDir.exists()) backupDir.deleteDir()
 		}
 	}
 }
