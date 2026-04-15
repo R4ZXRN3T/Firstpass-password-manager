@@ -64,7 +64,7 @@ public class GuiUtils {
 					toast.dispose();
 				} else {
 					float opacity = 1.0f - (float) step[0] / fadeSteps;
-					toast.setOpacity(Math.max(0.0f, Math.min(1.0f, opacity)));
+					toast.setOpacity(Math.clamp(opacity, 0.0f, 1.0f));
 				}
 			});
 			fade.start();
