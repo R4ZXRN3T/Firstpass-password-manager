@@ -13,6 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Supports different log levels and customizable log format.
  * Thread-safe and uses a background thread for writing logs.
  */
+@SuppressWarnings("unused")
 public class Logger {
 	private static final DateTimeFormatter TS_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private static final Object POISON = new Object();
