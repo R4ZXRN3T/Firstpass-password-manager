@@ -1,0 +1,93 @@
+name: Build cross-platform
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }} - ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - os: Linux
+            runner: ubuntu-latest
+            arch: x86_64
+          - os: Linux
+            runner: ubuntu-24.04-arm
+            arch: aarch64
+          - os: MacOS
+            runner: macos-26-intel
+            arch: x86_64
+          - os: MacOS
+            runner: macos-latest
+            arch: aarch64
+          - os: Windows
+            runner: windows-latest
+            arch: x86_64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '26'
+          architecture: ${{ matrix.arch }}
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+
+      - name: Ensure Java bin on PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Write-Host "JAVA_HOME: $Env:JAVA_HOME"
+          Add-Content -Path $Env:GITHUB_PATH -Value ("$Env:JAVA_HOME\bin")
+          Write-Host "Added $Env:JAVA_HOME\bin to PATH"
+
+      - name: Grant execute permission for gradlew
+        if: runner.os != 'Windows'
+        run: chmod +x ./gradlew
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        run: ./gradlew makeJlinkPackage --no-daemon
+
+      - name: Build (macOS)
+        if: runner.os == 'MacOS'
+        run: ./gradlew makeMacApp --no-daemon
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          if ($Env:JAVA_HOME) {
+            $Env:PATH = "$Env:JAVA_HOME\bin;$Env:PATH"
+            Write-Host "Session PATH updated to include: $Env:JAVA_HOME\bin"
+          } else {
+            Write-Host "WARNING: JAVA_HOME is not set in this session"
+          }
+          if ($Env:JAVA_HOME) {
+            $javaHome = $Env:JAVA_HOME
+            Write-Host "Setting Java registry entries to point to: $javaHome"
+            reg add "HKLM\SOFTWARE\JavaSoft\Java Runtime Environment" /v CurrentVersion /d "26" /f
+            reg add "HKLM\SOFTWARE\JavaSoft\Java Runtime Environment\26" /v JavaHome /d "$javaHome" /f
+            reg add "HKLM\SOFTWARE\JavaSoft\Java Runtime Environment\26" /v RuntimeLib /d "$javaHome\bin\server\jvm.dll" /f
+          } else {
+            Write-Host "Skipping registry entries because JAVA_HOME is not set"
+          }
+          choco install innosetup -y
+          choco install launch4j -y
+          .\gradlew.bat makeWindowsInstaller --no-daemon
+
+      - name: Upload final artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: final-${{ matrix.os }}-${{ matrix.arch }}.zip
+          path: |
+            final/**
