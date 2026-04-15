@@ -1,10 +1,10 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
 	id 'java'
 	id 'application'
 	id 'com.gradleup.shadow' version '9.4.1'
 }
-
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 repositories {
 	mavenCentral()
@@ -96,7 +96,7 @@ tasks.register('portableJar', ShadowJar) {
 	// produce a filename like Firstpass_portable.jar (underscore separator)
 	// instead of the default baseName-<classifier>.jar which gave you "-_portable"
 	archiveClassifier.set('portable')
-	archiveFileName.set(provider { "${archiveBaseName.get()}_portable.jar" })
+	archiveFileName.set(provider { "${archiveBaseName.get()}-${project.version}-portable.jar" })
 
 	from sourceSets.main.output
 
@@ -437,4 +437,11 @@ tasks.register('makeWindowsInstaller') {
 			throw new GradleException("ISCC.exe failed with exit code ${rcIscc}")
 		}
 	}
+}
+
+// Ensure Gradle uses the JUnit Platform (JUnit Jupiter) to discover and run tests.
+// Without this, Gradle's Test task may not discover JUnit Jupiter tests and will
+// fail with "did not discover any tests to execute".
+test {
+	useJUnitPlatform()
 }
