@@ -19,7 +19,7 @@ import javax.swing.*;
 
 public class Updater {
 	private static final String REPO_URL = "https://api.github.com/repos/R4ZXRN3T/Firstpass-password-manager/releases/latest";
-	private static final Logger logger = new org.R4ZXRN3T.firstpass.Logger(Config.LOG_PATH);
+	private static final Logger logger = new org.R4ZXRN3T.firstpass.Logger(Config.getLogFilePath().toString());
 	private static Firstpass firstpassInstance = null;
 	private static String latestVersion = "";
 
@@ -383,18 +383,18 @@ public class Updater {
 						writer.println("@echo off");
 						writer.println("timeout /t 1 /nobreak >nul");
 						// Use robocopy to mirror extracted content into installation directory
-						writer.println("robocopy \"" + extractedDir.toString() + "\" \"" + installDir.toString() + "\" /mir");
+						writer.println("robocopy \"" + extractedDir + "\" \"" + installDir.toString() + "\" /mir");
 						if (!currentJarName.isEmpty())
-							writer.println("start java -jar \"" + installDir.resolve(currentJarName).toString() + "\"");
-						writer.println("rd /s /q \"" + extractedDir.toString() + "\"");
+							writer.println("start java -jar \"" + installDir.resolve(currentJarName) + "\"");
+						writer.println("rd /s /q \"" + extractedDir + "\"");
 						writer.println("exit");
 					} else {
 						writer.println("#!/usr/bin/env bash");
 						writer.println("sleep 1");
-						writer.println("rsync -a --delete \"" + extractedDir.toString() + "/\" \"" + installDir.toString() + "/\"");
+						writer.println("rsync -a --delete \"" + extractedDir + "/\" \"" + installDir.toString() + "/\"");
 						if (!currentJarName.isEmpty())
-							writer.println("java -jar \"" + installDir.resolve(currentJarName).toString() + "\" &");
-						writer.println("rm -rf \"" + extractedDir.toString() + "\"");
+							writer.println("java -jar \"" + installDir.resolve(currentJarName) + "\" &");
+						writer.println("rm -rf \"" + extractedDir + "\"");
 					}
 				}
 
