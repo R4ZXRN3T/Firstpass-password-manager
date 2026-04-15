@@ -184,6 +184,8 @@ tasks.register('copyJarToFinal', Copy) {
 	}
 
 	from(tasks.named('shadowJar').flatMap { it.archiveFile })
+	// ensure the copied main jar is always named Firstpass.jar in final/
+	rename { 'Firstpass.jar' }
 	into 'final'
 }
 
@@ -233,10 +235,13 @@ tasks.register('jlinkImage') {
 	}
 }
 
+
 tasks.register('makeJlinkPackage') {
+	// Ensure the specific packaged shadow jar and portable jar are built before packaging
 	dependsOn tasks.named('shadowJar')
 	// Ensure the runtime image is available
 	dependsOn tasks.named('jlinkImage')
+	dependsOn tasks.named('shadowJarPackaged')
 
 	// Set distribution type at task execution time so configuration-phase
 	// changes (e.g. other tasks registering themselves) do not overwrite it.
@@ -268,10 +273,11 @@ tasks.register('makeJlinkPackage') {
 
 		def imageDir = file("${layout.buildDirectory.get().asFile}/jlink/image")
 		// Packaging layout: root contains the jars and launchers, assets/ alongside, and jre/ for runtime
-		// Copy the main shadow jar and portable jar into app/
+		// Copy the packaged shadow jar and portable jar into app/
 		def appOut = new File(tmpDir, 'app')
 		appOut.mkdirs()
-		copy { from(tasks.named('shadowJarPackaged').flatMap { it.archiveFile }); into appOut }
+		// rename the packaged jar to Firstpass.jar inside the package
+		copy { from(tasks.named('shadowJarPackaged').flatMap { it.archiveFile }); into appOut; rename { 'Firstpass.jar' } }
 
 		// packaged jar task already sets the correct Distribution-Type in its manifest
 
@@ -286,7 +292,8 @@ tasks.register('makeJlinkPackage') {
 		copy { from imageDir; into jreOut }
 
 		// Create launchers at the package root that invoke jre/bin/java -jar app/<jar>
-		def shadowFile = tasks.named('shadowJarPackaged').get().archiveFile.get().asFile
+		// the packaged jar will be named Firstpass.jar inside the package
+		def shadowFile = new File(appOut, 'Firstpass.jar')
 		if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
 			def launch4jPath = "C:\\Program Files (x86)\\Launch4j\\launch4jc.exe"
 			if (!file(launch4jPath).exists()) {
@@ -331,10 +338,11 @@ tasks.register('makeJlinkPackage') {
 	}
 }
 
+
 tasks.register('makeMacApp') {
 	currentDistributionType = 'packaged'
-	// Always ensure the main jar and the jlink runtime image are created.
-	dependsOn tasks.named('shadowJar')
+	// Always ensure the packaged jar(s) and the jlink runtime image are created.
+	dependsOn tasks.named('shadowJarPackaged')
 	dependsOn tasks.named('jlinkImage')
 
 	doLast {
@@ -354,10 +362,13 @@ tasks.register('makeMacApp') {
 		if (tmpDir.exists()) tmpDir.deleteDir()
 		tmpDir.mkdirs()
 
-		// Copy shadow jar and portable jar into app/
+		// Copy packaged jar and portable jar into app/
 		def appOut = new File(tmpDir, 'app')
 		appOut.mkdirs()
-		copy { from(tasks.named('shadowJar').flatMap { it.archiveFile }); into appOut }
+		// rename the packaged jar to Firstpass.jar inside the app bundle
+		copy { from(tasks.named('shadowJarPackaged').flatMap { it.archiveFile }); into appOut; rename { 'Firstpass.jar' } }
+		// include the portable jar alongside (keep its filename)
+		copy { from(tasks.named('portableJar').flatMap { it.archiveFile }); into appOut }
 
 		// Copy assets if present
 		def assetsSrc = file('assets')
@@ -521,7 +532,8 @@ tasks.register('makeWindowsInstaller') {
 
 		// Copy the installer-specific jar into the packaged app directory (replacing jars)
 		// This installer jar contains Distribution-Type: installer
-		copy { from(tasks.named('shadowJarInstaller').flatMap { it.archiveFile }); into appDir }
+		// Rename it to Firstpass.jar inside the packaged app
+		copy { from(tasks.named('shadowJarInstaller').flatMap { it.archiveFile }); into appDir; rename { 'Firstpass.jar' } }
 
 		// Run Inno Setup from the project root using the ISS file in installer files/
 		def iss = file('installer files/Firstpass.iss')
