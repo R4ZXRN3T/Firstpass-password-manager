@@ -7,8 +7,8 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
@@ -370,32 +370,29 @@ public class Updater {
 					}
 				}
 
-				// Find current running jar name to restart later
-				String currentJarName = "";
-				try {
-					currentJarName = Path.of(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getFileName().toString();
-				} catch (Exception ignored) {
-				}
-
 				// Create a platform-specific script that will mirror extracted content into the install dir and start the app
-				String scriptName = System.getProperty("os.name").toLowerCase().contains("win") ? "rename.bat" : "rename.sh";
+				String scriptName = AccountLoader.getAccountFilePath().toString().replace("accounts.vault", System.getProperty("os.name").toLowerCase().contains("win") ? "rename.bat" : "rename.sh");
+				String appName;
+				if (System.getProperty("os.name").toLowerCase().contains("win")) {
+					appName = "Firstpass.exe";
+				} else if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+					appName = "../MacOS/Firstpass";
+				} else {
+					appName = "firstpass";
+				}
 				try (PrintWriter writer = new PrintWriter(scriptName)) {
 					if (System.getProperty("os.name").toLowerCase().contains("win")) {
 						writer.println("@echo off");
 						writer.println("timeout /t 1 /nobreak >nul");
 						// Use robocopy to mirror extracted content into installation directory
 						writer.println("robocopy \"" + extractedDir + "\" \"" + installDir.toString() + "\" /mir");
-						if (!currentJarName.isEmpty())
-							writer.println("start java -jar \"" + installDir.resolve(currentJarName) + "\"");
-						writer.println("rd /s /q \"" + extractedDir + "\"");
+						writer.println("start \"\" \"" + installDir.resolve(appName) + "\"");
 						writer.println("exit");
 					} else {
 						writer.println("#!/usr/bin/env bash");
 						writer.println("sleep 1");
 						writer.println("rsync -a --delete \"" + extractedDir + "/\" \"" + installDir.toString() + "/\"");
-						if (!currentJarName.isEmpty())
-							writer.println("java -jar \"" + installDir.resolve(currentJarName) + "\" &");
-						writer.println("rm -rf \"" + extractedDir + "\"");
+						writer.println("\"" + installDir.resolve(appName) + "\" &");
 					}
 				}
 

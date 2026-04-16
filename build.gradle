@@ -237,8 +237,6 @@ tasks.register('jlinkImage') {
 
 
 tasks.register('makeJlinkPackage') {
-	// Ensure the specific packaged shadow jar and portable jar are built before packaging
-	dependsOn tasks.named('shadowJar')
 	// Ensure the runtime image is available
 	dependsOn tasks.named('jlinkImage')
 	dependsOn tasks.named('shadowJarPackaged')
