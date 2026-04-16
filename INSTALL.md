@@ -54,7 +54,7 @@ java -jar Firstpass-<version>-portable.jar
 - `./gradlew makeJlinkPackage` – builds platform-specific (MacOS excluded) runtime images with Jlink (
   requires [Launch4j](https://launch4j.sourceforge.net/) on Windows).
 - `./gradlew makeMacApp` - builds a MacOS .app bundle (use instead of `makeJlinkPackage`).
-- `./gradlew windowsInstaller` – builds a Windows installer EXE (
+- `./gradlew makeWindowsInstaller` – builds a Windows installer EXE (
   requires [Inno Setup](https://jrsoftware.org/isinfo.php) and [Launch4j](https://launch4j.sourceforge.net/) installed).
 
 ### Updating
