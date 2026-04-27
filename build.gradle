@@ -365,8 +365,6 @@ tasks.register('makeMacApp') {
 		appOut.mkdirs()
 		// rename the packaged jar to Firstpass.jar inside the app bundle
 		copy { from(tasks.named('shadowJarPackaged').flatMap { it.archiveFile }); into appOut; rename { 'Firstpass.jar' } }
-		// include the portable jar alongside (keep its filename)
-		copy { from(tasks.named('portableJar').flatMap { it.archiveFile }); into appOut }
 
 		// Copy assets if present
 		def assetsSrc = file('assets')
@@ -449,24 +447,29 @@ tasks.register('makeMacApp') {
 		def plist = new File(contents, 'Info.plist')
 		def iconEntry = iconFileName ? "  <key>CFBundleIconFile</key>\n  <string>${iconFileName}</string>\n" : ''
 
-		def plistText = """https://${meta.name}</string>
-  		<key>CFBundleDisplayName</key>
-		<string>${meta.name}</string>
-${iconEntry}  <key>CFBundleIdentifier</key>
-  		<string>${bundleId}</string>
-  		<key>CFBundleVersion</key>
-		<string>${project.version}</string>
-  		<key>CFBundleShortVersionString</key>
-		<string>${project.version}</string>
-  		<key>CFBundleExecutable</key>
-		<string>Firstpass</string>
-		<key>CFBundlePackageType</key>
-		<string>APPL</string>
-		<key>LSMinimumSystemVersion</key>
-		<string>10.12</string>
-		<key>NSHighResolutionCapable</key>
-		<true/>
-	</dict>
+		def plistText = """<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+	<key>CFBundleName</key>
+	<string>${meta.name}</string>
+	<key>CFBundleDisplayName</key>
+	<string>${meta.name}</string>
+${iconEntry}    <key>CFBundleIdentifier</key>
+	<string>${bundleId}</string>
+	<key>CFBundleVersion</key>
+	<string>${project.version}</string>
+	<key>CFBundleShortVersionString</key>
+	<string>${project.version}</string>
+	<key>CFBundleExecutable</key>
+	<string>Firstpass</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.12</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+  </dict>
 </plist>
 """
 		plist.text = plistText
