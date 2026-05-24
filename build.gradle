@@ -32,7 +32,7 @@ ext.meta = [
 def includeJarManifest = project.hasProperty('includeManifest') ? project.property('includeManifest').toString().toBoolean() : true
 
 dependencies {
-	implementation 'org.json:json:20251224'
+	implementation 'org.json:json:20260522'
 	implementation 'com.formdev:flatlaf:3.7.1'
 	implementation 'de.mkammerer:argon2-jvm:2.12'
 	implementation 'net.java.dev.jna:jna:5.18.1'
